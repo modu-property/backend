@@ -66,6 +66,8 @@ elif server_env == "stage":
     environ.Env.read_env(os.path.join(BASE_DIR, ".env.stage"))
 elif server_env == "prod":
     environ.Env.read_env(os.path.join(BASE_DIR, ".env.prod"))
+elif server_env == "test":
+    environ.Env.read_env(os.path.join(BASE_DIR, ".env.test"))
 else:
     environ.Env.read_env(os.path.join(BASE_DIR, ".env.local"))
     LOGGING = set_logging()
