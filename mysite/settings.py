@@ -28,7 +28,7 @@ def set_logging():
         "formatters": {
             "django.server": {
                 "()": "django.utils.log.ServerFormatter",
-                "format": "{asctime} [{levelname}] {message} {filename}:{lineno}",
+                "format": "{asctime} {filename}:{funcName}:{lineno} [{levelname}] {message}",
                 "style": "{",
             },
         },
@@ -50,7 +50,12 @@ def set_logging():
         },
         "loggers": {
             "django.server": {
-                "handlers": ["django.server", "file"],
+                "handlers": ["django.server"],
+                "level": env("LOG_LEVEL"),
+                "propagete": True,
+            },
+            "file": {
+                "handlers": ["file"],
                 "level": env("LOG_LEVEL"),
                 "propagete": True,
             },
@@ -70,7 +75,7 @@ elif server_env == "test":
     environ.Env.read_env(os.path.join(BASE_DIR, ".env.test"))
 else:
     environ.Env.read_env(os.path.join(BASE_DIR, ".env.local"))
-    LOGGING = set_logging()
+LOGGING = set_logging()
 
 
 # False if not in os.environ because of casting above
@@ -90,6 +95,8 @@ USER = env("USER")
 PASSWORD = env("PASSWORD")
 HOST = env("HOST")
 PORT = env("PORT")
+NAVER_NEW_API_CLIENT_ID = env("NAVER_NEW_API_CLIENT_ID")
+NAVER_NEW_API_CLIENT_SECRET = env("NAVER_NEW_API_CLIENT_SECRET")
 
 # Application definition
 
