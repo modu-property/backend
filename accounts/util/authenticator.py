@@ -1,7 +1,7 @@
 import jwt
 from rest_framework.response import Response
 
-from mysite.settings import SIMPLE_JWT
+from modu_property.settings import SIMPLE_JWT
 
 
 def jwt_authenticator(fn):

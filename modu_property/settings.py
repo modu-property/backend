@@ -42,7 +42,7 @@ def set_logging():
                 "level": env("LOG_LEVEL"),
                 "filters": ["require_debug_true"],
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": f"{BASE_DIR}/mysite.log",
+                "filename": f"{BASE_DIR}/modu_property.log",
                 "maxBytes": 1024 * 1024 * 5,  # 5 MB
                 "backupCount": 5,
                 "formatter": "django.server",
@@ -109,7 +109,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "app",
     "accounts",
-    "mysite",
+    "modu_property",
 ]
 
 MIDDLEWARE = [
@@ -122,7 +122,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "mysite.urls"
+ROOT_URLCONF = "modu_property.urls"
 
 TEMPLATES = [
     {
@@ -140,7 +140,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "mysite.wsgi.application"
+WSGI_APPLICATION = "modu_property.wsgi.application"
 
 
 # Database

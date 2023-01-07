@@ -1,6 +1,6 @@
 from celery import shared_task
 
-from mysite.utils.logger import logger
+from modu_property.utils.logger import logger
 
 
 @shared_task

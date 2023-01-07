@@ -4,7 +4,7 @@ import jwt
 import pytest
 
 from app.models import Post
-from mysite.settings import SECRET_KEY
+from modu_property.settings import SECRET_KEY
 
 
 @pytest.fixture
