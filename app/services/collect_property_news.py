@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from typing import Union, List, Dict
 
 import requests
@@ -20,8 +21,8 @@ NEWS_SEARCH_KEYWORDS = [
 
 
 class CollectPropertyNewsService:
-    def __init__(self):
-        self.display = 50
+    def __init__(self, display: int = 100):
+        self.display: int = display
 
     def search_news_by_naver_api(self, keyword: str) -> Union[Dict, bool]:
         try:
@@ -46,21 +47,25 @@ class CollectPropertyNewsService:
             return False
 
     def insert_news(self, detail_news_list: List[Dict]) -> bool:
-        # TODO : title, pubdate, link, description, 등 저장... news 모델 설계해야함
         news_list_for_bulk_creation = []
+        before_format = "%a %d %b %Y %H:%M:%S %z"  # 'Sat 07 Jan 2023 17:02:00 +0900'
+        after_format = "%Y-%m-%d %H:%M:%S %z"
         try:
             for detail_news in detail_news_list:
+                published_date = "".join(detail_news["published_date"].split(","))
+                published_date = datetime.strptime(published_date, before_format)
+                published_date = published_date.strftime(after_format)
                 news = News(
                     title=detail_news["title"],
                     body=detail_news["body"],
-                    published_date=detail_news["published_date"],
+                    published_date=published_date,
                     link=detail_news["link"],
                 )
                 news_list_for_bulk_creation.append(news)
             News.objects.bulk_create(news_list_for_bulk_creation)
             return True
         except Exception as e:
-            pass
+            logger.error(f"e : {e}")
             return False
 
     def get_detail_news_list(self, naver_news_list: List) -> List[Dict]:
@@ -87,9 +92,9 @@ class CollectPropertyNewsService:
             try:
                 soup = bs(response.text, "html.parser")
 
-                title = soup.select_one("#title_area").text
-                text = soup.select_one("#dic_area").text
-                contents = soup.select_one("#dic_area").contents
+                # title = soup.select_one("#title_area").text
+                text = soup.select_one("#dic_area").text  # 줄바꿈 없는거
+                # contents = soup.select_one("#dic_area").contents  # 줄바꿈 있는거
             except AttributeError as e:
                 logger.error(f"html parse 실패 e : {e}")
                 continue
@@ -120,7 +125,7 @@ class CollectPropertyNewsService:
         매 5분마다 지난 5분동안 게시된 뉴스를 가져오고, 본문까지 긁어와서 DB에 저장
         command 대신 service로 로직 빼고, celery beat 사용해야 함
         """
-        news = [{}]
+        detail_news_list = [{}]
         for keyword in NEWS_SEARCH_KEYWORDS:
             data: Union[Dict, bool] = self.search_news_by_naver_api(keyword)
 
@@ -139,4 +144,6 @@ class CollectPropertyNewsService:
             if not detail_news_list:
                 return
 
-        self.insert_news(detail_news_list=detail_news_list)
+        result = self.insert_news(detail_news_list=detail_news_list)
+
+        return result
