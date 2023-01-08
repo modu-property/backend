@@ -1,8 +1,9 @@
 from celery import shared_task
 
-from modu_property.utils.logger import logger
+from app.services.collect_property_news import CollectPropertyNewsService
 
 
 @shared_task
-def print_task(x):
-    logger.info(f"print x : {x}")
+def collect_property_news_task(display: int):
+    service = CollectPropertyNewsService(display=display)
+    service.execute()

@@ -1,8 +1,11 @@
 import datetime
+import json
 from pathlib import Path
 
 import environ
 import os
+
+from celery.schedules import crontab
 
 env = environ.Env(
     # set casting, default value
@@ -110,6 +113,7 @@ INSTALLED_APPS = [
     "app",
     "accounts",
     "modu_property",
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -214,3 +218,17 @@ CELERY_TIMEZONE = "UTC"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_BROKER_URL = CELERY_BROKER_URL
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_BEAT_SCHEDULE = {
+    "collect_property_news_every_5_minutes": {
+        "task": "modu_property.tasks.collect_property_news_task",
+        "schedule": crontab(minute="*/5"),
+        "args": json.dumps(
+            {
+                "days": 100,
+            }
+        ),
+    },
+}
