@@ -3,11 +3,6 @@ from django.db import models
 from modu_property.common.models.models import DateTimeFields
 
 
-class Post(models.Model):
-    title = models.CharField(max_length=100)
-    content = models.TextField()
-
-
 class News(DateTimeFields):
     title = models.CharField(max_length=100, help_text="기사 제목")
     body = models.TextField(help_text="기사 본문")

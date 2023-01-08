@@ -3,7 +3,7 @@ import datetime
 import jwt
 import pytest
 
-from app.models import Post
+from app.models import News
 from modu_property.settings import SECRET_KEY
 
 
@@ -20,6 +20,13 @@ def get_jwt():
 
 
 @pytest.fixture
-def create_post():
-    post = Post(title="test_title", content="test_content")
-    return post.save()
+def create_news(title: str = "test_title", body: str = "test_body"):
+    news = News(
+        title=title,
+        body=body,
+        published_date=datetime.datetime.utcnow(),
+        link="https://n.news.naver.com/mnews/article/001/0013688002?sid=101",
+    )
+    news.save()
+
+    return news

@@ -1,9 +1,9 @@
 from rest_framework import serializers
 
-from app.models import Post
+from app.models import News
 
 
-class PostSerializer(serializers.ModelSerializer):
+class NewsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Post
-        fields = ("id", "title", "content")
+        model = News
+        fields = ("id", "title", "body", "published_date", "link")
