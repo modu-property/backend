@@ -2,12 +2,14 @@ from typing import Union
 
 from django.contrib.auth.hashers import check_password, make_password
 from django.http import HttpResponseRedirect
+from rest_framework.decorators import api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from accounts.models import User
 
 
+@api_view(("POST",))
 def login(request: Request) -> Union[Response, HttpResponseRedirect]:
     body = request.POST
     username = body["username"]
@@ -22,6 +24,7 @@ def login(request: Request) -> Union[Response, HttpResponseRedirect]:
     return Response("로그인 실패")
 
 
+@api_view(("POST",))
 def signup(request: Request) -> Response:
     body = request.POST
     username = body["username"]
