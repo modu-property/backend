@@ -90,7 +90,6 @@ SECRET_KEY = env("SECRET_KEY")
 
 CELERY_BROKER_URL = env("CELERY_BROKER_URL")
 
-ALLOWED_HOSTS = []
 
 ENGINE = env("DB_ENGINE")
 NAME = env("DB_NAME")
@@ -100,6 +99,11 @@ HOST = env("HOST")
 PORT = env("PORT")
 NAVER_NEW_API_CLIENT_ID = env("NAVER_NEW_API_CLIENT_ID")
 NAVER_NEW_API_CLIENT_SECRET = env("NAVER_NEW_API_CLIENT_SECRET")
+DJANGO_ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS", default="").split(" ")
+ALLOWED_HOSTS = DJANGO_ALLOWED_HOSTS
+POSTGRES_USER = env("POSTGRES_USER", default="")
+POSTGRES_PASSWORD = env("POSTGRES_PASSWORD", default="")
+POSTGRES_DB = env("POSTGRES_DB", default="")
 
 # Application definition
 
@@ -114,7 +118,15 @@ INSTALLED_APPS = [
     "accounts",
     "modu_property",
     "django_celery_beat",
+    # "rest_framework_simplejwt",
 ]
+
+# TODO : rest_framework_simplejwt 설정 필요 없으면 제거
+# REST_FRAMEWORK = {
+#     "DEFAULT_AUTHENTICATION_CLASSES": (
+#         "rest_framework_simplejwt.authentication.JWTAuthentication",
+#     )
+# }
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

@@ -8,6 +8,7 @@
 * redis
 * pytest
 * pytest-xdist
+* docker-compose
 
 # pycharm setting
 run server
@@ -22,3 +23,6 @@ result
 # pytest
 pytest
 pytest -n {n}
+
+# docker-compose
+`docker-compose -f docker-compose.dev.yml up -d --build`
