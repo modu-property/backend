@@ -19,5 +19,3 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # copy project
 COPY . .
-
-CMD ["python", "manage.py", "runserver", "0.0.0.0:5000"]
