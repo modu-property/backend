@@ -27,7 +27,8 @@ jobs:
           NAVER_NEW_API_CLIENT_ID: ${{secrets.NAVER_NEW_API_CLIENT_ID}}
           NAVER_NEW_API_CLIENT_SECRET: ${{secrets.NAVER_NEW_API_CLIENT_SECRET}}
           DJANGO_ALLOWED_HOSTS: ${{secrets.DJANGO_ALLOWED_HOSTS}}
-      - run: pytest . # run pytest test
+      - name: Run Pytest
+        run: pytest . # run pytest test
 
 #on:
 #  push:
