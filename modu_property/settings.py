@@ -67,14 +67,14 @@ def set_logging():
 
 
 # FROM .env.* file
-server_env = os.environ.get("server_env")
-if server_env == "dev":
+SERVER_ENV = os.environ.get("SERVER_ENV")
+if SERVER_ENV == "dev":
     environ.Env.read_env(os.path.join(BASE_DIR, ".env.dev"))
-elif server_env == "stage":
+elif SERVER_ENV == "stage":
     environ.Env.read_env(os.path.join(BASE_DIR, ".env.stage"))
-# elif server_env == "prod":
+# elif SERVER_ENV == "prod":
 #     environ.Env.read_env(os.path.join(BASE_DIR, ".env.prod"))
-elif server_env == "test":
+elif SERVER_ENV == "test":
     environ.Env.read_env(os.path.join(BASE_DIR, ".env.test"))
 else:
     environ.Env.read_env(os.path.join(BASE_DIR, ".env.local"))
