@@ -6,10 +6,6 @@ jobs:
     runs-on: ubuntu-latest # operating system your code will run on
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-      - name: Install Dependencies
-        run: pip install -r requirements.txt # install all our dependencies for the project
-      - name: Set Env
         env:
           SERVER_ENV: "test"
           DEBUG: ${{secrets.SECRET_KEY}}
@@ -28,7 +24,9 @@ jobs:
           NAVER_NEW_API_CLIENT_ID: ${{secrets.NAVER_NEW_API_CLIENT_ID}}
           NAVER_NEW_API_CLIENT_SECRET: ${{secrets.NAVER_NEW_API_CLIENT_SECRET}}
           DJANGO_ALLOWED_HOSTS: ${{secrets.DJANGO_ALLOWED_HOSTS}}
-        run:
+      - uses: actions/setup-python@v2
+      - name: Install Dependencies
+        run: pip install -r requirements.txt # install all our dependencies for the project
       - name: Run Pytest
         run: pytest . # run pytest test
 
