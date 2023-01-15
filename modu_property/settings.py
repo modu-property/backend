@@ -9,7 +9,7 @@ from celery.schedules import crontab
 
 env = environ.Env(
     # set casting, default value
-    DEBUG=(bool, False)
+    # DEBUG=(bool, False)
 )
 
 # Set the project base directory

@@ -7,10 +7,27 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
-      - run: pip install flake8
       - run: pip install -r requirements.txt # install all our dependencies for the project
-#      - run: pytest . # run pytest test
-      - run: flake8 . # run flake8 test
+      - name: Set Env
+        env:
+          SERVER_ENV: "test"
+          DEBUG: ${{secrets.SECRET_KEY}}
+          SECRET_KEY: ${{secrets.SECRET_KEY}}
+          DB_ENGINE: ${{secrets.DB_ENGINE}}
+          DB_NAME: ${{secrets.DB_NAME}}
+          USER: ${{secrets.USER}}
+          PASSWORD: ${{secrets.PASSWORD}}
+          POSTGRES_USER: ${{secrets.POSTGRES_USER}}
+          POSTGRES_PASSWORD: ${{secrets.POSTGRES_PASSWORD}}
+          POSTGRES_DB: ${{secrets.POSTGRES_DB}}
+          HOST: ${{secrets.HOST}}
+          PORT: ${{secrets.PORT}}
+          CELERY_BROKER_URL: ${{secrets.CELERY_BROKER_URL}}
+          LOG_LEVEL: ${{secrets.LOG_LEVEL}}
+          NAVER_NEW_API_CLIENT_ID: ${{secrets.NAVER_NEW_API_CLIENT_ID}}
+          NAVER_NEW_API_CLIENT_SECRET: ${{secrets.NAVER_NEW_API_CLIENT_SECRET}}
+          DJANGO_ALLOWED_HOSTS: ${{secrets.DJANGO_ALLOWED_HOSTS}}
+      - run: pytest . # run pytest test
 
 #on:
 #  push:
