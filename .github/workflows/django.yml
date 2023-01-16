@@ -29,20 +29,14 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.8
-      - name: Create venv
+      - name: Install Dependencies
         run: |
           pip install --upgrade pip
-          python3.8 -m venv venv
-          source venv/bin/activate
-      - name: check python version
-        run: python -V
-      - name: check python version
-        run: venv/bin/python -V
-      - name: Install Dependencies
-        run: venv/bin/python -m pip install -r requirements.txt # install all our dependencies for the project
-      - name: Run Pytest
-        run: venv/bin/python -m pytest
-
+          python3.8 -m venv env
+          source env/bin/activate
+          pip install -r requirements.txt # install all our dependencies for the project
+          pytest . # run pytest test
+          
 #on:
 #  push:
 #    branches: [ main ]
