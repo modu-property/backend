@@ -17,8 +17,8 @@ env:
   PORT: ${{secrets.PORT}}
   CELERY_BROKER_URL: ${{secrets.CELERY_BROKER_URL}}
   LOG_LEVEL: ${{secrets.LOG_LEVEL}}
-  NAVER_NEW_API_CLIENT_ID: ${{secrets.NAVER_NEW_API_CLIENT_ID}}
-  NAVER_NEW_API_CLIENT_SECRET: ${{secrets.NAVER_NEW_API_CLIENT_SECRET}}
+  NAVER_NEWS_API_CLIENT_ID: ${{secrets.NAVER_NEWS_API_CLIENT_ID}}
+  NAVER_NEWS_API_CLIENT_SECRET: ${{secrets.NAVER_NEWS_API_CLIENT_SECRET}}
   DJANGO_ALLOWED_HOSTS: ${{secrets.DJANGO_ALLOWED_HOSTS}}
 
 jobs:
@@ -29,6 +29,10 @@ jobs:
       - uses: actions/setup-python@v2
       - name: Install Dependencies
         run: pip install -r requirements.txt # install all our dependencies for the project
+      - name: run ls -a
+        run: ls -a
+      - name: run ls
+        run: ls
       - name: Run Pytest
         run: pytest . # run pytest test
 
@@ -85,8 +89,8 @@ jobs:
 ##        PORT: ${{secrets.PORT}}
 ##        CELERY_BROKER_URL: ${{secrets.CELERY_BROKER_URL}}
 ##        LOG_LEVEL: ${{secrets.LOG_LEVEL}}
-##        NAVER_NEW_API_CLIENT_ID: ${{secrets.NAVER_NEW_API_CLIENT_ID}}
-##        NAVER_NEW_API_CLIENT_SECRET: ${{secrets.NAVER_NEW_API_CLIENT_SECRET}}
+##        NAVER_NEWS_API_CLIENT_ID: ${{secrets.NAVER_NEWS_API_CLIENT_ID}}
+##        NAVER_NEWS_API_CLIENT_SECRET: ${{secrets.NAVER_NEWS_API_CLIENT_SECRET}}
 ##        DJANGO_ALLOWED_HOSTS: ${{secrets.DJANGO_ALLOWED_HOSTS}}
 #      run: |
 ##        python set_env.py

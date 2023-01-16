@@ -6,7 +6,10 @@ import requests
 from pytz import timezone
 
 from app.models import News
-from modu_property.settings import NAVER_NEW_API_CLIENT_ID, NAVER_NEW_API_CLIENT_SECRET
+from modu_property.settings import (
+    NAVER_NEWS_API_CLIENT_ID,
+    NAVER_NEWS_API_CLIENT_SECRET,
+)
 from modu_property.utils.logger import logger
 
 from bs4 import BeautifulSoup as bs
@@ -33,8 +36,8 @@ class CollectPropertyNewsService:
     def search_news_by_naver_api(self, keyword: str) -> Union[Dict, bool]:
         try:
             headers = {
-                "X-Naver-Client-Id": NAVER_NEW_API_CLIENT_ID,
-                "X-Naver-Client-Secret": NAVER_NEW_API_CLIENT_SECRET,
+                "X-Naver-Client-Id": NAVER_NEWS_API_CLIENT_ID,
+                "X-Naver-Client-Secret": NAVER_NEWS_API_CLIENT_SECRET,
             }
             params = {"query": keyword, "display": self.display}
             url = f"https://openapi.naver.com/v1/search/news"
