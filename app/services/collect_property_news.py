@@ -85,7 +85,7 @@ class CollectPropertyNewsService:
                 headers = {
                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/98.0.4758.102"
                 }
-                response = requests.get(url, headers=headers, timeout=0.1)
+                response = requests.get(url, headers=headers, timeout=0.5)
             except Exception as e:
                 logger.error(f"requests.get 실패 e : {e}")
                 continue
