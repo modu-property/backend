@@ -2,12 +2,12 @@ name: Django CI
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, dev ]
+    branches: [ main ]
 
 env:
-  SERVER_ENV: "test"
+  SERVER_ENV: "prod"
   DEBUG: ${{secrets.SECRET_KEY}}
   SECRET_KEY: ${{secrets.SECRET_KEY}}
   DB_ENGINE: ${{secrets.DB_ENGINE}}
