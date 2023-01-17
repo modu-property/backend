@@ -15,6 +15,7 @@ RUN apk update \
 # install python dependencies
 COPY requirements.txt /app/requirements.txt
 RUN pip install --upgrade pip
+RUN pip install gunicorn
 RUN pip install --no-cache-dir -r requirements.txt
 
 # copy project

@@ -15,14 +15,17 @@ services:
     container_name: core_app
     build: .
     restart: always
-    env_file: .env
+    env_file: .env.local
     ports:
-      - "5000:5000"
+      - "8000:8000"
     command:
       - sh
       - -c
       - |
-        python manage.py migrate && python manage.py runserver 0.0.0.0:5000
+        python manage.py migrate &&
+        gunicorn modu_property.wsgi --bind 0.0.0.0:8000 --workers 4 --threads 4 &&
+        celery -A modu_property worker -l INFO --concurrency 1 -E
+
     volumes:
      - .:/app
      - static_volume:/app/static
@@ -36,7 +39,7 @@ services:
   db:
     container_name: core_db
     image: postgres:14.6-alpine
-    env_file: .env
+    env_file: .env.local
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     ports:
