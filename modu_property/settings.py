@@ -9,7 +9,7 @@ from celery.schedules import crontab
 
 env = environ.Env(
     # set casting, default value
-    # DEBUG=(bool, False)
+    DEBUG=(bool, False)
 )
 
 # Set the project base directory
@@ -72,8 +72,8 @@ if SERVER_ENV == "dev":
     environ.Env.read_env(os.path.join(BASE_DIR, ".env.dev"))
 elif SERVER_ENV == "stage":
     environ.Env.read_env(os.path.join(BASE_DIR, ".env.stage"))
-# elif SERVER_ENV == "prod":
-#     environ.Env.read_env(os.path.join(BASE_DIR, ".env.prod"))
+elif SERVER_ENV == "prod":
+    environ.Env.read_env(os.path.join(BASE_DIR, ".env.prod"))
 elif SERVER_ENV == "test":
     environ.Env.read_env(os.path.join(BASE_DIR, ".env.test"))
 else:
@@ -237,10 +237,6 @@ CELERY_BEAT_SCHEDULE = {
     "collect_property_news_every_5_minutes": {
         "task": "modu_property.tasks.collect_property_news_task",
         "schedule": crontab(minute="*/5"),
-        "args": json.dumps(
-            {
-                "days": 100,
-            }
-        ),
+        "kwargs": {"display": 100},
     },
 }

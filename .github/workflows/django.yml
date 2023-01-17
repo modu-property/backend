@@ -34,7 +34,7 @@ jobs:
         python-version: [3.8]
     services:
       postgres:
-        image: postgres:12
+        image: postgres:14
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres

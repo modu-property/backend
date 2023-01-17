@@ -23,13 +23,16 @@ services:
       - -c
       - |
         python manage.py migrate && python manage.py runserver 0.0.0.0:5000
-        
-
     volumes:
      - .:/app
      - static_volume:/app/static
     depends_on:
      - db
+  redis:
+    restart: unless-stopped
+    image: redis:7.0.5-alpine
+    expose:
+      - 6379
   db:
     container_name: core_db
     image: postgres:14.6-alpine
@@ -40,8 +43,8 @@ services:
       - '5432:5432'
     user: postgres
     environment:
-      - "POSTGRES_USER=postgres"
       - "POSTGRES_DB=modu_property"
+      - "POSTGRES_USER=postgres"
       - "POSTGRES_PASSWORD=postgres"
 
 volumes:

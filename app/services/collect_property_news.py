@@ -47,7 +47,7 @@ class CollectPropertyNewsService:
                 logger.error(f"Error Code : {status_code}")
 
             text = response.text
-            logger.debug(text)
+            # logger.debug(text)
             loaded_data = json.loads(text)
 
             return loaded_data
@@ -69,6 +69,7 @@ class CollectPropertyNewsService:
                     )
                 )
             News.objects.bulk_create(news_list_for_bulk_creation)
+            logger.info("insert_news success")
             return True
         except Exception as e:
             logger.error(f"e : {e}")
@@ -84,7 +85,7 @@ class CollectPropertyNewsService:
                 headers = {
                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/98.0.4758.102"
                 }
-                response = requests.get(url, headers=headers, timeout=0.05)
+                response = requests.get(url, headers=headers, timeout=0.1)
             except Exception as e:
                 logger.error(f"requests.get 실패 e : {e}")
                 continue
@@ -154,6 +155,7 @@ class CollectPropertyNewsService:
                 if last_time <= published_date:
                     news_list_by_last_time.append(detail_news)
 
+            logger.info(f"5분 전 뉴스 목록 news_list_by_last_time : {news_list_by_last_time}")
             return news_list_by_last_time
         except Exception as e:
             logger.error(f"e : {e}")
