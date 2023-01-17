@@ -13,7 +13,9 @@ services:
       - web
   web:
     container_name: core_app
-    build: .
+    build:
+      context: .
+      dockerfile: ./Dockerfile
     restart: always
     env_file: .env.local
     ports:
@@ -23,14 +25,26 @@ services:
       - -c
       - |
         python manage.py migrate &&
-        gunicorn modu_property.wsgi --bind 0.0.0.0:8000 --workers 4 --threads 4 &&
-        celery -A modu_property worker -l INFO --concurrency 1 -E
-
+        gunicorn modu_property.wsgi --bind 0.0.0.0:8000 --workers 4 --threads 4
     volumes:
      - .:/app
      - static_volume:/app/static
     depends_on:
      - db
+  worker:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - static_volume:/app/backend/django_static
+    command:
+      - sh
+      - -c
+      - celery -A modu_property worker -l INFO --concurrency 1 -E
+    depends_on:
+      - web
+      - redis
   redis:
     restart: unless-stopped
     image: redis:7.0.5-alpine
