@@ -1,11 +1,9 @@
 name: Django CI
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
-
+    branches:
+      - main
 env:
   SERVER_ENV: "prod"
   DEBUG: ${{secrets.SECRET_KEY}}
