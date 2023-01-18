@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-TARGET='main'
+TARGET='dev'
 
 cd ~/app || exit
 
 ACTION='\033[1;90m'
 NOCOLOR='\033[0m'
 
-# Checking if we are on the main branch
+# Checking if we are on the dev branch
 
 echo -e ${ACTION}Checking Git repo
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -30,10 +30,11 @@ fi
 
 # If that's not the case, we pull the latest changes and we build a new image
 
-git pull origin main;
+git pull origin dev;
 
 # Docker
 
-docker-compose up -d --build
+#docker-compose up -d --build
+docker-compose -f docker-compose.dev.yml up -d --build
 
 exit 0;
