@@ -56,3 +56,18 @@ jobs:
           source env/bin/activate
           pip install -r requirements.txt
           pytest .
+    deploy:
+      name: Deploying
+      needs: [ test_project ]
+      runs-on: ubuntu-latest
+      steps:
+        - name: Deploying Application
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.SSH_AWS_SERVER_IP }}
+            username: ${{ secrets.SSH_SERVER_USER }}
+            key: ${{ secrets.SSH_PRIVATE_KEY }}
+            passphrase: ${{ secrets.SSH_PASSPHRASE }}
+            script: |
+              cd ~/.scripts
+              ./docker-deploy-dev.sh
