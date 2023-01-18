@@ -80,7 +80,6 @@ else:
     environ.Env.read_env(os.path.join(BASE_DIR, ".env.local"))
 LOGGING = set_logging()
 
-
 # False if not in os.environ because of casting above
 DEBUG = env("DEBUG")
 
@@ -89,8 +88,6 @@ DEBUG = env("DEBUG")
 SECRET_KEY = env("SECRET_KEY")
 
 CELERY_BROKER_URL = env("CELERY_BROKER_URL")
-
-
 ENGINE = env("DB_ENGINE")
 NAME = env("DB_NAME")
 USER = env("USER")

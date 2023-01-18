@@ -6,7 +6,7 @@ on:
       - main
 env:
   SERVER_ENV: "prod"
-  DEBUG: ${{secrets.SECRET_KEY}}
+  DEBUG: ${{secrets.DEBUG}}
   SECRET_KEY: ${{secrets.SECRET_KEY}}
   DB_ENGINE: ${{secrets.DB_ENGINE}}
   DB_NAME: ${{secrets.DB_NAME}}
