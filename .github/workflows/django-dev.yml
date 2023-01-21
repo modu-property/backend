@@ -64,8 +64,8 @@ jobs:
       - name: Deploying Application
         uses: appleboy/ssh-action@master
         with:
-          host: dev.modu-property.com  # IP 대신 도메인 주소
-          username: mh shim
+          host: 3.37.34.129
+          username: bitnami
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase:
           script: |
