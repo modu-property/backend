@@ -11,10 +11,7 @@ env:
   DB_ENGINE: ${{secrets.DB_ENGINE}}
   DB_NAME: ${{secrets.DB_NAME}}
   USER: ${{secrets.USER}}
-  PASSWORD: ${{secrets.PASSWORD}}
-  POSTGRES_USER: ${{secrets.POSTGRES_USER}}
-  POSTGRES_PASSWORD: ${{secrets.POSTGRES_PASSWORD}}
-  POSTGRES_DB: ${{secrets.POSTGRES_DB}}
+  DB_PASSWORD: ${{secrets.PASSWORD}}
   DB_HOST: ${{secrets.HOST}}
   DB_PORT: ${{secrets.PORT}}
   CELERY_BROKER_URL: ${{secrets.CELERY_BROKER_URL}}
