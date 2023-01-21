@@ -92,8 +92,8 @@ ENGINE = env("DB_ENGINE")
 NAME = env("DB_NAME")
 USER = env("USER")
 PASSWORD = env("PASSWORD")
-HOST = env("HOST")
-PORT = env("PORT")
+DB_HOST = env("DB_HOST")
+DB_PORT = env("DB_PORT")
 NAVER_NEWS_API_CLIENT_ID = env("NAVER_NEWS_API_CLIENT_ID")
 NAVER_NEWS_API_CLIENT_SECRET = env("NAVER_NEWS_API_CLIENT_SECRET")
 DJANGO_ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS", default="").split(" ")
@@ -165,8 +165,8 @@ DATABASES = {
         "NAME": NAME,
         "USER": USER,
         "PASSWORD": PASSWORD,
-        "HOST": HOST,
-        "PORT": PORT,
+        "HOST": DB_HOST,
+        "PORT": DB_PORT,
     },
 }
 
