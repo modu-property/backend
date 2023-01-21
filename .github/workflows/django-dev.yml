@@ -64,7 +64,7 @@ jobs:
       - name: Deploying Application
         uses: appleboy/ssh-action@master
         with:
-          host: 3.37.34.129
+          host: dev.modu-property.com
           username: bitnami
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase:
