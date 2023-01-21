@@ -67,7 +67,8 @@ jobs:
           host: dev.modu-property.com
           username: bitnami
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase:
+          port: 22
           script: |
+            whoami
             cd ~/.scripts
             ./docker-deploy-dev.sh
