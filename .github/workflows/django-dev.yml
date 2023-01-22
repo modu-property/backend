@@ -66,5 +66,6 @@ jobs:
           key: ${{secrets.SSH_PRIVATE_KEY_DEV}}
           port: 22
           script: |
+            whoami
             cd ~/.scripts
             ./docker-deploy-dev.sh
