@@ -63,10 +63,10 @@ jobs:
         uses: fifsky/ssh-action@master
         with:
           host: 3.37.34.129
-          username: ubuntu
+          user: ubuntu
           key: ${{secrets.SSH_PRIVATE_KEY_DEV}}
           port: 22
-          script: |
+          command: |
             whoami
             cd ~/.scripts
             ./docker-deploy-dev.sh
