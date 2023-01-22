@@ -68,5 +68,5 @@ jobs:
           port: 22
           command: |
             whoami
-            cd ~/.scripts
+            cd ~/app/.scripts
             ./docker-deploy-dev.sh
