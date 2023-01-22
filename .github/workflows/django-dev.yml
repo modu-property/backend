@@ -63,7 +63,7 @@ jobs:
         with:
           host: 3.37.34.129
           username: ubuntu
-          key: ${{ secrets.SSH_PRIVATE_KEY_DEV }}
+          key: ${{secrets.SSH_PRIVATE_KEY_DEV}}
           port: 22
           script: |
             cd ~/.scripts
