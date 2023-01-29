@@ -34,3 +34,16 @@ pytest -n {n}
 docker-compose -f docker-compose.local.yml up -d --build
 
 docker-compose -f docker-compose.dev.yml up -d --build
+
+# lightsail 인스턴스에 key 설정하기
+* 인스턴스에 ssh 접속
+* key 생성 : ssh-keygen -t rsa -b 4096 -C "samnaka@naver.com"
+* ~/.ssh/authorized_keys 파일에 새로 만든 id_rsa.pub 값 이어 붙여주기
+* github 사이트에서 profile -> setting -> ssh and gpg keys 에도 id_rsa.pub 등록해야 함
+* SSH_PRIVATE_KEY_DEV 키는 id_rsa(개인키) 넣어줘야 함
+* key 줄바꿈 안되면 엔터 쳐서 이런 모양 만들어야함.
+```
+-----BEGIN OPENSSH PRIVATE KEY-----
+...
+-----END OPENSSH PRIVATE KEY-----
+```
