@@ -66,6 +66,7 @@ jobs:
           user: ubuntu
           key: ${{secrets.SSH_PRIVATE_KEY_DEV}}
           port: 22
+          args: "-tt -vvv"
           command: |
             whoami
             cd ~/app/.scripts
