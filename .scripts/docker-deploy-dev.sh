@@ -1,8 +1,8 @@
 #!/usr/bin
 
-/env bash
+#/env bash
 
-TARGET='dev'
+TARGET='feature/simon/crawling-property-news'
 
 cd ~/app || exit
 
@@ -32,7 +32,7 @@ fi
 
 # If that's not the case, we pull the latest changes and we build a new image
 
-git pull origin dev;
+git pull origin feature/simon/crawling-property-news;
 
 # Installing docker engine if not exists
 if ! type docker > /dev/null
