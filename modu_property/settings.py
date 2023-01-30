@@ -113,6 +113,7 @@ INSTALLED_APPS = [
     "accounts",
     "modu_property",
     "django_celery_beat",
+    "rest_framework"
     # "rest_framework_simplejwt",
 ]
 
