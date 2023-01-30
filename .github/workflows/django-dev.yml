@@ -68,6 +68,7 @@ jobs:
           port: 22
           args: "-tt -vvv"
           command: |
+            sudo chmod 777 ./docker-deploy-dev.sh
             whoami
             cd ~/app/.scripts
             ./docker-deploy-dev.sh
