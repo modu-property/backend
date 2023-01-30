@@ -1,7 +1,7 @@
 name: Django CI
 
 on:
-  pull_request:
+  push:
     branches:
       - dev
 
@@ -65,7 +65,7 @@ jobs:
           host: 3.37.34.129
           user: ubuntu
           key: ${{secrets.SSH_PRIVATE_KEY_DEV}}
-          pass: 0000
+#          pass: 0000
           port: 22
 #          args: "-tt -vvv"
           command: |
