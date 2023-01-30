@@ -13,6 +13,8 @@ NOCOLOR='\033[0m'
 
 echo -e ${ACTION}Checking Git repo
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
+echo target : ${TARGET}
+echo branch : $BRANCH
 if [ "$BRANCH" != ${TARGET} ]
 then
   exit 0
@@ -24,11 +26,11 @@ git fetch
 HEADHASH=$(git rev-parse HEAD)
 UPSTREAMHASH=$(git rev-parse ${TARGET}@{upstream})
 
-if [ "$HEADHASH" == "$UPSTREAMHASH" ]
-then
-  echo -e "${FINISHED}"Current branch is up to date with origin/${TARGET}."${NOCOLOR}"
-  exit 0
-fi
+#if [ "$HEADHASH" == "$UPSTREAMHASH" ]
+#then
+#  echo -e "${FINISHED}"Current branch is up to date with origin/${TARGET}."${NOCOLOR}"
+#  exit 0
+#fi
 
 # If that's not the case, we pull the latest changes and we build a new image
 
@@ -58,6 +60,7 @@ then
 fi
 
 #docker-compose up -d --build
-docker-compose -f docker-compose.dev.yml up -d --build
+docker-compose -f ../docker-compose.dev.yml up -d --build
+#docker-compose -f ../docker-compose.local.yml up -d --build
 
 exit 0;
