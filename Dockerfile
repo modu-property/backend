@@ -16,6 +16,8 @@ RUN apk update \
 COPY requirements.txt /app/requirements.txt
 RUN pip install --upgrade pip
 RUN pip install gunicorn
+RUN python3.8 -m venv env
+RUN source env/bin/activate
 RUN pip install --no-cache-dir -r requirements.txt
 
 # copy project
