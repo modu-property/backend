@@ -34,17 +34,28 @@ services:
      - static_volume:/app/static
     depends_on:
      - db
-  worker:
+  celery:
     restart: unless-stopped
     build:
       context: .
-      dockerfile: ./Dockerfile
     volumes:
       - static_volume:/app/backend/django_static
     command:
       - sh
       - -c
       - celery -A modu_property worker -l INFO --concurrency 1 -E
+    depends_on:
+      - web
+      - redis
+  celery-beat:
+    build:
+      context: .
+    volumes:
+      - static_volume:/app/backend/django_static
+    command:
+      - sh
+      - -c
+      - celery -A modu_property beat -l INFO
     depends_on:
       - web
       - redis

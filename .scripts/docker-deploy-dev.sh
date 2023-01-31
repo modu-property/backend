@@ -2,7 +2,7 @@
 
 #/env bash
 
-TARGET='feature/simon/crawling-property-news'
+TARGET='dev'
 
 cd ~/app || exit
 
@@ -34,7 +34,7 @@ UPSTREAMHASH=$(git rev-parse ${TARGET}@{upstream})
 
 # If that's not the case, we pull the latest changes and we build a new image
 
-git pull origin feature/simon/crawling-property-news;
+git pull origin dev;
 
 # Installing docker engine if not exists
 if ! type docker > /dev/null
@@ -59,8 +59,6 @@ then
   sudo chmod +x /usr/local/bin/docker-compose
 fi
 
-#docker-compose up -d --build
 docker-compose -f docker-compose.dev.yml up -d --build
-#docker-compose -f ../docker-compose.local.yml up -d --build
 
 exit 0;
