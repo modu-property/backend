@@ -34,13 +34,13 @@ services:
      - static_volume:/app/static
     depends_on:
      - db
-  celery:
-    container_name: celery
+  celery-worker:
+    container_name: celery-worker
     build:
       context: .
     restart: always
     volumes:
-      - static_volume:/app/backend/django_static
+      - .:/var/www/app/worker
     command:
       - sh
       - -c
@@ -53,15 +53,18 @@ services:
     build:
       context: .
     volumes:
-      - static_volume:/app/backend/django_static
+      - .:/var/www/app/beat
     command:
       - sh
       - -c
       - celery -A modu_property beat -l INFO
+    links:
+      - celery-worker
+      - redis
     depends_on:
       - web
       - redis
-      - celery
+      - celery-worker
   redis:
     restart: unless-stopped
     image: redis:7.0.5-alpine
