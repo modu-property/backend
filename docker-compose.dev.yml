@@ -35,8 +35,10 @@ services:
     depends_on:
      - db
   celery:
+    container_name: celery
     build:
       context: .
+    restart: always
     volumes:
       - static_volume:/app/backend/django_static
     command:
@@ -47,6 +49,7 @@ services:
       - web
       - redis
   celery-beat:
+    container_name: celery-beat
     build:
       context: .
     volumes:
@@ -58,6 +61,7 @@ services:
     depends_on:
       - web
       - redis
+      - celery
   redis:
     restart: unless-stopped
     image: redis:7.0.5-alpine
