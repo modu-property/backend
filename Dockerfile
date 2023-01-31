@@ -10,14 +10,14 @@ ENV PYTHONUNBUFFERED 1  # 표준 출력, 표준 에러를 버퍼링하지 않음
 
 # install psycopg2 dependencies
 RUN apk update \
-    && apk add postgresql-dev gcc python3-dev musl-dev
+    && apk add postgresql-dev gcc python3-dev musl-dev py3-pip
 
 # install python dependencies
 COPY requirements.txt /app/requirements.txt
 RUN pip install --upgrade pip
 RUN pip install gunicorn
-RUN python3.8 -m venv env
-RUN source env/bin/activate
+RUN #python3.8 -m venv venv
+RUN #source env/bin/activate
 RUN pip install --no-cache-dir -r requirements.txt
 
 # copy project
