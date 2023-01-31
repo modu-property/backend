@@ -44,6 +44,7 @@ services:
       - sh
       - -c
       - celery -A modu_property worker -l INFO --concurrency 1 -E
+      - tail -f /dev/null
     depends_on:
       - web
       - redis
@@ -56,6 +57,7 @@ services:
       - sh
       - -c
       - celery -A modu_property beat -l INFO
+      - tail -f /dev/null
     depends_on:
       - web
       - redis
