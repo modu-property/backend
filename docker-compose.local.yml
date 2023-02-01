@@ -38,6 +38,7 @@ services:
     container_name: celery-worker
     build:
       context: .
+      dockerfile: ./Dockerfile
     restart: always
     volumes:
       - .:/var/www/app/worker
@@ -45,6 +46,7 @@ services:
       - sh
       - -c
       - celery -A modu_property worker -l INFO --concurrency 1 -E
+      - tail -f /dev/null
     depends_on:
       - web
       - redis
@@ -52,12 +54,14 @@ services:
     container_name: celery-beat
     build:
       context: .
+      dockerfile: ./Dockerfile
     volumes:
       - .:/var/www/app/beat
     command:
       - sh
       - -c
       - celery -A modu_property beat -l INFO
+      - tail -f /dev/null
     links:
       - celery-worker
       - redis
