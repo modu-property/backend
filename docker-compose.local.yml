@@ -47,6 +47,7 @@ services:
     depends_on:
       - core_app
       - redis_broker
+    env_file: .env.local
   celery_beat:
     container_name: celery_beat
     build:
@@ -66,6 +67,7 @@ services:
       - core_app
       - redis_broker
       - celery_worker
+    env_file: .env.local
   redis_broker:
     container_name: redis_broker
     restart: unless-stopped
