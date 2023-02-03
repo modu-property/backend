@@ -51,3 +51,13 @@ docker-compose -f docker-compose.dev.yml up -d --build
 sudo vi /etc/ssh/sshd_config
 PasswordAuthentication no -> PasswordAuthentication yes 로 수정
 PubkeyAcceptedKeyTypes=+ssh-rsa 추가
+
+# db
+db 컨테이너 접속
+`sudo docker exec -it core_db bash`
+로그인
+`psql -U postgres`
+db 지정
+`\c {db명}`
+테이블 조회
+`\dt`
