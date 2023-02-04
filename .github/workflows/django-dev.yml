@@ -10,8 +10,7 @@ env:
   DEBUG: ${{secrets.DEBUG}}
   SECRET_KEY: ${{secrets.SECRET_KEY}}
   DB_ENGINE: ${{secrets.DB_ENGINE}}
-#  DB_NAME: ${{secrets.DB_NAME}}
-  DB_NAME: "db"
+  DB_NAME: ${{secrets.DB_NAME}}
   USER: ${{secrets.USER}}
   DB_PASSWORD: ${{secrets.DB_PASSWORD}}
   DB_HOST: ${{secrets.DB_HOST}}
@@ -24,7 +23,7 @@ env:
 
 jobs:
   test_project:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       max-parallel: 4
       matrix:
