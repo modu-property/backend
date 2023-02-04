@@ -10,7 +10,8 @@ env:
   DEBUG: ${{secrets.DEBUG}}
   SECRET_KEY: ${{secrets.SECRET_KEY}}
   DB_ENGINE: ${{secrets.DB_ENGINE}}
-  DB_NAME: ${{secrets.DB_NAME}}
+#  DB_NAME: ${{secrets.DB_NAME}}
+  DB_NAME: "db"
   USER: ${{secrets.USER}}
   DB_PASSWORD: ${{secrets.DB_PASSWORD}}
   DB_HOST: ${{secrets.DB_HOST}}
@@ -46,7 +47,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: psycopg2 prerequisites
         run: sudo apt-get install python3-capstone libpq-dev
-      - name: Install Dependencies
+      - name: Install Dependencies & pytest
         run: |
           pip install --upgrade pip
           python3.8 -m venv venv
