@@ -113,7 +113,7 @@ class CollectPropertyNewsService:
                 "link": naver_news["link"],
             }
             detail_news_list.append(detail_news)
-        logger.debug(f"detail_news_list : {detail_news_list}")
+        # logger.debug(f"detail_news_list : {detail_news_list}")
         return detail_news_list
 
     def get_only_naver_news_list(self, data: Dict) -> List[Dict]:

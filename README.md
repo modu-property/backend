@@ -35,6 +35,12 @@ docker-compose -f docker-compose.local.yml up -d --build
 
 docker-compose -f docker-compose.dev.yml up -d --build
 
+파일 검증 : 
+
+docker-compose -f docker-compose.dev.yml config
+
+docker-compose -f docker-compose.local.yml config
+
 # lightsail 인스턴스에 key 설정하기
 * 인스턴스에 ssh 접속
 * key 생성 : ssh-keygen -t ed25519 -a 200 -C "samnaka@naver.com"
@@ -61,3 +67,22 @@ db 지정
 `\c {db명}`
 테이블 조회
 `\dt`
+
+여러개 insert
+```sql
+insert into app_news
+    (title, body, link, published_date, created_at, updated_at) 
+    values
+    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00'),
+    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00'),
+    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00'),
+    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00'),
+    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00'),
+    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00'),
+    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00'),
+    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00'),
+    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00'),
+    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00'),
+    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00')
+;
+```
