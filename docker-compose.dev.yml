@@ -4,8 +4,6 @@ services:
     container_name: core_web
     restart: on-failure
     image: jonasal/nginx-certbot:latest
-    env_file:
-      - .env.nginx.dev
     volumes:
       - nginx_secrets:/etc/letsencrypt
       - ./nginx/user_conf.d:/etc/nginx/user_conf.d
@@ -14,6 +12,8 @@ services:
       - "443:443"
     depends_on:
       - core_app
+    env_file:
+      - .env.nginx.dev
   core_app:
     container_name: core_app
     build:
@@ -34,6 +34,26 @@ services:
      - static_volume:/app/static
     depends_on:
      - db
+    links:
+      - db
+      - redis_broker
+    environment:
+      - POSTGRES_DB=modu_property
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  db:
+    container_name: core_db
+    image: postgres:14.6
+    ports:
+      - '5432:5432'
+    env_file: .env.dev
+    environment:
+      - POSTGRES_DB=modu_property
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ./data:/var/lib/postgresql/data/
   celery_worker:
     container_name: celery_worker
     build:
@@ -72,25 +92,12 @@ services:
       - celery_worker
     env_file: .env.dev
   redis_broker:
+    container_name: redis_broker
     restart: unless-stopped
     image: redis:7.0.5-alpine
     expose:
       - 6379
-  db:
-    container_name: core_db
-    image: postgres:14.6-alpine
-    env_file: .env.dev
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    ports:
-      - '5432:5432'
-    user: postgres
-    environment:
-      - "POSTGRES_DB=modu_property"
-      - "POSTGRES_USER=postgres"
-      - "POSTGRES_PASSWORD=postgres"
- 
+
 volumes:
   static_volume:
-  postgres_data:
   nginx_secrets:
