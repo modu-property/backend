@@ -49,6 +49,6 @@ jobs:
         run: |
           pip install --upgrade pip
           python3.8 -m venv venv
-          source env/bin/activate
+          source venv/bin/activate
           pip install -r requirements.txt
           pytest .
