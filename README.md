@@ -1,7 +1,6 @@
 # Used
 * jwt
 * serializer
-* postgresql
 * sqlite
 * form
 * celery
@@ -9,6 +8,7 @@
 * pytest
 * pytest-xdist
 * docker-compose
+* mysql
 
 # pycharm setting
 run server
@@ -41,48 +41,6 @@ docker-compose -f docker-compose.dev.yml config
 
 docker-compose -f docker-compose.local.yml config
 
-# lightsail 인스턴스에 key 설정하기
-* 인스턴스에 ssh 접속
-* key 생성 : ssh-keygen -t ed25519 -a 200 -C "samnaka@naver.com"
-* ~/.ssh/authorized_keys 파일에 새로 만든 id_ed25519.pub 값 이어 붙여주기. `cat id_ed25519.pub >> authorized_keys`
-* github 사이트에서 profile -> setting -> ssh and gpg keys 에도 id_ed25519.pub 등록해야 함
-* SSH_PRIVATE_KEY_DEV 키는 id_ed25519(개인키) 넣어줘야 함
-* key 줄바꿈 안되면 엔터 쳐서 이런 모양 만들어야함.
-```
------BEGIN OPENSSH PRIVATE KEY-----
-...
------END OPENSSH PRIVATE KEY-----
-```
-
-sudo vi /etc/ssh/sshd_config
-PasswordAuthentication no -> PasswordAuthentication yes 로 수정
-PubkeyAcceptedKeyTypes=+ssh-rsa 추가
-
-# db
-db 컨테이너 접속
-`sudo docker exec -it core_db bash`
-로그인
-`psql -U postgres`
-db 지정
-`\c {db명}`
-테이블 조회
-`\dt`
-
-여러개 insert
-```sql
-insert into app_news
-    (title, body, link, published_date, created_at, updated_at) 
-    values
-    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00'),
-    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00'),
-    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00'),
-    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00'),
-    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00'),
-    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00'),
-    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00'),
-    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00'),
-    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00'),
-    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00'),
-    ('hi', 'hi', 'https://n.news.naver.com/article/666/0000002887?cds=news_media_pc&type=editn', '2023-01-01 00:00:00', '2023-01-01 00:00:00', '2023-01-01 00:00:00')
-;
-```
+# 공공데이터
+[국토교통부_연립다세대 매매 실거래자료](https://www.data.go.kr/tcs/dss/selectApiDataDetailView.do?publicDataPk=15058038)
+[국토교통부_연립다세대 전월세 자료](https://www.data.go.kr/tcs/dss/selectApiDataDetailView.do?publicDataPk=15058016)
