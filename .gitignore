@@ -182,3 +182,5 @@ cython_debug/
 .env.test
 
 /data
+
+.DS_Store
