@@ -68,6 +68,7 @@ def set_logging():
 
 # FROM .env.* file
 SERVER_ENV = os.environ.get("SERVER_ENV")
+print(f"SERVER_ENV : {SERVER_ENV}")
 if SERVER_ENV == "dev":
     environ.Env.read_env(os.path.join(BASE_DIR, ".env.dev"))
 elif SERVER_ENV == "stage":
@@ -90,15 +91,13 @@ SECRET_KEY = env("SECRET_KEY")
 CELERY_BROKER_URL = env("CELERY_BROKER_URL")
 ENGINE = env("DB_ENGINE")
 NAME = env("DB_NAME")
-USER = env("USER")
+DB_USER = env("DB_USER")
 DB_PASSWORD = env("DB_PASSWORD")
 DB_HOST = env("DB_HOST")
 DB_PORT = env("DB_PORT")
-NAVER_NEWS_API_CLIENT_ID = env("NAVER_NEWS_API_CLIENT_ID")
-NAVER_NEWS_API_CLIENT_SECRET = env("NAVER_NEWS_API_CLIENT_SECRET")
 DJANGO_ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS", default="").split(" ")
 ALLOWED_HOSTS = DJANGO_ALLOWED_HOSTS
-POSTGRES_USER = env("POSTGRES_USER", default="")
+DB_USER = env("DB_USER", default="")
 
 # Application definition
 
@@ -162,7 +161,7 @@ DATABASES = {
     "default": {
         "ENGINE": ENGINE,
         "NAME": NAME,
-        "USER": USER,
+        "USER": DB_USER,
         "PASSWORD": DB_PASSWORD,
         "HOST": DB_HOST,
         "PORT": DB_PORT,
