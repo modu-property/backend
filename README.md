@@ -1,3 +1,6 @@
+# ERD
+https://www.erdcloud.com/d/egr2NSsXmeZ6HiJnJ
+
 # Used
 * jwt
 * serializer
@@ -44,3 +47,14 @@ docker-compose -f docker-compose.local.yml config
 # 공공데이터
 [국토교통부_연립다세대 매매 실거래자료](https://www.data.go.kr/tcs/dss/selectApiDataDetailView.do?publicDataPk=15058038)
 [국토교통부_연립다세대 전월세 자료](https://www.data.go.kr/tcs/dss/selectApiDataDetailView.do?publicDataPk=15058016)
+
+# 카카오 API
+* 구주소 -> 신주소 변환 및 위도경도 구하기 : [로컬](https://developers.kakao.com/docs/latest/ko/local/common)
+
+# migrate
+## test용
+* migration
+    * python manage.py makemigrations --settings=modu_property.test_settings
+* migrate
+    * python manage.py migrate --settings=modu_property.test_settings
+

@@ -1,7 +1,7 @@
 # import datetime
 
 # import jwt
-# import pytest
+import pytest
 
 # from app.models import News
 # from modu_property.settings import SECRET_KEY

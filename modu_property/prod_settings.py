@@ -1,3 +1,14 @@
+from dotenv import load_dotenv
+load_dotenv("../.env")
+
+import os
+
+import pymysql
+pymysql.install_as_MySQLdb()
+
+# project_folder = os.path.expanduser('~/my-project-dir')  # adjust as appropriate
+# load_dotenv(os.path.join(project_folder, '.env'))
+
 import datetime
 import json
 from pathlib import Path
@@ -108,7 +119,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "app",
+    "property",
     "accounts",
     "modu_property",
     "django_celery_beat",
