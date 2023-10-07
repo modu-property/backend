@@ -9,13 +9,18 @@ from property.dto.villa_dto import GetDealPriceOfVillaDto
 from property.models import Villa
 from property.serializers import GetVillaRequestSerializer
 from property.services.get_deal_price_of_villa_service import GetDealPriceOfVillaService
+
 # from property.serializers import NewsSerializer
 
 
 class VillaView(APIView):
     @jwt_authenticator
     def get(
-        self, request: Request, user_id, *args, **kwargs,
+        self,
+        request: Request,
+        user_id,
+        *args,
+        **kwargs,
     ) -> Union[HttpResponse, HttpResponseNotFound]:
         """
         TODO
@@ -27,7 +32,7 @@ class VillaView(APIView):
         mysql에 위경도로 거리 계산하는거 있는지 확인 필요!
         """
         request_data = {
-            "type": kwargs['type'],
+            "type": kwargs["type"],
             "latitude": request.query_params["latitude"],
             "longitude": request.query_params["longitude"],
             "zoom_level": request.query_params["zoom_level"],
@@ -40,7 +45,6 @@ class VillaView(APIView):
             dto = GetDealPriceOfVillaDto(**validated_data)
             GetDealPriceOfVillaService().execute(dto=dto)
 
-
         return JsonResponse()
         post_list = News.objects.all()
 
@@ -48,5 +52,3 @@ class VillaView(APIView):
         if not serialized_news_list:
             return HttpResponseNotFound()
         return JsonResponse(serialized_news_list, safe=False)
-    
-

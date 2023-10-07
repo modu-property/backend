@@ -6,10 +6,10 @@
 # class AddressUtil:
 #     def __init__(self) -> None:
 #         pass
-    
+
 #     def get_address_info(self, dong: str, lot_number: str) -> Union[dict, bool]:
 #         headers = {
-#             "Authorization": f"KakaoAK {os.getenv('KAKAO_API_KEY')}" 
+#             "Authorization": f"KakaoAK {os.getenv('KAKAO_API_KEY')}"
 #         }
 #         params = {
 #             "query": f"{dong} {lot_number}"
@@ -19,13 +19,13 @@
 #         if response.status_code != 200:
 #             print("카카오 주소 변환 실패")
 #             return False
-        
+
 #         documents = response.json()['documents']
-        
+
 #         if not documents:
 #             print("documents 없음")
 #             return False
-        
+
 #         document = documents[0]
 #         road_name_address = document['road_address']['address_name']
 #         latitude = document['road_address']['x']

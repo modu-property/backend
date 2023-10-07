@@ -1,5 +1,7 @@
 import pytest
-from property.services.collect_deal_price_of_villa_service import CollectDealPriceOfVillaService
+from property.services.collect_deal_price_of_villa_service import (
+    CollectDealPriceOfVillaService,
+)
 
 
 @pytest.mark.django_db
@@ -8,4 +10,3 @@ class TestCollectDealPriceOfVillaService:
         result = CollectDealPriceOfVillaService().execute()
 
         assert result == True
-

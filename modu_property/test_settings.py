@@ -1,9 +1,11 @@
 from dotenv import load_dotenv
+
 load_dotenv(".env.test")
 
 import os
 
 import pymysql
+
 pymysql.install_as_MySQLdb()
 
 # project_folder = os.path.expanduser('~/my-project-dir')  # adjust as appropriate

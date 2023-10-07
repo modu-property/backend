@@ -19,7 +19,7 @@ class VillaSerializer(serializers.ModelSerializer):
         super().__init__(instance, data, **kwargs)
         self.deal_price = None
         self.pyung = None
-    
+
     class Meta:
         model = Villa
         fields = (
@@ -46,34 +46,34 @@ class VillaSerializer(serializers.ModelSerializer):
             "price_per_pyung",
         )
 
-
-
     def get_deal_price(self, instance):
-        self.deal_price =  int(instance.deal_price.replace(',', ''))
+        self.deal_price = int(instance.deal_price.replace(",", ""))
         return self.deal_price
-    
+
     def get_deal_type(self, instance):
         if not instance.deal_type:
             return None
-        
+
     def get_latitude(self, instance):
         latitude = instance.latitude
-        integer, _decimal = instance.latitude.split('.')
+        integer, _decimal = instance.latitude.split(".")
         if len(_decimal) > 6:
-            latitude = integer + '.' + _decimal[:6]
+            latitude = integer + "." + _decimal[:6]
         return latitude
-    
+
     def get_longitude(self, instance):
         longitude = instance.longitude
-        integer, _decimal = instance.longitude.split('.')
+        integer, _decimal = instance.longitude.split(".")
         if len(_decimal) > 6:
-            longitude = integer + '.' + _decimal[:6]
+            longitude = integer + "." + _decimal[:6]
         return longitude
 
     def convert_square_meter_to_pyung(self, instance):
-        self.pyung = round(Decimal(instance.area_for_exclusive_use) / Decimal(3.305785), 2)
+        self.pyung = round(
+            Decimal(instance.area_for_exclusive_use) / Decimal(3.305785), 2
+        )
         return self.pyung
-    
+
     def calc_price_per_pyung(self, instance) -> Decimal:
         return round(self.deal_price / self.pyung, 2)
 
@@ -81,6 +81,7 @@ class VillaSerializer(serializers.ModelSerializer):
         if instance.is_deal_canceled == "O":
             return True
         return False
+
 
 class GetVillaRequestSerializer(serializers.Serializer):
     TYPE_CHOICES = (
