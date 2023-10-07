@@ -81,3 +81,15 @@ class VillaSerializer(serializers.ModelSerializer):
         if instance.is_deal_canceled == "O":
             return True
         return False
+
+class GetVillaRequestSerializer(serializers.Serializer):
+    TYPE_CHOICES = (
+        ("deal", "deal"),
+        ("jeonse", "jeonse"),
+        ("monthly_rent", "monthly_rent"),
+    )
+    type = serializers.ChoiceField(choices=TYPE_CHOICES)
+    latitude = serializers.CharField(max_length=10)
+    longitude = serializers.CharField(max_length=10)
+    zoom_level = serializers.IntegerField()
+    keyword = serializers.CharField(allow_blank=True)
