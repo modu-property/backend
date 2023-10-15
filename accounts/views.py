@@ -2,6 +2,8 @@ from typing import Union
 
 from django.contrib.auth.hashers import check_password, make_password
 from django.http import HttpResponseRedirect
+from django.urls import reverse
+import requests
 from rest_framework.decorators import api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -19,9 +21,16 @@ def login(request: Request) -> Union[Response, HttpResponseRedirect]:
     is_authenticated = check_password(password, user.password)
 
     if is_authenticated:
-        return HttpResponseRedirect("/api/token/")
+        data = {
+            "username": username,
+            "password": password,
+        }
+        url = request.build_absolute_uri(reverse("token_obtain_pair"))
+        response = requests.post(url, data=data)
+        if response.status_code != 200:
+            return Response("로그인 실패", 401)
 
-    return Response("로그인 실패")
+        return Response(data=response.json())
 
 
 @api_view(("POST",))

@@ -5,8 +5,16 @@ import sys
 
 
 def main():
+    settings = None
+    if os.getenv("SERVER_ENV") == "prod":
+        settings = "modu_property.prod_settings"
+    elif os.getenv("SERVER_ENV") == "local":
+        settings = "modu_property.local_settings"
+    elif os.getenv("SERVER_ENV") == "test":
+        settings = "modu_property.test_settings"
+
     """Run administrative tasks."""
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "modu_property.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", settings)
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

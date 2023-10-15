@@ -1,18 +1,7 @@
 version: '3.7'
 services:
-  nginx:
-    container_name: core_web
-    restart: on-failure
-    image: nginx:stable
-    volumes:
-      - ./nginx/nginx.local.conf:/etc/nginx/conf.d/default.conf
-      - static_volume:/app/static
-    ports:
-      - "80:80"
-    depends_on:
-      - core_app
-  core_app:
-    container_name: core_app
+  django:
+    container_name: django
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -27,74 +16,104 @@ services:
         python manage.py migrate &&
         gunicorn modu_property.wsgi --bind 0.0.0.0:8000 --workers 1 --threads 1
     volumes:
-      - .:/app
-      - static_volume:/app/static
-    depends_on:
-      - db
-    links:
-      - db
-      - redis_broker
+      - .:/modu_property
+      - static_volume:/modu_property/static
     environment:
       - POSTGRES_DB=modu_property
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-  db:  # db로 하면 도커가 아닌 파이참에서 서버 띄울 때 .env.local에서 DB_HOST 값이 db라 문제 생김. 임의로 localhost로 이름 붙임.
-    container_name: core_db
-    image: postgres:14.6
-    ports:
-      - '54321:5432'
-    env_file: .env.local
-    environment:
-      - POSTGRES_DB=modu_property
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - PGDATA=/var/lib/postgresql/data/pgdata
-    volumes:
-      - ./data:/var/lib/postgresql/data  # volume에 저장하면 컨테이너, 볼륨 삭제 시 문제 생길 수 있음. host에 저장하도록 함. TODO : RDS 연결하기
-  celery_worker:
-    container_name: celery_worker
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    restart: always
-    volumes:
-      - .:/var/www/app/worker
-    command:
-      - sh
-      - -c
-      - celery -A modu_property worker -l INFO --concurrency 1 -E
-      - tail -f /dev/null
-    depends_on:
-      - core_app
-      - redis_broker
-    env_file: .env.local
-  celery_beat:
-    container_name: celery_beat
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    volumes:
-      - .:/var/www/app/beat
-    command:
-      - sh
-      - -c
-      - celery -A modu_property beat -l INFO
-      - tail -f /dev/null
-    links:
-      - celery_worker
-      - redis_broker
-    depends_on:
-      - core_app
-      - redis_broker
-      - celery_worker
-    env_file: .env.local
+      - PGPORT=5432
+    network_mode: "host"
+    # extra_hosts:
+    #   - "host.docker.internal"
+    # networks:
+    #   - custom_network
+
+#   nginx:
+#     container_name: core_web
+#     restart: on-failure
+#     image: nginx:stable
+#     volumes:
+#       - ./nginx/nginx.local.conf:/etc/nginx/conf.d/default.conf
+#       - static_volume:/modu_property/static
+#     ports:
+#       - "80:80"
+#     depends_on:
+#       - django
+
+#   celery_worker:
+#     container_name: celery_worker
+#     build:
+#       context: .
+#       dockerfile: ./Dockerfile
+#     restart: always
+#     volumes:
+#       - .:/var/www/modu_property/worker
+#     command:
+#       - sh
+#       - -c
+#       - celery -A modu_property worker -l INFO --concurrency 1 -E
+#       - tail -f /dev/null
+#     depends_on:
+#       - django
+#       - redis_broker
+#     env_file: .env.local
+#   celery_beat:
+#     container_name: celery_beat
+#     build:
+#       context: .
+#       dockerfile: ./Dockerfile
+#     volumes:
+#       - .:/var/www/modu_property/beat
+#     command:
+#       - sh
+#       - -c
+#       - celery -A modu_property beat -l INFO
+#       - tail -f /dev/null
+#     links:
+#       - celery_worker
+#       - redis_broker
+#     depends_on:
+#       - django
+#       - redis_broker
+#       - celery_worker
+#     env_file: .env.local
   redis_broker:
     container_name: redis_broker
     restart: unless-stopped
     image: redis:7.0.5-alpine
     expose:
       - 6379
-
+  manticore:
+    container_name: manticore
+    image: manticoresearch/manticore
+    environment:
+      - EXTRA=1
+    restart: always
+    ports:
+      - 127.0.0.1:9306:9306
+      - 127.0.0.1:9308:9308
+    ulimits:
+      nproc: 65535
+      nofile:
+         soft: 65535
+         hard: 65535
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./manticore/data:/var/lib/manticore
+      - ./manticore/manticore.conf:/etc/manticoresearch/manticore.conf # uncomment if you use a custom config
+      - ./manticore/log:/var/log/manticore
+      - ./manticore/index:/var/index/manticore
+    network_mode: "host"
+    # extra_hosts:
+    #   - "host.docker.internal"
+    # networks:
+    #   - custom_network
 volumes:
   static_volume:
   nginx_secrets:
+
+# networks:
+#   custom_network:

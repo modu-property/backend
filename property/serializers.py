@@ -94,3 +94,11 @@ class GetVillaRequestSerializer(serializers.Serializer):
     longitude = serializers.CharField(max_length=10)
     zoom_level = serializers.IntegerField()
     keyword = serializers.CharField(allow_blank=True)
+
+
+class GetVillasOnSearchTabResponseSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    lot_number = serializers.CharField(max_length=30)
+    dong = serializers.CharField(max_length=10)
+    name = serializers.CharField(max_length=30)
+    road_name_address = serializers.CharField(max_length=30)

@@ -4,9 +4,10 @@ load_dotenv(".env.test")
 
 import os
 
-import pymysql
+# import pymysql
 
-pymysql.install_as_MySQLdb()
+# pymysql.install_as_MySQLdb()
+
 
 # project_folder = os.path.expanduser('~/my-project-dir')  # adjust as appropriate
 # load_dotenv(os.path.join(project_folder, '.env'))
@@ -125,16 +126,16 @@ INSTALLED_APPS = [
     "accounts",
     "modu_property",
     "django_celery_beat",
-    "rest_framework"
-    # "rest_framework_simplejwt",
+    "rest_framework",
+    "rest_framework_simplejwt",
 ]
 
 # TODO : rest_framework_simplejwt 설정 필요 없으면 제거
-# REST_FRAMEWORK = {
-#     "DEFAULT_AUTHENTICATION_CLASSES": (
-#         "rest_framework_simplejwt.authentication.JWTAuthentication",
-#     )
-# }
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication"
+    ]
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -166,6 +167,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "modu_property.wsgi.application"
 
+APPEND_SLASH = False
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -178,7 +180,10 @@ DATABASES = {
         "PASSWORD": DB_PASSWORD,
         "HOST": DB_HOST,
         "PORT": DB_PORT,
-    },
+        "TEST": {
+            "NAME": f"test_{NAME}",
+        },
+    }
 }
 
 
@@ -228,7 +233,10 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": datetime.timedelta(days=14),
     "SIGNING_KEY": SECRET_KEY,
     "ALGORITHM": "HS256",
-    "AUTH_HEADER_TYPES": ("JWT",),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
 }
 
 AUTH_USER_MODEL = "accounts.User"

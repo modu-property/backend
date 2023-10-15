@@ -4,12 +4,14 @@ from tests.fixtures import *
 
 
 @pytest.mark.django_db
-def test_get_villas_with_latitude_longitude_zoom_level_view(client, get_jwt):
+def test_get_villas_with_latitude_longitude_zoom_level_view(
+    client, get_jwt, create_villa
+):
     url = reverse("villa", kwargs={"type": "deal"})
 
     _jwt = get_jwt
 
-    headers = {"HTTP_Authorization": _jwt}
+    headers = {"HTTP_AUTHORIZATION": f"Bearer {_jwt}"}
     query_params = {"latitude": 1, "longitude": 1, "zoom_level": 3, "keyword": ""}
 
     response = client.get(url, data=query_params, **headers)

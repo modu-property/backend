@@ -2,8 +2,16 @@ import os
 
 from celery import Celery
 
+settings = None
+if os.getenv("SERVER_ENV") == "prod":
+    settings = "modu_property.prod_settings"
+elif os.getenv("SERVER_ENV") == "local":
+    settings = "modu_property.local_settings"
+elif os.getenv("SERVER_ENV") == "test":
+    settings = "modu_property.test_settings"
+
 # Set the default Django settings module for the 'celery' program.
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "modu_property.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", settings)
 
 app = Celery("modu_property")
 

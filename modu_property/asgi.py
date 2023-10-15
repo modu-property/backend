@@ -11,6 +11,14 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "modu_property.settings")
+settings = None
+if os.getenv("SERVER_ENV") == "prod":
+    settings = "modu_property.prod_settings"
+elif os.getenv("SERVER_ENV") == "local":
+    settings = "modu_property.local_settings"
+elif os.getenv("SERVER_ENV") == "test":
+    settings = "modu_property.test_settings"
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", settings)
 
 application = get_asgi_application()

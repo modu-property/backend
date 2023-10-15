@@ -228,7 +228,7 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": datetime.timedelta(days=14),
     "SIGNING_KEY": SECRET_KEY,
     "ALGORITHM": "HS256",
-    "AUTH_HEADER_TYPES": ("JWT",),
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
 AUTH_USER_MODEL = "accounts.User"
