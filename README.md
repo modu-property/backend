@@ -89,6 +89,8 @@ docker-compose -f docker-compose.dev.yml config
 manticore search
 https://github.com/manticoresoftware/manticoresearch-python/tree/3.3.1
 
+https://github.com/manticoresoftware/manticoresearch-python/blob/master/test/test_manual.py
+
 기본 manticore.conf
 ```
 searchd {
@@ -130,10 +132,17 @@ manticore terminal에서 실행할 명령어
     * searchd --config /etc/manticoresearch/manticore.conf --status
 
 
+9306에서 테이블은 있는데 search 쿼리 날리면 field 못찾는 경우 아래 명령어 실행하기
 mysql -P9306 -h0 -e "RELOAD TABLES"
 mysql -P9306 -h0 -e "RELOAD INDEXES"
 
 mysql -P9306 -h0;
+
+
+min_infix_len = 2
+min_prefix_len = 1
+select * from property_villa where match('@dong *동');
+
 
 * manticore 컨테이너에서 mysql -P9306 -h0;
 
@@ -158,20 +167,56 @@ curl --location 'http://127.0.0.1:9308/search' --header 'Content-Type: applicati
 curl --location 'http://0.0.0.0:9308/search' --header 'Content-Type: application/json' --data '{"index": "property_villa", "query": { "match": {"dong":"연수동" }}}'
 
 curl --location 'http://127.0.0.1:9308/search' --header 'Content-Type: application/json' --data '{"index": "property_villa", "query": { "match": {"name":"빌라" }}}'
+
+> local db에 데이터 넣고 sh ./manticore/run_indexer.sh 실행한다음 manticore 테스트 코드 돌리기
+
 ```
 
+# postgis
+spatial db를 위해 postgis 설치해야 함
+
+brew install postgresql 이미 설치 됐으면 스킵, 실행 brew services start postgresql@14
+brew install postgis gdal libgeoip
+
+settings.py에 추가
+GDAL_LIBRARY_PATH = '/opt/homebrew/opt/gdal/lib/libgdal.dylib'
+GEOS_LIBRARY_PATH = '/opt/homebrew/opt/geos/lib/libgeos_c.dylib' 
+
 # migrate
-## test용
+SERVER_ENV 설정하기
+## local용
 * migration
-    * python manage.py makemigrations --settings=modu_property.test_settings
+    * SERVER_ENV=local python manage.py makemigrations --settings=modu_property.local_settings
 * migrate
-    * python manage.py migrate --settings=modu_property.test_settings
+    * SERVER_ENV=local python manage.py migrate --settings=modu_property.local_settings
 
 # postgres 접속
 
 psql -h 127.0.0.1 -U postgres -d modu_property -p 5432
 
+psql 안되면
+createdb --owner=postgres --encoding=utf8 user
+
+psql postgres;
+CREATE USER postgres SUPERUSER;
+<!-- CREATE DATABASE postgres WITH OWNER postgres; -->
+create database modu_property;
+CREATE EXTENSION postgis;
+SELECT postgis_full_version();
+![Alt text](image-3.png)
+
+
+django.db.utils.DataError: invalid value for parameter "TimeZone": "UTC"
+-> brew services restart postgresql@14 안됨
+->  brew link postgresql@14, brew link --overwrite postgresql 
+
+DB 싹 지웠다가 재설치 시도함
+
 # TODO
 23.10.11
 도커 컨테이너 실행되면 indexing하는 코드 호출해서 indexing되는지 확인하기
 search도 하기
+
+## pre-commit
+커밋할 때 black 적용 안되어 있으면 커밋 실패하게 하는 용도로 씀.
+.pre-commit-config.yaml

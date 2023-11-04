@@ -128,12 +128,13 @@ INSTALLED_APPS = [
     "django_celery_beat",
     "rest_framework",
     "rest_framework_simplejwt",
+    "django.contrib.gis",
 ]
 
 # TODO : rest_framework_simplejwt 설정 필요 없으면 제거
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication"
+        # "rest_framework_simplejwt.authentication.JWTAuthentication"
     ]
 }
 

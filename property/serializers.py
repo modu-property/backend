@@ -10,15 +10,19 @@ class VillaSerializer(serializers.ModelSerializer):
     deal_type = serializers.SerializerMethodField()
     latitude = serializers.SerializerMethodField()
     longitude = serializers.SerializerMethodField()
-    pyung = serializers.SerializerMethodField("convert_square_meter_to_pyung")
-    price_per_pyung = serializers.SerializerMethodField("calc_price_per_pyung")
+    area_for_exclusive_use_pyung = serializers.SerializerMethodField(
+        "convert_square_meter_to_pyung"
+    )
+    area_for_exclusive_use_price_per_pyung = serializers.SerializerMethodField(
+        "calc_price_per_pyung"
+    )
     is_deal_canceled = serializers.SerializerMethodField("calc_is_deal_canceled")
     # road_name_address = serializers.SerializerMethodField("get_road_name_address")
 
     def __init__(self, instance=None, data=..., **kwargs):
         super().__init__(instance, data, **kwargs)
         self.deal_price = None
-        self.pyung = None
+        self.area_for_exclusive_use_pyung = None
 
     class Meta:
         model = Villa
@@ -42,8 +46,8 @@ class VillaSerializer(serializers.ModelSerializer):
             "road_name_address",
             "latitude",
             "longitude",
-            "pyung",
-            "price_per_pyung",
+            "area_for_exclusive_use_pyung",
+            "area_for_exclusive_use_price_per_pyung",
         )
 
     def get_deal_price(self, instance):
@@ -84,14 +88,15 @@ class VillaSerializer(serializers.ModelSerializer):
 
 
 class GetVillaRequestSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
     TYPE_CHOICES = (
         ("deal", "deal"),
         ("jeonse", "jeonse"),
         ("monthly_rent", "monthly_rent"),
     )
     type = serializers.ChoiceField(choices=TYPE_CHOICES)
-    latitude = serializers.CharField(max_length=10)
-    longitude = serializers.CharField(max_length=10)
+    latitude = serializers.FloatField()
+    longitude = serializers.FloatField()
     zoom_level = serializers.IntegerField()
     keyword = serializers.CharField(allow_blank=True)
 
@@ -99,6 +104,13 @@ class GetVillaRequestSerializer(serializers.Serializer):
 class GetVillasOnSearchTabResponseSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     lot_number = serializers.CharField(max_length=30)
-    dong = serializers.CharField(max_length=10)
     name = serializers.CharField(max_length=30)
     road_name_address = serializers.CharField(max_length=30)
+
+
+class GetVillasOnMapResponseSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    latitude = serializers.CharField(max_length=20)
+    longitude = serializers.CharField(max_length=20)
+    area_for_exclusive_use_pyung = serializers.CharField(max_length=6)
+    area_for_exclusive_use_price_per_pyung = serializers.CharField(max_length=8)

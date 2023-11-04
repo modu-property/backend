@@ -3,8 +3,9 @@ from dataclasses import dataclass
 
 @dataclass
 class GetDealPriceOfVillaDto:
+    id: int
     type: str
-    latitude: str
-    longitude: str
+    latitude: float
+    longitude: float
     zoom_level: int
     keyword: str

@@ -103,17 +103,10 @@ services:
         hard: -1
     volumes:
       - ./manticore/data:/var/lib/manticore
-      - ./manticore/manticore.conf:/etc/manticoresearch/manticore.conf # uncomment if you use a custom config
+      - ./manticore/manticore.conf:/etc/manticoresearch/manticore.conf
       - ./manticore/log:/var/log/manticore
       - ./manticore/index:/var/index/manticore
     network_mode: "host"
-    # extra_hosts:
-    #   - "host.docker.internal"
-    # networks:
-    #   - custom_network
 volumes:
   static_volume:
   nginx_secrets:
-
-# networks:
-#   custom_network:

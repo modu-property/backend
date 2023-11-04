@@ -6,11 +6,13 @@ import sys
 
 def main():
     settings = None
-    if os.getenv("SERVER_ENV") == "prod":
+    server_env = os.getenv("SERVER_ENV")
+    print(server_env)
+    if server_env == "prod":
         settings = "modu_property.prod_settings"
-    elif os.getenv("SERVER_ENV") == "local":
+    elif server_env == "local":
         settings = "modu_property.local_settings"
-    elif os.getenv("SERVER_ENV") == "test":
+    elif server_env == "test":
         settings = "modu_property.test_settings"
 
     """Run administrative tasks."""
