@@ -1,7 +1,5 @@
 from decimal import Decimal
 from rest_framework import serializers
-from rest_framework.fields import empty
-
 from property.models import Villa
 
 
@@ -17,7 +15,6 @@ class VillaSerializer(serializers.ModelSerializer):
         "calc_price_per_pyung"
     )
     is_deal_canceled = serializers.SerializerMethodField("calc_is_deal_canceled")
-    # road_name_address = serializers.SerializerMethodField("get_road_name_address")
 
     def __init__(self, instance=None, data=..., **kwargs):
         super().__init__(instance, data, **kwargs)

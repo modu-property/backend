@@ -1,9 +1,3 @@
-"""
-클라이언트로부터 검색어 받기
-검색어에 해당하는 위경도 구하기
-위경도 반경 몇미터에 있는 빌라들 구해서 응답하기
-
-"""
 from typing import Union
 import manticoresearch
 
@@ -70,8 +64,31 @@ class GetDealPriceOfVillaService:
 
         return villas
 
-    def get_villas_by_keyword(self):
-        pass
+    def get_villas_by_keyword(self, dto: GetDealPriceOfVillaDto):
+        configuration = manticoresearch.Configuration(host="http://0.0.0.0:9308")
+
+        api_client = manticoresearch.ApiClient(configuration)
+
+        # with manticoresearch.ApiClient(configuration) as api_client:
+        search_instance = search_api.SearchApi(api_client)
+
+        search_request = SearchRequest(
+            index="villa",
+            query={"query_string": f"@* *{dto.keyword}*"},
+        )
+
+        search_response = search_instance.search(search_request)
+        hits = search_response.hits
+        if not hits:
+            return []
+        hits = hits.hits
+
+        villas = []
+        for hit in hits:
+            hit["_source"]["id"] = int(hit["_id"])
+            villas.append(hit["_source"])
+
+        return villas
 
     def execute(
         self, dto: GetDealPriceOfVillaDto
@@ -83,9 +100,8 @@ class GetDealPriceOfVillaService:
         # keyword 없고 latitude, longitude 있으면  반경 내에 속하는 것들 추출
 
         villas = []
-        # ST_Distance
         if not dto.keyword and dto.latitude and dto.longitude:
-            distance_tolerance = self.get_distance_tolerance(dto)
+            distance_tolerance = self.get_distance_tolerance(dto=dto)
             villas = self.get_villas_by_lat_and_long(
                 dto, distance_tolerance=distance_tolerance
             )
@@ -94,81 +110,8 @@ class GetDealPriceOfVillaService:
             return []
 
         elif dto.keyword and not dto.latitude and not dto.longitude:
-            self.get_villas_by_keyword()
-
-        configuration = manticoresearch.Configuration(host="http://0.0.0.0:9308")
-
-        with manticoresearch.ApiClient(configuration) as api_client:
-            search_instance = search_api.SearchApi(api_client)
-
-            search_request = SearchRequest(
-                index="property_villa",
-                query={"query_string": "@dong 반포*"},
-            )
-
-            api_response1 = search_instance.search(search_request)
-            print(f"hits 1 {api_response1.hits}")
-
-            search_request = SearchRequest(
-                index="property_villa",
-                query={"query_string": "@dong *포동"},
-            )
-
-            api_response2 = search_instance.search(search_request)
-            print(f"hits 2 {api_response2.hits}")
-
-            return
-            # from manticoresearch.model.query_filter import QueryFilter
-
-            # search_request.fulltext_filter = QueryFilter("연수동")
-            # api_response = search_instance.search(search_request)
-            # print(api_response.hits)
-
-            # search_request.fulltext_filter = QueryFilter("연")
-            # api_response = search_instance.search(search_request)
-            # print(api_response.hits)
-
-            # from manticoresearch.model.match_filter import MatchFilter
-
-            # search_request.fulltext_filter = MatchFilter("@dong 연수*")
-            # api_response = search_instance.search(search_request)
-            # print(api_response.hits)
-
-            # search_request.fulltext_filter = MatchFilter("@dong 연*")
-            # api_response = search_instance.search(search_request)
-            # print(f"api_response.hits {api_response}")
-
-            # from manticoresearch.model.fulltext_filter import FulltextFilter
-
-            # search_request.fulltext_filter = FulltextFilter("연수동")
-            # api_response = search_instance.search(search_request)
-            # print(api_response.hits)
-
-            # search_request.fulltext_filter = FulltextFilter("연")
-            # api_response = search_instance.search(search_request)
-            # print(api_response.hits)
-
-            try:
-                api_response = search_instance.search(search_request)
-                hits = api_response.hits
-                if not hits:
-                    return {}, "검색 결과 없음"
-                _hits = hits.hits
-                villas = []
-                for hit in _hits:
-                    source = hit["_source"]
-                    source["id"] = int(hit["_id"])
-                    serializer = GetVillasOnSearchTabResponseSerializer(data=source)
-                    if serializer.is_valid():
-                        validated_data = serializer.validated_data
-
-                        villas.append(dict(validated_data))
-                    else:
-                        print(f"VillaView get invalid source : {source}")
-                return villas, "빌라 찾음"
-            except manticoresearch.ApiException as e:
-                message = f"Exception when calling SearchApi->search e: {e}"
-                return {}, message
-            except Exception as e:
-                message = f"VillaView get e: {e}"
-                return {}, message
+            villas = self.get_villas_by_keyword(dto=dto)
+            if villas:
+                return GetVillasOnSearchTabResponseSerializer(
+                    data=list(villas), many=True
+                )

@@ -155,19 +155,11 @@ curl -s 'http://127.0.0.1:9308/cli_json?show%20tables'
 
 
 로컬 터미널에서 manticore 컨테이너 mysql 호출
-curl -d '{ \
-  "index": "property_villa", \
-  "query": { "match": { "dong": "연수동" } } \
-}' \
--H "Content-Type: application/json" \
--X POST http://localhost:9308/search
+curl --location 'http://127.0.0.1:9308/search' --header 'Content-Type: application/json' --data '{"index": "villa", "query": { "match": {"road_name_address":"*주흥*"}}}'
 
-curl --location 'http://127.0.0.1:9308/search' --header 'Content-Type: application/json' --data '{"index": "property_villa", "query": { "match": {"dong":"연수동"}}}'
+curl --location 'http://127.0.0.1:9308/search' --header 'Content-Type: application/json' --data '{"index": "villa", "query": { "match": {"lot_number":"*반포*"}}}'
 
-curl --location 'http://0.0.0.0:9308/search' --header 'Content-Type: application/json' --data '{"index": "property_villa", "query": { "match": {"dong":"연수동" }}}'
-
-curl --location 'http://127.0.0.1:9308/search' --header 'Content-Type: application/json' --data '{"index": "property_villa", "query": { "match": {"name":"빌라" }}}'
-
+curl --location 'http://127.0.0.1:9308/search' --header 'Content-Type: application/json' --data '{"index": "villa", "query": { "match": {"name":"*신천*"}}}'
 > local db에 데이터 넣고 sh ./manticore/run_indexer.sh 실행한다음 manticore 테스트 코드 돌리기
 
 ```

@@ -1,16 +1,5 @@
-import os
 from django.urls import reverse
-
 from tests.fixtures import *
-
-# TODO
-"""
-***** 먼저, 매매 정보를 DB에 넣고 indexer 실행해서 manticore가 검색할 데이터를 만들어야 함
-
-parametrize 써서 연*, 연수*, *수* 등등 체크하기
-검색 keyword에 동, 도로명주소, 지번, 이름
-
-"""
 
 
 @pytest.mark.django_db(transaction=True)
@@ -145,6 +134,21 @@ def test_get_villas_with_latitude_longitude_zoom_level_view(
         assert "longitude" in villa
         assert "area_for_exclusive_use_pyung" in villa
         assert "area_for_exclusive_use_price_per_pyung" in villa
+
+
+@pytest.mark.django_db(transaction=True)
+def test_get_villas_with_keyword_view(client, get_jwt):
+    url = reverse("villa", kwargs={"type": "deal"})
+
+    _jwt = get_jwt
+
+    headers = {"HTTP_AUTHORIZATION": f"Bearer {_jwt}"}
+    query_params = {
+        "keyword": "반포",
+    }
+
+    response = client.get(url, data=query_params, **headers)
+    assert response.status_code == 200
 
 
 # @pytest.mark.django_db

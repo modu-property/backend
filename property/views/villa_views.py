@@ -1,18 +1,10 @@
 from typing import Union
-
 from django.http import HttpResponseNotFound, JsonResponse, HttpResponse
 from rest_framework.request import Request
-from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
-
 from accounts.util.authenticator import jwt_authenticator
 from property.dto.villa_dto import GetDealPriceOfVillaDto
-
-from property.serializers import (
-    GetVillaRequestSerializer,
-    GetVillasOnMapResponseSerializer,
-    GetVillasOnSearchTabResponseSerializer,
-)
+from property.serializers import GetVillaRequestSerializer
 from property.services.get_deal_price_of_villa_service import GetDealPriceOfVillaService
 
 
@@ -36,10 +28,10 @@ class VillaView(ListAPIView):
         request_data = {
             "id": request.query_params.get("id", 0) and int(request.query_params["id"]),
             "type": kwargs["type"],
-            "latitude": request.query_params["latitude"],
-            "longitude": request.query_params["longitude"],
-            "zoom_level": request.query_params["zoom_level"],
-            "keyword": request.query_params["keyword"],
+            "latitude": request.query_params.get("latitude", 0.0),
+            "longitude": request.query_params.get("longitude", 0.0),
+            "zoom_level": request.query_params.get("zoom_level", 0),
+            "keyword": request.query_params.get("keyword", ""),
         }
         serializer = GetVillaRequestSerializer(data=request_data)
 
@@ -50,8 +42,6 @@ class VillaView(ListAPIView):
 
             if not villas_response_serializer:
                 return JsonResponse(data={}, status=404)
-
-            # return GetVillasOnSearchTabResponseSerializer(data=villas, many=True)
 
             if villas_response_serializer.is_valid():
                 return JsonResponse(
