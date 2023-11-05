@@ -1,5 +1,4 @@
-# ERD
-https://www.erdcloud.com/d/egr2NSsXmeZ6HiJnJ
+# [ERD](https://www.erdcloud.com/d/egr2NSsXmeZ6HiJnJ)
 
 # Used
 * jwt
@@ -16,7 +15,17 @@ https://www.erdcloud.com/d/egr2NSsXmeZ6HiJnJ
 # run server
 * export SERVER_ENV=local
 * python manage.py runserver --settings modu_property.local_settings 
-* docker compose로 manticore search 등 필요한 컨테이너 띄우기
+* docker compose -f docker-compose.local.yml up -d --force-recreate
+
+
+# docker-compose
+* docker-compose.local.yml에서 manticore, django service의 network_mode: "host"로 수정
+* docker-compose -f docker-compose.local.yml up -d --build --force-recreate
+
+파일 검증 : 
+* docker-compose -f docker-compose.local.yml config
+* docker-compose -f docker-compose.dev.yml config
+
 
 # debugging
 .vscode 디렉토리에 launch.json 생성
@@ -62,27 +71,17 @@ celery 사용법
 * celery worker 실행해서 redis 큐에 있는 task 실행
 
 # pytest
-pytest
-pytest -n {n}
+`pytest`
 
-# docker-compose
-docker-compose.local.yml에서 manticore, django service의 network_mode: "host"로 수정
-docker-compose -f docker-compose.local.yml up -d --build --force-recreate
-
-docker-compose -f docker-compose.dev.yml up -d --build
-
-파일 검증 : 
-
-docker-compose -f docker-compose.local.yml config
-
-docker-compose -f docker-compose.dev.yml config
+`pytest -n {n}`
 
 
-# 공공데이터
+# API
+## 공공데이터
 [국토교통부_연립다세대 매매 실거래자료](https://www.data.go.kr/tcs/dss/selectApiDataDetailView.do?publicDataPk=15058038)
 [국토교통부_연립다세대 전월세 자료](https://www.data.go.kr/tcs/dss/selectApiDataDetailView.do?publicDataPk=15058016)
 
-# 카카오 API
+## 카카오 API
 * 구주소 -> 신주소 변환 및 위도경도 구하기 : [로컬](https://developers.kakao.com/docs/latest/ko/local/common)
 
 # search engine
@@ -101,6 +100,17 @@ searchd {
     query_log = /opt/homebrew/var/log/manticore/query.log
     pid_file = /opt/homebrew/var/run/manticore/searchd.pid
     data_dir = /opt/homebrew/var/manticore  # plain table이라 이거 없어야 함
+}
+
+
+searchd {
+    # Manticore Search server listening address and port
+    listen = 9312
+    # Manticore Search server query daemon
+    listen = 9306:mysql41
+    listen = 0.0.0.0:9308:http
+    pid_file = /var/run/manticore/searchd.pid
+    log = /var/log/manticore/searchd.log
 }
 ```
 
@@ -143,16 +153,8 @@ min_infix_len = 2
 min_prefix_len = 1
 select * from property_villa where match('@dong *동');
 
-
-* manticore 컨테이너에서 mysql -P9306 -h0;
-
-
-select * from property_villa;
-
-* 
 table 확인 curl
 curl -s 'http://127.0.0.1:9308/cli_json?show%20tables'
-
 
 로컬 터미널에서 manticore 컨테이너 mysql 호출
 curl --location 'http://127.0.0.1:9308/search' --header 'Content-Type: application/json' --data '{"index": "villa", "query": { "match": {"road_name_address":"*주흥*"}}}'
@@ -170,10 +172,6 @@ spatial db를 위해 postgis 설치해야 함
 brew install postgresql 이미 설치 됐으면 스킵, 실행 brew services start postgresql@14
 brew install postgis gdal libgeoip
 
-settings.py에 추가
-GDAL_LIBRARY_PATH = '/opt/homebrew/opt/gdal/lib/libgdal.dylib'
-GEOS_LIBRARY_PATH = '/opt/homebrew/opt/geos/lib/libgeos_c.dylib' 
-
 # migrate
 SERVER_ENV 설정하기
 ## local용
@@ -183,7 +181,6 @@ SERVER_ENV 설정하기
     * SERVER_ENV=local python manage.py migrate --settings=modu_property.local_settings
 
 # postgres 접속
-
 psql -h 127.0.0.1 -U postgres -d modu_property -p 5432
 
 psql 안되면
@@ -196,7 +193,6 @@ create database modu_property;
 CREATE EXTENSION postgis;
 SELECT postgis_full_version();
 ![Alt text](image-3.png)
-
 
 django.db.utils.DataError: invalid value for parameter "TimeZone": "UTC"
 -> brew services restart postgresql@14 안됨
