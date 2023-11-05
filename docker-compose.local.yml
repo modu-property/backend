@@ -28,7 +28,6 @@ services:
     #   - "host.docker.internal"
     # networks:
     #   - custom_network
-
 #   nginx:
 #     container_name: core_web
 #     restart: on-failure
@@ -109,4 +108,3 @@ services:
     network_mode: "host"
 volumes:
   static_volume:
-  nginx_secrets:

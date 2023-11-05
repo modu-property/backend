@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED 1  # 표준 출력, 표준 에러를 버퍼링하지 않음
 
 # install psycopg2 dependencies
 RUN apk update \
-    && apk add postgresql-dev gcc python3-dev musl-dev libffi-dev
+    && apk add postgresql-dev gcc python3-dev musl-dev libffi-dev binutils proj-dev geos gdal
 
 # install python dependencies
 COPY poetry.lock pyproject.toml /modu_property/

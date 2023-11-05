@@ -1,10 +1,12 @@
 import jwt
 import datetime
 import pytest
+from accounts.models import User
 
 from modu_property.test_settings import SECRET_KEY
 from property.models import Villa, VillaDeal
 from django.contrib.gis.geos import Point
+from django.contrib.auth.hashers import make_password
 
 
 @pytest.fixture
@@ -17,6 +19,18 @@ def get_jwt():
         SECRET_KEY,
         algorithm="HS256",
     )
+
+
+@pytest.fixture
+def create_user():
+    def _create_user(username: str, password: str):
+        encrypted_password = make_password(str(password))
+        user = User(username=username, password=encrypted_password)
+
+        user.save()
+        return user
+
+    return _create_user
 
 
 @pytest.fixture

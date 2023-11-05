@@ -792,6 +792,21 @@ dev = ["pre-commit", "tox"]
 testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
+name = "postgis"
+version = "1.0.4"
+description = "Pyscopg and asyncpg helpers to work with PostGIS."
+optional = false
+python-versions = "*"
+files = [
+    {file = "postgis-1.0.4-py3-none-any.whl", hash = "sha256:1dfa62d33c585d68a54bdd47c21bdcb9302f9cbb0ef5aec360e64d2c3e0e1a93"},
+    {file = "postgis-1.0.4.tar.gz", hash = "sha256:3d41f087e249a2a8b6720931e6f8f22b7747801f250265a8b8ac5f9d48221e63"},
+]
+
+[package.extras]
+docs = ["mkdocs"]
+test = ["pytest"]
+
+[[package]]
 name = "pre-commit"
 version = "3.5.0"
 description = "A framework for managing and maintaining multi-language pre-commit hooks."
@@ -1365,4 +1380,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "3.9.18"
-content-hash = "a95ca9b93571ada5265046243e2e50575d4e0745786c2ff333902216b72dedbb"
+content-hash = "88349cfd9207798940dac24d6c59f7fe7d69bb7d191cbb9a8fae72bdf55bc66f"
