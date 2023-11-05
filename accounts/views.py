@@ -1,4 +1,5 @@
 import os
+from django.db import IntegrityError
 import requests
 from typing import Union
 from django.contrib.auth.hashers import check_password, make_password
@@ -9,19 +10,43 @@ from rest_framework.decorators import api_view
 from rest_framework.request import Request
 from rest_framework.response import Response
 from accounts.models import User
+from drf_spectacular.utils import (
+    extend_schema,
+    OpenApiResponse,
+)
+
+from accounts.serializers import UserSerializer
 
 
+@extend_schema(
+    summary="회원가입",
+    description="username, password 입력해서 회원가입. multipart/form-data",
+    request=UserSerializer,
+    responses={
+        200: OpenApiResponse(description="회원가입 성공"),
+        409: OpenApiResponse(description="{} 이미 있는 이름입니다."),
+        400: OpenApiResponse(description="회원가입 실패"),
+    },
+)
 @api_view(("POST",))
 def signup(request: Request) -> Response:
-    body = request.POST
-    username = body["username"]
-    password = body["password"]
+    print(request.POST)
+    serializer = UserSerializer(data=request.POST)
 
-    encrypted_password = make_password(password)
-    user = User(username=username, password=encrypted_password)
-    user.save()
+    if serializer.is_valid():
+        username = serializer.validated_data["username"]
+        password = serializer.validated_data["password"]
 
-    return Response("회원가입 성공")
+        encrypted_password = make_password(password)
+        try:
+            user = User(username=username, password=encrypted_password)
+            user.save()
+
+            return Response("회원가입 성공")
+        except IntegrityError as e:
+            print(e)
+            return Response(f"{username} 이미 있는 이름입니다.", 409)
+    return Response("회원가입 실패", 400)
 
 
 @api_view(("POST",))

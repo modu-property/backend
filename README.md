@@ -208,3 +208,9 @@ search도 하기
 ## pre-commit
 커밋할 때 black 적용 안되어 있으면 커밋 실패하게 하는 용도로 씀.
 .pre-commit-config.yaml
+
+# open api
+http://localhost:8000/api/schema/swagger-ui/
+
+회원가입 테스트 시 content-type을 multipart/form-data로 지정해야 함
+![Alt text](image-2.png)
