@@ -14,7 +14,7 @@
 
 # run server
 * export SERVER_ENV=local
-* python manage.py runserver --settings modu_property.local_settings 
+* SERVER_ENV=local python manage.py runserver --settings modu_property.local_settings 
 * docker compose -f docker-compose.local.yml up -d --build --force-recreate
 
 

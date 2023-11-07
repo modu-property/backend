@@ -23,4 +23,5 @@ def test_login_view(client, create_user):
     response = client.post(path=url, data=data)
 
     assert response.status_code == 200
-    assert "access" in response.json()
+    assert "access_token" in response.json()
+    assert "refresh_token" in response.json()
