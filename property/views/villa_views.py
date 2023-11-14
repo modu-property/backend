@@ -1,30 +1,84 @@
-from typing import Union
-from django.http import HttpResponseNotFound, JsonResponse, HttpResponse
+from django.http import JsonResponse
 from rest_framework.request import Request
 from rest_framework.generics import ListAPIView
 from accounts.util.authenticator import jwt_authenticator
 from property.dto.villa_dto import GetDealPriceOfVillaDto
-from property.serializers import GetVillaRequestSerializer
+from property.serializers import (
+    GetVillaRequestSerializer,
+    GetVillasOnMapResponseSerializer,
+    GetVillasOnSearchTabResponseSerializer,
+)
 from property.services.get_deal_price_of_villa_service import GetDealPriceOfVillaService
+from drf_spectacular.utils import (
+    extend_schema,
+    OpenApiResponse,
+    OpenApiParameter,
+    PolymorphicProxySerializer,
+)
 
 
 class VillaView(ListAPIView):
-    """
-    TODO
-    * 위경도+줌레벨, 검색어+줌레벨 받기
-    * 검색어면 위경도로 변환
-    * 위경도 기준으로 줌레벨에 맞는 반경 n킬로미터에 있는 빌라 매물 정보 가져오기
-    """
-
+    @extend_schema(
+        summary="빌라 조회",
+        description="keyword로 검색하거나 latitude, longitude으로 요청",
+        parameters=[
+            OpenApiParameter(
+                name="type",
+                type=str,
+                location=OpenApiParameter.PATH,
+                description="deal, jeonse, monthly_rent",
+                required=False,
+            ),
+            OpenApiParameter(
+                name="latitude",
+                type=float,
+                location=OpenApiParameter.QUERY,
+                description="위도",
+                required=False,
+            ),
+            OpenApiParameter(
+                name="longitude",
+                type=float,
+                location=OpenApiParameter.QUERY,
+                description="경도",
+                required=False,
+            ),
+            OpenApiParameter(
+                name="zoom_level",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description="줌 레벨",
+                required=False,
+            ),
+            OpenApiParameter(
+                name="keyword",
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description="검색어",
+                required=False,
+            ),
+        ],
+        request=GetVillaRequestSerializer,
+        responses={
+            200: PolymorphicProxySerializer(
+                component_name="Villas",
+                serializers=[
+                    GetVillasOnSearchTabResponseSerializer,
+                    GetVillasOnMapResponseSerializer,
+                ],
+                resource_type_field_name=None,
+                # many=True,
+            ),
+            400: OpenApiResponse(description="bad request"),
+        },
+    )
     @jwt_authenticator
     def get(
         self,
         request: Request,
         *args,
         **kwargs,
-    ) -> Union[HttpResponse, HttpResponseNotFound]:
-        # search tab에서 검색할 때/지도 이동할 때 나오는 빌라 주소 정보
-
+    ) -> JsonResponse:
         request_data = {
             "id": request.query_params.get("id", 0) and int(request.query_params["id"]),
             "type": kwargs["type"],
@@ -49,21 +103,3 @@ class VillaView(ListAPIView):
                     status=200,
                     safe=False,
                 )
-
-            # # TODO : response 메서드 만들기
-            # if message == "검색 결과 없음":
-            #     return JsonResponse(
-            #         data={"villas": villas, "message": message}, status=404
-            #     )
-            # elif message == "빌라 찾음":
-            #     return JsonResponse(
-            #         data={"villas": villas, "message": message}, status=200
-            #     )
-            # elif message in "Exception when calling SearchApi->search e:":
-            #     return JsonResponse(
-            #         data={"villas": villas, "message": message}, status=400
-            #     )
-            # elif message in "VillaView get e:":
-            #     return JsonResponse(
-            #         data={"villas": villas, "message": message}, status=400
-            #     )
