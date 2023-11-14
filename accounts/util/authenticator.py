@@ -6,6 +6,9 @@ from rest_framework.response import Response
 def jwt_authenticator(fn):
     def wrapper(self, request, *args, **kwargs):
         try:
+            auth = request.headers.get("Authorization", "")
+            if not auth:
+                raise PermissionError("header에 Authorization 없음")
             jwt_token = request.headers.get("Authorization").split("Bearer ")[1]
             decoded_jwt = jwt.decode(
                 jwt=jwt_token,

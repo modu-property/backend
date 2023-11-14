@@ -67,12 +67,11 @@ class VillaView(ListAPIView):
                     GetVillasOnMapResponseSerializer,
                 ],
                 resource_type_field_name=None,
-                # many=True,
             ),
             400: OpenApiResponse(description="bad request"),
         },
     )
-    @jwt_authenticator
+    # @jwt_authenticator
     def get(
         self,
         request: Request,
