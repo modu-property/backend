@@ -15,8 +15,10 @@ RUN apk update \
 COPY poetry.lock pyproject.toml /modu_property/
 RUN pip install --upgrade pip
 
-RUN pip install virtualenv
+RUN pip install --upgrade virtualenv
+RUN rm -rf venv
 RUN python -m venv venv
+RUN source venv/bin/activate
 
 RUN pip install poetry
 
