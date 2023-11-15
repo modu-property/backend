@@ -260,6 +260,17 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
+from glob import glob
+
+_libgdal = glob("/usr/lib/libgdal.so.*")
+_libgeos_c = glob("/usr/lib/libgeos_c.so.*")
+GDAL_LIBRARY_PATH = ""
+GEOS_LIBRARY_PATH = ""
+if _libgdal:
+    GDAL_LIBRARY_PATH = _libgdal[0]
+if _libgeos_c:
+    GEOS_LIBRARY_PATH = _libgeos_c[0]
+
 SPECTACULAR_SETTINGS = {
     "TITLE": "모두의 부동산 API",
     "DESCRIPTION": "부동산 계산기. 시세. 검색. 매칭",
