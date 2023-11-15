@@ -14,14 +14,13 @@ RUN apk update \
 # install python dependencies
 COPY poetry.lock pyproject.toml /modu_property/
 RUN pip install --upgrade pip
-# RUN pip install wheel
-# RUN pip install cffi
+
 RUN pip install virtualenv
 RUN python -m venv venv
 
 RUN pip install poetry
 
 RUN poetry config virtualenvs.create false
-RUN poetry install --no-interaction
+RUN poetry install
 
 COPY . .
