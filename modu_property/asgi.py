@@ -12,7 +12,9 @@ import os
 from django.core.asgi import get_asgi_application
 
 settings = None
-if os.getenv("SERVER_ENV") == "prod":
+if os.getenv("SERVER_ENV") == "testing":
+    settings = "modu_property.testing_settings"
+elif os.getenv("SERVER_ENV") == "prod":
     settings = "modu_property.prod_settings"
 elif os.getenv("SERVER_ENV") == "local":
     settings = "modu_property.local_settings"
