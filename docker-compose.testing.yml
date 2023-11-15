@@ -14,7 +14,6 @@ services:
       - -c
       - |
         export SERVER_ENV=testing
-        python manage.py migrate &&
         gunicorn modu_property.wsgi --bind 0.0.0.0:8000 --workers 1 --threads 1
     volumes:
       - .:/modu_property

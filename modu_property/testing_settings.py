@@ -129,20 +129,22 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "django.contrib.gis",
+    "drf_spectacular",
 ]
 
 # TODO : rest_framework_simplejwt 설정 필요 없으면 제거
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        # "rest_framework_simplejwt.authentication.JWTAuthentication"
-    ]
+        "rest_framework_simplejwt.authentication.JWTAuthentication"
+    ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    # "django.middleware.csrf.CsrfViewMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -181,9 +183,9 @@ DATABASES = {
         "PASSWORD": DB_PASSWORD,
         "HOST": DB_HOST,
         "PORT": DB_PORT,
-        "TEST": {
-            "NAME": f"test_{NAME}",
-        },
+        # "TEST": {
+        #     "NAME": f"test_{NAME}",
+        # },
     }
 }
 
@@ -256,4 +258,12 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(minute="*/5"),
         "kwargs": {"display": 100},
     },
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "모두의 부동산 API",
+    "DESCRIPTION": "부동산 계산기. 시세. 검색. 매칭",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    # OTHER SETTINGS
 }
