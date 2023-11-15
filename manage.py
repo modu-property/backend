@@ -8,7 +8,9 @@ def main():
     settings = None
     server_env = os.getenv("SERVER_ENV")
     print(server_env)
-    if server_env == "prod":
+    if server_env == "testing":
+        settings = "modu_property.testing_settings"
+    elif server_env == "prod":
         settings = "modu_property.prod_settings"
     elif server_env == "local":
         settings = "modu_property.local_settings"
