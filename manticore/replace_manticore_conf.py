@@ -3,6 +3,7 @@ manticore_testing.conf 파일에 .env의 환경 변수를 replace해주는 스�
 """
 import os
 from dotenv import load_dotenv
+from shutil import copyfile
 
 SERVER_ENV = os.getenv("SERVER_ENV")
 load_dotenv(verbose=True, dotenv_path=f".env.{SERVER_ENV}")
@@ -30,6 +31,8 @@ def open_and_modify_file(config_contents):
 
     with open("./manticore_testing.conf", "w") as f:
         f.write(config_contents)
+
+    copyfile("./manticore_testing.conf", "./manticore.conf")
 
 
 config_contents = read_file()
