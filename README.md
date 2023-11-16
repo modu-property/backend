@@ -180,6 +180,11 @@ SERVER_ENV 설정하기
 * migrate
     * SERVER_ENV=local python manage.py migrate --settings=modu_property.local_settings
 
+## testing용 (ec2, RDS)
+* migrate
+    * SERVER_ENV=testing python manage.py migrate --settings=modu_property.testing_settings
+
+
 # postgres 접속
 psql -h 127.0.0.1 -U postgres -d modu_property -p 5432
 
