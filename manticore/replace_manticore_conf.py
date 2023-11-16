@@ -17,7 +17,7 @@ DB_NAME = os.getenv("DB_NAME")
 
 
 def read_file():
-    with open("./manticore_testing.conf", "r") as f:
+    with open("./manticore/manticore_testing.conf", "r") as f:
         config_contents = f.read()
     return config_contents
 
@@ -29,10 +29,10 @@ def open_and_modify_file(config_contents):
     config_contents = config_contents.replace("DB_PASSWORD", DB_PASSWORD)
     config_contents = config_contents.replace("DB_NAME", DB_NAME)
 
-    with open("./manticore_testing.conf", "w") as f:
+    with open("./manticore/manticore_testing.conf", "w") as f:
         f.write(config_contents)
 
-    copyfile("./manticore_testing.conf", "./manticore.conf")
+    copyfile("./manticore/manticore_testing.conf", "./manticore/manticore.conf")
 
 
 config_contents = read_file()
