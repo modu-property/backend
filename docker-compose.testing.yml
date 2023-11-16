@@ -42,12 +42,9 @@ services:
       memlock:
         soft: -1
         hard: -1
-    command:
-      - |
-        python3 ./manticore/replace_manticore_conf.py
     volumes:
       - ./manticore/data:/var/lib/manticore
-      - ./manticore/manticore_testing.conf:/etc/manticoresearch/manticore.conf
+      - ./manticore/manticore_testing_.conf:/etc/manticoresearch/manticore.conf
       - ./manticore/log:/var/log/manticore
       - ./manticore/index:/var/index/manticore
     network_mode: "host"
