@@ -37,9 +37,14 @@ class GetDealPriceOfVillaService:
     def get_villas_by_lat_and_long(
         self, dto: GetDealPriceOfVillaDto, distance_tolerance: int
     ):
+        print("get_villas_by_lat_and_long!")
         center_point = Point(
             float(dto.latitude), float(dto.longitude), srid=4326
         )  # 위경도 받아서 지도의 중심으로 잡음
+
+        print("get all villa")
+        villas = Villa.objects.all()
+        print(f"villa : {villas}")
 
         villas = (
             Villa.objects.prefetch_related("villa_deal")
@@ -61,6 +66,7 @@ class GetDealPriceOfVillaService:
                 "area_for_exclusive_use_price_per_pyung",
             )
         )
+        print(villas)
 
         return villas
 
