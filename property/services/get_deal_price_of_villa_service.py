@@ -43,10 +43,6 @@ class GetDealPriceOfVillaService:
             float(dto.latitude), float(dto.longitude), srid=4326
         )  # 위경도 받아서 지도의 중심으로 잡음
 
-        self.logger.debug("get all villa")
-        villas = Villa.objects.all()
-        self.logger.debug(f"villa : {villas}")
-
         villas = (
             Villa.objects.prefetch_related("villa_deal")
             .annotate(
@@ -72,6 +68,10 @@ class GetDealPriceOfVillaService:
         return villas
 
     def get_villas_by_keyword(self, dto: GetDealPriceOfVillaDto):
+        self.logger.debug("get_villas_by_keyword")
+        villas = Villa.objects.all()
+        self.logger.debug(f"villa : {villas}")
+
         configuration = manticoresearch.Configuration(host="http://0.0.0.0:9308")
 
         api_client = manticoresearch.ApiClient(configuration)
