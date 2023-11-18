@@ -50,6 +50,12 @@ def set_logging():
             },
         },
         "handlers": {
+            "console": {
+                "level": "INFO",
+                "filters": ["require_debug_true"],
+                "class": "logging.StreamHandler",
+            },
+            # 개발 서버에서만 사용하는 핸들러로 콘솔에 로그를 출력
             "django.server": {
                 "level": env("LOG_LEVEL"),
                 "class": "logging.StreamHandler",
@@ -66,13 +72,12 @@ def set_logging():
             },
         },
         "loggers": {
+            "django": {
+                "handlers": ["console", "file"],
+                "level": env("LOG_LEVEL"),
+            },
             "django.server": {
                 "handlers": ["django.server"],
-                "level": env("LOG_LEVEL"),
-                "propagete": True,
-            },
-            "file": {
-                "handlers": ["file"],
                 "level": env("LOG_LEVEL"),
                 "propagete": True,
             },

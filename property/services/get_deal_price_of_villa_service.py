@@ -1,3 +1,4 @@
+import logging
 from typing import Union
 import manticoresearch
 
@@ -16,7 +17,7 @@ from django.db.models import F
 
 class GetDealPriceOfVillaService:
     def __init__(self) -> None:
-        pass
+        self.logger = logging.getLogger("django")
 
     def get_distance_tolerance(self, dto: GetDealPriceOfVillaDto):
         # TODO level은 임시로 정함, 바꿔야함
@@ -37,14 +38,14 @@ class GetDealPriceOfVillaService:
     def get_villas_by_lat_and_long(
         self, dto: GetDealPriceOfVillaDto, distance_tolerance: int
     ):
-        print("get_villas_by_lat_and_long!")
+        self.logger.debug("get_villas_by_lat_and_long!")
         center_point = Point(
             float(dto.latitude), float(dto.longitude), srid=4326
         )  # 위경도 받아서 지도의 중심으로 잡음
 
-        print("get all villa")
+        self.logger.debug("get all villa")
         villas = Villa.objects.all()
-        print(f"villa : {villas}")
+        self.logger.debug(f"villa : {villas}")
 
         villas = (
             Villa.objects.prefetch_related("villa_deal")
@@ -66,7 +67,7 @@ class GetDealPriceOfVillaService:
                 "area_for_exclusive_use_price_per_pyung",
             )
         )
-        print(villas)
+        self.logger.debug(villas)
 
         return villas
 
