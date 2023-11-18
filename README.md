@@ -13,10 +13,13 @@
 * mysql
 
 # run server
+로컬 서버
 * export SERVER_ENV=local
 * SERVER_ENV=local python manage.py runserver --settings modu_property.local_settings 
 * docker compose -f docker-compose.local.yml up -d --build --force-recreate
 
+테스팅 서버
+* docker-compose -f docker-compose.testing.yml up -d --build --force-recreate
 
 # docker-compose
 * docker-compose.local.yml에서 manticore, django service의 network_mode: "host"로 수정
