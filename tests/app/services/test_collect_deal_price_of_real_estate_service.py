@@ -1,7 +1,7 @@
-import pytest
-from property.services.collect_deal_price_of_villa_service import (
-    CollectDealPriceOfVillaService,
-)
+# import pytest
+# from property.services.collect_deal_price_of_real_estate_service import (
+#     CollectDealPriceOfVillaService,
+# )
 
 
 # @pytest.mark.django_db

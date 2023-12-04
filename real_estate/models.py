@@ -5,15 +5,16 @@ from django.db import migrations
 from modu_property.common.models.models import DateTimeFields
 
 DEAL_TYPES = (("BROKERAGE_DEAL", "중개거래"), ("DIRECT_DEAL", "직거래"))
+TYPES = (("DEAL", "매매"), ("JEONSE", "전세"), ("MONTHLY_RENT", "월세"))
 
 
 class Migration(migrations.Migration):
     operations = [CreateExtension("postgis")]
 
 
-class Villa(gis_models.Model):
+class RealEstate(gis_models.Model):
     class Meta:
-        db_table = "villa"
+        db_table = "real_estate"
 
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(help_text="부동산 이름", null=True, blank=True, max_length=30)
@@ -35,14 +36,12 @@ class Villa(gis_models.Model):
     point = gis_models.PointField(geography=True, null=False, blank=False)
 
 
-class VillaDeal(DateTimeFields):
+class Deal(DateTimeFields):
     class Meta:
-        db_table = "villa_deal"
+        db_table = "deal"
 
     id = models.BigAutoField(primary_key=True)
-    deal_price = models.PositiveIntegerField(
-        help_text="거래금액(거래금액(만원))", null=False, blank=False
-    )
+
     deal_type = models.CharField(
         help_text="중개/직거래(거래유형)",
         null=True,
@@ -57,22 +56,37 @@ class VillaDeal(DateTimeFields):
     deal_month = models.SmallIntegerField(help_text="계약 월", null=False, blank=False)
     deal_day = models.SmallIntegerField(help_text="계약 일", null=False, blank=False)
     area_for_exclusive_use = models.CharField(
-        help_text="전용면적(제곱미터)", null=False, blank=False, max_length=7
+        help_text="전용면적(제곱미터)", null=False, blank=False, max_length=10
     )
-    floor = models.CharField(help_text="층", null=False, blank=False, max_length=2)
+    floor = models.CharField(help_text="층", null=False, blank=False, max_length=3)
     is_deal_canceled = models.BooleanField(
         help_text="해제여부(거래계약이 무효, 취소, 해제)", null=False, blank=False
     )
-    deal_canceld_date = models.DateField(help_text="해제사유 발생일", null=True, blank=True)
+    deal_canceled_date = models.DateField(help_text="해제사유 발생일", null=True, blank=True)
     area_for_exclusive_use_pyung = models.CharField(
         help_text="전용면적(평)", null=False, blank=False, max_length=6
     )
     area_for_exclusive_use_price_per_pyung = models.CharField(
         help_text="전용면적 평당가", null=False, blank=False, max_length=8
     )
+    type = models.CharField(
+        help_text="유형(매매, 전세, 월세)", null=False, blank=False, max_length=12
+    )
 
-    villa = models.ForeignKey(
-        "Villa",
-        related_name="villa_deal",
+    real_estate = models.ForeignKey(
+        "RealEstate",
+        related_name="real_estate",
         on_delete=models.DO_NOTHING,
+    )
+
+
+class MonthlyRent(DateTimeFields):
+    class Meta:
+        db_table = "monthly_rent"
+
+    deal = models.OneToOneField(
+        Deal, primary_key=True, help_text="기본키, 거래 외래키", on_delete=models.CASCADE
+    )
+    price = models.PositiveIntegerField(
+        help_text="반전세의 월세, 월세", null=False, blank=False
     )

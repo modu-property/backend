@@ -1,9 +1,9 @@
 from decimal import Decimal
 from rest_framework import serializers
-from property.models import Villa
+from real_estate.models import RealEstate
 
 
-class VillaSerializer(serializers.ModelSerializer):
+class RealEstateSerializer(serializers.ModelSerializer):
     deal_price = serializers.SerializerMethodField()
     deal_type = serializers.SerializerMethodField()
     latitude = serializers.SerializerMethodField()
@@ -22,7 +22,7 @@ class VillaSerializer(serializers.ModelSerializer):
         self.area_for_exclusive_use_pyung = None
 
     class Meta:
-        model = Villa
+        model = RealEstate
         fields = (
             "deal_price",
             "deal_type",
@@ -38,7 +38,7 @@ class VillaSerializer(serializers.ModelSerializer):
             "regional_code",
             "floor",
             "is_deal_canceled",
-            "deal_canceld_date",
+            "deal_canceled_date",
             "broker_address",
             "road_name_address",
             "latitude",
@@ -84,7 +84,7 @@ class VillaSerializer(serializers.ModelSerializer):
         return False
 
 
-class GetVillaRequestSerializer(serializers.Serializer):
+class GetRealEstateRequestSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     TYPE_CHOICES = (
         ("deal", "deal"),
@@ -98,14 +98,14 @@ class GetVillaRequestSerializer(serializers.Serializer):
     keyword = serializers.CharField(allow_blank=True)
 
 
-class GetVillasOnSearchTabResponseSerializer(serializers.Serializer):
+class GetRealEstatesOnSearchTabResponseSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     lot_number = serializers.CharField(max_length=30)
     name = serializers.CharField(max_length=30)
     road_name_address = serializers.CharField(max_length=30)
 
 
-class GetVillasOnMapResponseSerializer(serializers.Serializer):
+class GetRealEstatesOnMapResponseSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     latitude = serializers.CharField(max_length=20)
     longitude = serializers.CharField(max_length=20)

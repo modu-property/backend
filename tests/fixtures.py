@@ -4,7 +4,7 @@ import pytest
 from accounts.models import User
 
 from modu_property.test_settings import SECRET_KEY
-from property.models import Villa, VillaDeal
+from real_estate.models import Deal, RealEstate, MonthlyRent
 from django.contrib.gis.geos import Point
 from django.contrib.auth.hashers import make_password
 
@@ -34,8 +34,8 @@ def create_user():
 
 
 @pytest.fixture
-def create_villa():
-    def _create_villa(
+def create_real_estate():
+    def _create_real_estate(
         name: str,
         build_year: int,
         regional_code: str,
@@ -45,7 +45,7 @@ def create_villa():
         longitude: str,
         point: Point,
     ):
-        villa = Villa(
+        real_estate = RealEstate(
             name=name,
             build_year=build_year,
             regional_code=regional_code,
@@ -55,16 +55,16 @@ def create_villa():
             longitude=longitude,
             point=point,
         )
-        villa.save()
-        return villa
+        real_estate.save()
+        return real_estate
 
-    return _create_villa
+    return _create_real_estate
 
 
 @pytest.fixture
-def create_villa_deal():
-    def _create_villa_deal(
-        villa_id: int,
+def create_deal():
+    def _create_deal(
+        real_estate_id: int,
         deal_price: int,
         deal_type: str,
         deal_year: int,
@@ -74,12 +74,13 @@ def create_villa_deal():
         area_for_exclusive_use: str,
         floor: str,
         is_deal_canceled: bool,
-        deal_canceld_date: datetime,
+        deal_canceled_date: datetime,
         area_for_exclusive_use_pyung: str,
         area_for_exclusive_use_price_per_pyung: str,
+        type: str,
     ):
-        villa_deal = VillaDeal(
-            villa_id=villa_id,
+        deal = Deal(
+            real_estate_id=real_estate_id,
             deal_price=deal_price,
             deal_type=deal_type,
             deal_year=deal_year,
@@ -89,11 +90,12 @@ def create_villa_deal():
             area_for_exclusive_use=area_for_exclusive_use,
             floor=floor,
             is_deal_canceled=is_deal_canceled,
-            deal_canceld_date=deal_canceld_date,
+            deal_canceled_date=deal_canceled_date,
             area_for_exclusive_use_pyung=area_for_exclusive_use_pyung,
             area_for_exclusive_use_price_per_pyung=area_for_exclusive_use_price_per_pyung,
+            type=type,
         )
-        villa_deal.save()
-        return villa_deal
+        deal.save()
+        return deal
 
-    return _create_villa_deal
+    return _create_deal

@@ -122,7 +122,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "property",
+    "real_estate",
     "accounts",
     "modu_property",
     "django_celery_beat",

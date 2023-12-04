@@ -4,22 +4,22 @@ import manticoresearch
 
 from manticoresearch.api import search_api
 from manticoresearch.model.search_request import SearchRequest
-from property.dto.villa_dto import GetDealPriceOfVillaDto
-from property.models import Villa
-from property.serializers import (
-    GetVillasOnMapResponseSerializer,
-    GetVillasOnSearchTabResponseSerializer,
+from real_estate.dto.real_estate_dto import GetDealPriceOfRealEstateDto
+from real_estate.models import RealEstate
+from real_estate.serializers import (
+    GetRealEstatesOnMapResponseSerializer,
+    GetRealEstatesOnSearchTabResponseSerializer,
 )
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 from django.db.models import F
 
 
-class GetDealPriceOfVillaService:
+class GetDealPriceOfRealEstateService:
     def __init__(self) -> None:
         self.logger = logging.getLogger("django")
 
-    def get_distance_tolerance(self, dto: GetDealPriceOfVillaDto):
+    def get_distance_tolerance(self, dto: GetDealPriceOfRealEstateDto):
         # TODO level은 임시로 정함, 바꿔야함
         zoom_levels = {
             1: 1000 * 1000,
@@ -35,23 +35,21 @@ class GetDealPriceOfVillaService:
         }
         return zoom_levels[dto.zoom_level]
 
-    def get_villas_by_lat_and_long(
-        self, dto: GetDealPriceOfVillaDto, distance_tolerance: int
+    def get_real_estates_by_lat_and_long(
+        self, dto: GetDealPriceOfRealEstateDto, distance_tolerance: int
     ):
-        self.logger.debug("get_villas_by_lat_and_long!")
+        self.logger.debug("get_real_estates_by_lat_and_long!")
         center_point = Point(
             float(dto.latitude), float(dto.longitude), srid=4326
         )  # 위경도 받아서 지도의 중심으로 잡음
 
-        villas = (
-            Villa.objects.prefetch_related("villa_deal")
+        real_estates = (
+            RealEstate.objects.prefetch_related("deal")
             .annotate(
                 distance=Distance("point", center_point),
-                area_for_exclusive_use_pyung=F(
-                    "villa_deal__area_for_exclusive_use_pyung"
-                ),
+                area_for_exclusive_use_pyung=F("deal__area_for_exclusive_use_pyung"),
                 area_for_exclusive_use_price_per_pyung=F(
-                    "villa_deal__area_for_exclusive_use_price_per_pyung"
+                    "deal__area_for_exclusive_use_price_per_pyung"
                 ),
             )
             .filter(distance__lte=distance_tolerance)
@@ -63,24 +61,23 @@ class GetDealPriceOfVillaService:
                 "area_for_exclusive_use_price_per_pyung",
             )
         )
-        self.logger.debug(villas)
+        self.logger.debug(real_estates)
 
-        return villas
+        return real_estates
 
-    def get_villas_by_keyword(self, dto: GetDealPriceOfVillaDto):
-        self.logger.debug("get_villas_by_keyword")
-        villas = Villa.objects.all()
-        self.logger.debug(f"villa : {villas}")
+    def get_real_estates_by_keyword(self, dto: GetDealPriceOfRealEstateDto):
+        self.logger.debug("get_real_estates_by_keyword")
+        real_estates = RealEstate.objects.all()
+        self.logger.debug(f"real_estate : {real_estates}")
 
         configuration = manticoresearch.Configuration(host="http://0.0.0.0:9308")
 
         api_client = manticoresearch.ApiClient(configuration)
 
-        # with manticoresearch.ApiClient(configuration) as api_client:
         search_instance = search_api.SearchApi(api_client)
 
         search_request = SearchRequest(
-            index="villa",
+            index="real_estate",
             query={"query_string": f"@* *{dto.keyword}*"},
         )
 
@@ -90,35 +87,39 @@ class GetDealPriceOfVillaService:
             return []
         hits = hits.hits
 
-        villas = []
+        real_estates = []
         for hit in hits:
             hit["_source"]["id"] = int(hit["_id"])
-            villas.append(hit["_source"])
+            real_estates.append(hit["_source"])
 
-        return villas
+        return real_estates
 
     def execute(
-        self, dto: GetDealPriceOfVillaDto
+        self, dto: GetDealPriceOfRealEstateDto
     ) -> Union[
-        list, GetVillasOnMapResponseSerializer, GetVillasOnSearchTabResponseSerializer
+        list,
+        GetRealEstatesOnMapResponseSerializer,
+        GetRealEstatesOnSearchTabResponseSerializer,
     ]:
         # zoom_level에 맞게 반경 지정하는 메서드 만들기
         # keyword가 있으면 그 검색어에 맞는 거 추출(manticore 사용?)하고 그곳의 latitude, longitude 구해서 반경 내에 속하는 것들 추출
         # keyword 없고 latitude, longitude 있으면  반경 내에 속하는 것들 추출
 
-        villas = []
+        real_estates = []
         if not dto.keyword and dto.latitude and dto.longitude:
             distance_tolerance = self.get_distance_tolerance(dto=dto)
-            villas = self.get_villas_by_lat_and_long(
+            real_estates = self.get_real_estates_by_lat_and_long(
                 dto, distance_tolerance=distance_tolerance
             )
-            if villas:
-                return GetVillasOnMapResponseSerializer(data=list(villas), many=True)
+            if real_estates:
+                return GetRealEstatesOnMapResponseSerializer(
+                    data=list(real_estates), many=True
+                )
             return []
 
         elif dto.keyword and not dto.latitude and not dto.longitude:
-            villas = self.get_villas_by_keyword(dto=dto)
-            if villas:
-                return GetVillasOnSearchTabResponseSerializer(
-                    data=list(villas), many=True
+            real_estates = self.get_real_estates_by_keyword(dto=dto)
+            if real_estates:
+                return GetRealEstatesOnSearchTabResponseSerializer(
+                    data=list(real_estates), many=True
                 )

@@ -2,13 +2,15 @@ from django.http import JsonResponse
 from rest_framework.request import Request
 from rest_framework.generics import ListAPIView
 from accounts.util.authenticator import jwt_authenticator
-from property.dto.villa_dto import GetDealPriceOfVillaDto
-from property.serializers import (
-    GetVillaRequestSerializer,
-    GetVillasOnMapResponseSerializer,
-    GetVillasOnSearchTabResponseSerializer,
+from real_estate.dto.real_estate_dto import GetDealPriceOfRealEstateDto
+from real_estate.serializers import (
+    GetRealEstateRequestSerializer,
+    GetRealEstatesOnMapResponseSerializer,
+    GetRealEstatesOnSearchTabResponseSerializer,
 )
-from property.services.get_deal_price_of_villa_service import GetDealPriceOfVillaService
+from real_estate.services.get_deal_price_of_real_estate_service import (
+    GetDealPriceOfRealEstateService,
+)
 from drf_spectacular.utils import (
     extend_schema,
     OpenApiResponse,
@@ -17,7 +19,7 @@ from drf_spectacular.utils import (
 )
 
 
-class VillaView(ListAPIView):
+class RealEstateView(ListAPIView):
     @extend_schema(
         summary="빌라 조회",
         description="keyword로 검색하거나 latitude, longitude으로 요청",
@@ -58,13 +60,13 @@ class VillaView(ListAPIView):
                 required=False,
             ),
         ],
-        request=GetVillaRequestSerializer,
+        request=GetRealEstateRequestSerializer,
         responses={
             200: PolymorphicProxySerializer(
-                component_name="Villas",
+                component_name="RealEstates",
                 serializers=[
-                    GetVillasOnSearchTabResponseSerializer,
-                    GetVillasOnMapResponseSerializer,
+                    GetRealEstatesOnSearchTabResponseSerializer,
+                    GetRealEstatesOnMapResponseSerializer,
                 ],
                 resource_type_field_name=None,
             ),
@@ -86,19 +88,21 @@ class VillaView(ListAPIView):
             "zoom_level": request.query_params.get("zoom_level", 0),
             "keyword": request.query_params.get("keyword", ""),
         }
-        serializer = GetVillaRequestSerializer(data=request_data)
+        serializer = GetRealEstateRequestSerializer(data=request_data)
 
         if serializer.is_valid():
             validated_data = serializer.validated_data
-            dto = GetDealPriceOfVillaDto(**validated_data)
-            villas_response_serializer = GetDealPriceOfVillaService().execute(dto=dto)
+            dto = GetDealPriceOfRealEstateDto(**validated_data)
+            real_estates_response_serializer = (
+                GetDealPriceOfRealEstateService().execute(dto=dto)
+            )
 
-            if not villas_response_serializer:
+            if not real_estates_response_serializer:
                 return JsonResponse(data={}, status=404)
 
-            if villas_response_serializer.is_valid():
+            if real_estates_response_serializer.is_valid():
                 return JsonResponse(
-                    data=villas_response_serializer.validated_data,
+                    data=real_estates_response_serializer.validated_data,
                     status=200,
                     safe=False,
                 )

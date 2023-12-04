@@ -41,7 +41,7 @@ import pytest
 
 
 @pytest.fixture
-def mock_collect_deal_price_of_villa():
+def mock_collect_deal_price_of_real_estate():
     return {
         "response": {
             "body": {

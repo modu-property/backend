@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class GetDealPriceOfVillaDto:
+class GetDealPriceOfRealEstateDto:
     id: int
     type: str
     latitude: float

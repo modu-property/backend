@@ -6,17 +6,17 @@ from django.forms import model_to_dict
 import requests
 import xmltodict
 
-from property.models import Villa
-from property.serializers import VillaSerializer
+from real_estate.models import RealEstate
+from real_estate.serializers import RealEstateSerializer
 from rest_framework.exceptions import ValidationError
 
 
-class CollectDealPriceOfVillaService:
+class CollectDealPriceOfRealEstateService:
     def __init__(self) -> None:
-        self.url = os.getenv("DEAL_PRICE_OF_VILLA_API")
+        self.url = os.getenv("DEAL_PRICE_OF_REAL_ESTATE_API")
         self.service_key = os.getenv("SERVICE_KEY")
 
-    def get_deal_price_of_villa(self, params: dict) -> Union[list[dict], bool]:
+    def get_deal_price_of_real_estate(self, params: dict) -> Union[list[dict], bool]:
         response = requests.get(self.url, params=params)
 
         if response.status_code == 200:
@@ -67,11 +67,13 @@ class CollectDealPriceOfVillaService:
             "longitude": longitude,
         }
 
-    def validate_villa_model(
-        self, villa_model: Villa, villa_dict: dict
+    def validate_real_estate_model(
+        self, real_estate_model: RealEstate, real_estate_dict: dict
     ) -> Union[dict, bool]:
         try:
-            serializer = VillaSerializer(instance=villa_model, data=villa_dict)
+            serializer = RealEstateSerializer(
+                instance=real_estate_model, data=real_estate_dict
+            )
 
             if not serializer.is_valid(raise_exception=True):
                 return False
@@ -82,15 +84,17 @@ class CollectDealPriceOfVillaService:
 
             return data
         except ValueError as e:
-            print(f"validate_villa_model ValueError e : {e}, villa_dict : {villa_dict}")
+            print(
+                f"validate_real_estate_model ValueError e : {e}, real_estate_dict : {real_estate_dict}"
+            )
             return False
         except ValidationError as e:
             print(
-                f"validate_villa_model ValidationError e : {e}, villa_dict : {villa_dict}"
+                f"validate_real_estate_model ValidationError e : {e}, real_estate_dict : {real_estate_dict}"
             )
             return False
         except Exception as e:
-            print(f"validate_villa_model e : {e}")
+            print(f"validate_real_estate_model e : {e}")
             return False
 
     def execute(self):
@@ -102,55 +106,58 @@ class CollectDealPriceOfVillaService:
             "DEAL_YMD": "201512",
         }
 
-        deal_prices_of_villa = self.get_deal_price_of_villa(params=params)
+        deal_prices_of_real_estate = self.get_deal_price_of_real_estate(params=params)
 
-        if not deal_prices_of_villa:
+        if not deal_prices_of_real_estate:
             return
 
-        deal_price_of_villa_models = []
-        for deal_price_of_villa in deal_prices_of_villa:
+        deal_price_of_real_estate_models = []
+        for deal_price_of_real_estate in deal_prices_of_real_estate:
             # bulk_create를 하면 유효성 검사가 안되므로 미리 확인하고 진행해야함.
             address_info = self.get_address_info(
-                dong=deal_price_of_villa["법정동"], lot_number=deal_price_of_villa["지번"]
+                dong=deal_price_of_real_estate["법정동"],
+                lot_number=deal_price_of_real_estate["지번"],
             )
 
-            villa_model = Villa(
-                deal_price=deal_price_of_villa["거래금액"],
-                deal_type=deal_price_of_villa["거래유형"],
-                build_year=deal_price_of_villa["건축년도"],
-                deal_year=deal_price_of_villa["년"],
-                land_area=deal_price_of_villa["대지권면적"],
-                dong=deal_price_of_villa["법정동"],
-                name=deal_price_of_villa["연립다세대"],
-                deal_month=deal_price_of_villa["월"],
-                deal_day=deal_price_of_villa["일"],
-                area_for_exclusive_use=deal_price_of_villa["전용면적"],
-                lot_number=deal_price_of_villa["지번"],
-                regional_code=deal_price_of_villa["지역코드"],
-                floor=deal_price_of_villa["층"],
-                is_deal_canceled=deal_price_of_villa["해제여부"],
-                deal_canceld_date=deal_price_of_villa["해제사유발생일"],
-                broker_address=deal_price_of_villa["중개사소재지"],
+            real_estate_model = RealEstate(
+                deal_price=deal_price_of_real_estate["거래금액"],
+                deal_type=deal_price_of_real_estate["거래유형"],
+                build_year=deal_price_of_real_estate["건축년도"],
+                deal_year=deal_price_of_real_estate["년"],
+                land_area=deal_price_of_real_estate["대지권면적"],
+                dong=deal_price_of_real_estate["법정동"],
+                name=deal_price_of_real_estate["연립다세대"],
+                deal_month=deal_price_of_real_estate["월"],
+                deal_day=deal_price_of_real_estate["일"],
+                area_for_exclusive_use=deal_price_of_real_estate["전용면적"],
+                lot_number=deal_price_of_real_estate["지번"],
+                regional_code=deal_price_of_real_estate["지역코드"],
+                floor=deal_price_of_real_estate["층"],
+                is_deal_canceled=deal_price_of_real_estate["해제여부"],
+                deal_canceled_date=deal_price_of_real_estate["해제사유발생일"],
+                broker_address=deal_price_of_real_estate["중개사소재지"],
                 road_name_address=address_info["road_name_address"],
                 latitude=address_info["latitude"],
                 longitude=address_info["longitude"],
             )
 
-            villa_dict = model_to_dict(villa_model)
+            real_estate_dict = model_to_dict(real_estate_model)
 
-            validated_villa = self.validate_villa_model(
-                villa_model=villa_model, villa_dict=villa_dict
+            validated_real_estate = self.validate_real_estate_model(
+                real_estate_model=real_estate_model, real_estate_dict=real_estate_dict
             )
-            if not validated_villa:
-                print(f"유효성 검사 실패 deal_price_of_villa : {deal_price_of_villa}")
+            if not validated_real_estate:
+                print(
+                    f"유효성 검사 실패 deal_price_of_real_estate : {deal_price_of_real_estate}"
+                )
                 continue
 
-            deal_price_of_villa_models.append(Villa(**validated_villa))
+            deal_price_of_real_estate_models.append(RealEstate(**validated_real_estate))
 
         try:
-            if deal_price_of_villa_models:
-                Villa.objects.bulk_create(deal_price_of_villa_models)
+            if deal_price_of_real_estate_models:
+                RealEstate.objects.bulk_create(deal_price_of_real_estate_models)
             return True
         except Exception as e:
-            print(f"villa bulk_create params : {params}, e : {e}")
+            print(f"real_estate bulk_create params : {params}, e : {e}")
             return False

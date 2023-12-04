@@ -3,7 +3,7 @@ import subprocess
 from django.core.management.base import BaseCommand
 from django.contrib.gis.geos import Point
 
-from property.models import Villa, VillaDeal
+from real_estate.models import RealEstate, Deal
 
 
 class Command(BaseCommand):
@@ -13,14 +13,14 @@ class Command(BaseCommand):
         dir_path = os.path.dirname(os.path.realpath(__file__))
         subprocess.run(["bash", f"{dir_path}/run_indexer.sh"])
 
-    def delete_villa(self):
-        Villa.objects.all().delete()
+    def delete_real_estate(self):
+        RealEstate.objects.all().delete()
 
-    def delete_villa_deal(self):
-        VillaDeal.objects.all().delete()
+    def delete_real_estate_deal(self):
+        Deal.objects.all().delete()
 
-    def create_villa_and_villa_deal(self):
-        villa1 = Villa(
+    def create_real_estate_and_real_estate_deal(self):
+        real_estate1 = RealEstate(
             name="테스트빌라 1",
             build_year=1990,
             regional_code="11650",
@@ -31,10 +31,10 @@ class Command(BaseCommand):
             point=Point(37.5054, 127.0216),
         )
 
-        villa1.save()
+        real_estate1.save()
 
-        villa_deal1 = VillaDeal(
-            villa_id=villa1.id,
+        real_estate_deal1 = Deal(
+            real_estate_id=real_estate1.id,
             deal_price=10000,
             deal_type="BROKERAGE_DEAL",
             deal_year=2023,
@@ -44,14 +44,14 @@ class Command(BaseCommand):
             area_for_exclusive_use=80,
             floor=3,
             is_deal_canceled=False,
-            deal_canceld_date=None,
+            deal_canceled_date=None,
             area_for_exclusive_use_pyung="30.30",
             area_for_exclusive_use_price_per_pyung="330",
         )
 
-        villa_deal1.save()
+        real_estate_deal1.save()
 
-        villa2 = Villa(
+        real_estate2 = RealEstate(
             name="OAK 빌",
             build_year=1990,
             regional_code="11650",
@@ -62,10 +62,10 @@ class Command(BaseCommand):
             point=Point(37.5056, 127.0215),
         )
 
-        villa2.save()
+        real_estate2.save()
 
-        villa_deal2 = VillaDeal(
-            villa_id=villa2.id,
+        real_estate_deal2 = Deal(
+            real_estate_id=real_estate2.id,
             deal_price=20000,
             deal_type="BROKERAGE_DEAL",
             deal_year=2023,
@@ -75,14 +75,14 @@ class Command(BaseCommand):
             area_for_exclusive_use=150,
             floor=5,
             is_deal_canceled=False,
-            deal_canceld_date=None,
+            deal_canceled_date=None,
             area_for_exclusive_use_pyung="60.60",
             area_for_exclusive_use_price_per_pyung="329.99",
         )
 
-        villa_deal2.save()
+        real_estate_deal2.save()
 
-        villa3 = Villa(
+        real_estate3 = RealEstate(
             name="봉은사로 빌라",
             build_year=1990,
             regional_code="11650",
@@ -93,10 +93,10 @@ class Command(BaseCommand):
             point=Point(37.5094, 127.0321),
         )
 
-        villa3.save()
+        real_estate3.save()
 
-        villa_deal3 = VillaDeal(
-            villa_id=villa3.id,
+        real_estate_deal3 = Deal(
+            real_estate_id=real_estate3.id,
             deal_price=30000,
             deal_type="BROKERAGE_DEAL",
             deal_year=2022,
@@ -106,14 +106,14 @@ class Command(BaseCommand):
             area_for_exclusive_use=130,
             floor=2,
             is_deal_canceled=False,
-            deal_canceld_date=None,
+            deal_canceled_date=None,
             area_for_exclusive_use_pyung="60.60",
             area_for_exclusive_use_price_per_pyung="329.99",
         )
 
-        villa_deal3.save()
+        real_estate_deal3.save()
 
-        villa4 = Villa(
+        real_estate4 = RealEstate(
             name="지산로얄빌라",
             build_year=1990,
             regional_code="21070",
@@ -124,10 +124,10 @@ class Command(BaseCommand):
             point=Point(35.133, 129.0959),
         )
 
-        villa4.save()
+        real_estate4.save()
 
-        villa_deal4 = VillaDeal(
-            villa_id=villa4.id,
+        real_estate_deal4 = Deal(
+            real_estate_id=real_estate4.id,
             deal_price=30000,
             deal_type="BROKERAGE_DEAL",
             deal_year=2022,
@@ -137,15 +137,15 @@ class Command(BaseCommand):
             area_for_exclusive_use=130,
             floor=2,
             is_deal_canceled=False,
-            deal_canceld_date=None,
+            deal_canceled_date=None,
             area_for_exclusive_use_pyung="60.60",
             area_for_exclusive_use_price_per_pyung="329.99",
         )
 
-        villa_deal4.save()
+        real_estate_deal4.save()
 
     def handle(self, *args, **options):
-        self.delete_villa_deal()
-        self.delete_villa()
-        self.create_villa_and_villa_deal()
+        self.delete_real_estate_deal()
+        self.delete_real_estate()
+        self.create_real_estate_and_real_estate_deal()
         self.run_indexer()

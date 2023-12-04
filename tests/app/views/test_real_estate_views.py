@@ -3,10 +3,10 @@ from tests.fixtures import *
 
 
 @pytest.mark.django_db(transaction=True)
-def test_get_villas_with_latitude_longitude_zoom_level_view(
-    client, get_jwt, create_villa, create_villa_deal
+def test_get_real_estates_with_latitude_longitude_zoom_level_view(
+    client, get_jwt, create_real_estate, create_deal
 ):
-    villa1 = create_villa(
+    real_estate1 = create_real_estate(
         name="테스트빌라 1",
         build_year=1990,
         regional_code="11650",
@@ -17,8 +17,8 @@ def test_get_villas_with_latitude_longitude_zoom_level_view(
         point=Point(37.5054, 127.0216),
     )
 
-    create_villa_deal(
-        villa_id=villa1.id,
+    create_deal(
+        real_estate_id=real_estate1.id,
         deal_price=10000,
         deal_type="BROKERAGE_DEAL",
         deal_year=2023,
@@ -28,12 +28,12 @@ def test_get_villas_with_latitude_longitude_zoom_level_view(
         area_for_exclusive_use=80,
         floor=3,
         is_deal_canceled=False,
-        deal_canceld_date=None,
+        deal_canceled_date=None,
         area_for_exclusive_use_pyung="30.30",
         area_for_exclusive_use_price_per_pyung="330",
     )
 
-    villa2 = create_villa(
+    real_estate2 = create_real_estate(
         name="OAK 빌",
         build_year=1990,
         regional_code="11650",
@@ -44,8 +44,8 @@ def test_get_villas_with_latitude_longitude_zoom_level_view(
         point=Point(37.5056, 127.0215),
     )
 
-    create_villa_deal(
-        villa_id=villa2.id,
+    create_deal(
+        real_estate_id=real_estate2.id,
         deal_price=20000,
         deal_type="BROKERAGE_DEAL",
         deal_year=2023,
@@ -55,12 +55,12 @@ def test_get_villas_with_latitude_longitude_zoom_level_view(
         area_for_exclusive_use=150,
         floor=5,
         is_deal_canceled=False,
-        deal_canceld_date=None,
+        deal_canceled_date=None,
         area_for_exclusive_use_pyung="60.60",
         area_for_exclusive_use_price_per_pyung="329.99",
     )
 
-    villa3 = create_villa(
+    real_estate3 = create_real_estate(
         name="봉은사로 빌라",
         build_year=1990,
         regional_code="11650",
@@ -71,8 +71,8 @@ def test_get_villas_with_latitude_longitude_zoom_level_view(
         point=Point(37.5094, 127.0321),
     )
 
-    create_villa_deal(
-        villa_id=villa3.id,
+    create_deal(
+        real_estate_id=real_estate3.id,
         deal_price=30000,
         deal_type="BROKERAGE_DEAL",
         deal_year=2022,
@@ -82,12 +82,12 @@ def test_get_villas_with_latitude_longitude_zoom_level_view(
         area_for_exclusive_use=130,
         floor=2,
         is_deal_canceled=False,
-        deal_canceld_date=None,
+        deal_canceled_date=None,
         area_for_exclusive_use_pyung="60.60",
         area_for_exclusive_use_price_per_pyung="329.99",
     )
 
-    villa4 = create_villa(
+    real_estate4 = create_real_estate(
         name="지산로얄빌라",
         build_year=1990,
         regional_code="21070",
@@ -98,8 +98,8 @@ def test_get_villas_with_latitude_longitude_zoom_level_view(
         point=Point(35.133, 129.0959),
     )
 
-    create_villa_deal(
-        villa_id=villa4.id,
+    create_deal(
+        real_estate_id=real_estate4.id,
         deal_price=30000,
         deal_type="BROKERAGE_DEAL",
         deal_year=2022,
@@ -109,12 +109,12 @@ def test_get_villas_with_latitude_longitude_zoom_level_view(
         area_for_exclusive_use=130,
         floor=2,
         is_deal_canceled=False,
-        deal_canceld_date=None,
+        deal_canceled_date=None,
         area_for_exclusive_use_pyung="60.60",
         area_for_exclusive_use_price_per_pyung="329.99",
     )
 
-    url = reverse("villa", kwargs={"type": "deal"})
+    url = reverse("real_estate", kwargs={"type": "deal"})
 
     _jwt = get_jwt
 
@@ -128,17 +128,17 @@ def test_get_villas_with_latitude_longitude_zoom_level_view(
 
     response = client.get(url, data=query_params, **headers)
     assert response.status_code == 200
-    villas = response.json()
-    for villa in villas:
-        assert "latitude" in villa
-        assert "longitude" in villa
-        assert "area_for_exclusive_use_pyung" in villa
-        assert "area_for_exclusive_use_price_per_pyung" in villa
+    real_estates = response.json()
+    for real_estate in real_estates:
+        assert "latitude" in real_estate
+        assert "longitude" in real_estate
+        assert "area_for_exclusive_use_pyung" in real_estate
+        assert "area_for_exclusive_use_price_per_pyung" in real_estate
 
 
 @pytest.mark.django_db(transaction=True)
-def test_get_villas_with_keyword_view(client, get_jwt):
-    url = reverse("villa", kwargs={"type": "deal"})
+def test_get_real_estates_with_keyword_view(client, get_jwt):
+    url = reverse("real_estate", kwargs={"type": "deal"})
 
     _jwt = get_jwt
 
