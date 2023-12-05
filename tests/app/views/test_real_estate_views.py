@@ -1,4 +1,5 @@
 from django.urls import reverse
+from real_estate.enum.deal_enum import DealType
 from tests.fixtures import *
 
 
@@ -20,7 +21,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
     create_deal(
         real_estate_id=real_estate1.id,
         deal_price=10000,
-        deal_type="BROKERAGE_DEAL",
+        deal_type="DIRECT_DEAL",
         deal_year=2023,
         land_area=100,
         deal_month=3,
@@ -31,6 +32,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         deal_canceled_date=None,
         area_for_exclusive_use_pyung="30.30",
         area_for_exclusive_use_price_per_pyung="330",
+        type=DealType.DEAL,
     )
 
     real_estate2 = create_real_estate(
@@ -58,6 +60,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         deal_canceled_date=None,
         area_for_exclusive_use_pyung="60.60",
         area_for_exclusive_use_price_per_pyung="329.99",
+        type=DealType.DEAL,
     )
 
     real_estate3 = create_real_estate(
@@ -85,6 +88,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         deal_canceled_date=None,
         area_for_exclusive_use_pyung="60.60",
         area_for_exclusive_use_price_per_pyung="329.99",
+        type=DealType.DEAL,
     )
 
     real_estate4 = create_real_estate(
@@ -112,9 +116,10 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         deal_canceled_date=None,
         area_for_exclusive_use_pyung="60.60",
         area_for_exclusive_use_price_per_pyung="329.99",
+        type=DealType.DEAL,
     )
 
-    url = reverse("real_estate", kwargs={"type": "deal"})
+    url = reverse("real-estate", kwargs={"type": "deal"})
 
     _jwt = get_jwt
 
@@ -138,7 +143,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
 
 @pytest.mark.django_db(transaction=True)
 def test_get_real_estates_with_keyword_view(client, get_jwt):
-    url = reverse("real_estate", kwargs={"type": "deal"})
+    url = reverse("real-estate", kwargs={"type": "deal"})
 
     _jwt = get_jwt
 

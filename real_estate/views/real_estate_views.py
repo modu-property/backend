@@ -21,7 +21,7 @@ from drf_spectacular.utils import (
 
 class RealEstateView(ListAPIView):
     @extend_schema(
-        summary="빌라 조회",
+        summary="부동산 조회",
         description="keyword로 검색하거나 latitude, longitude으로 요청",
         parameters=[
             OpenApiParameter(

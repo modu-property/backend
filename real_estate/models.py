@@ -20,7 +20,7 @@ class RealEstate(gis_models.Model):
     name = models.CharField(help_text="부동산 이름", null=True, blank=True, max_length=30)
     build_year = models.SmallIntegerField(help_text="건축년도", null=False, blank=False)
     regional_code = models.CharField(
-        help_text="지역코드", null=False, blank=False, max_length=5
+        help_text="지역코드", null=False, blank=False, max_length=6
     )
     lot_number = models.CharField(
         help_text="지번(구획마다 부여된 땅 번호, 서울특별시 서초구 반포동 1-1)",
@@ -42,6 +42,9 @@ class Deal(DateTimeFields):
 
     id = models.BigAutoField(primary_key=True)
 
+    deal_price = models.PositiveIntegerField(
+        help_text="거래금액(전월세 보증금)", null=False, blank=False
+    )
     deal_type = models.CharField(
         help_text="중개/직거래(거래유형)",
         null=True,
@@ -64,18 +67,21 @@ class Deal(DateTimeFields):
     )
     deal_canceled_date = models.DateField(help_text="해제사유 발생일", null=True, blank=True)
     area_for_exclusive_use_pyung = models.CharField(
-        help_text="전용면적(평)", null=False, blank=False, max_length=6
+        help_text="전용면적(평)", null=False, blank=False, max_length=7
     )
     area_for_exclusive_use_price_per_pyung = models.CharField(
         help_text="전용면적 평당가", null=False, blank=False, max_length=8
     )
     type = models.CharField(
-        help_text="유형(매매, 전세, 월세)", null=False, blank=False, max_length=12
+        help_text="유형(DEAL(매매), JEONSE(전세), MONTHLY_RENT(월세))",
+        null=False,
+        blank=False,
+        max_length=13,
     )
 
     real_estate = models.ForeignKey(
         "RealEstate",
-        related_name="real_estate",
+        related_name="deal",
         on_delete=models.DO_NOTHING,
     )
 
