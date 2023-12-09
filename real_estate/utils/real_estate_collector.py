@@ -10,9 +10,9 @@ logger = logging.getLogger("django")
 
 class RealEstateCollector:
     def collect_deal_price_of_real_estate(
-        self, params: dict
+        self, url: str, params: dict
     ) -> Union[list[dict], bool]:
-        response = requests.get(self.url, params=params)
+        response = requests.get(url, params=params)
 
         if response.status_code == 200:
             content: dict = xmltodict.parse(response.content, encoding="utf-8")

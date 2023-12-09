@@ -26,15 +26,15 @@ class CollectDealPriceOfRealEstateService:
         self.address_getter = AddressGetter()
 
     def execute(self, dong_code, deal_ymd):
-        ## LAWD_CD : 지역코드. https://www.code.go.kr/index.do 의 법정동코드 10자리 중 앞 5자리
-        # 1111000000 이렇게 동까지 지정하면???
         params = {
             "serviceKey": self.service_key,
             "LAWD_CD": dong_code,
             "DEAL_YMD": deal_ymd,
         }
         deal_prices_of_real_estate = (
-            self.real_estate_collector.collect_deal_price_of_real_estate(params=params)
+            self.real_estate_collector.collect_deal_price_of_real_estate(
+                url=self.url, params=params
+            )
         )
 
         if not deal_prices_of_real_estate:
@@ -43,31 +43,8 @@ class CollectDealPriceOfRealEstateService:
         real_estate_models = []
         deal_models = []
         for deal_price_of_real_estate in deal_prices_of_real_estate:
-            # bulk_create를 하면 유효성 검사가 안되므로 미리 확인하고 진행해야함.
-            address_info = self.address_getter.get_address_info(
-                dong=deal_price_of_real_estate["법정동"],
-                lot_number=deal_price_of_real_estate["지번"],
-            )
-
-            real_estate_model = RealEstate(
-                name=deal_price_of_real_estate["연립다세대"],
-                build_year=deal_price_of_real_estate["건축년도"],
-                regional_code=deal_price_of_real_estate["지역코드"],
-                lot_number=deal_price_of_real_estate["지번"],
-                road_name_address=address_info["road_name_address"],
-                latitude=address_info["latitude"],
-                longitude=address_info["longitude"],
-                point=Point(
-                    float(address_info["latitude"]), float(address_info["longitude"])
-                ),
-            )
-
-            real_estate_dict = model_to_dict(real_estate_model)
-
-            validated_real_estate = validate_model(
-                model=real_estate_model,
-                data=real_estate_dict,
-                serializer=RealEstateSerializer,
+            validated_real_estate = self.create_validated_real_estate(
+                deal_price_of_real_estate
             )
             if not validated_real_estate:
                 logger.error(
@@ -88,27 +65,8 @@ class CollectDealPriceOfRealEstateService:
                 return False
 
             for inserted_real_estate_model in inserted_real_estate_models:
-                deal_model = Deal(
-                    deal_price=deal_price_of_real_estate["거래금액"],
-                    deal_type=deal_price_of_real_estate["거래유형"],
-                    deal_year=deal_price_of_real_estate["년"],
-                    land_area=deal_price_of_real_estate["대지권면적"],
-                    deal_month=deal_price_of_real_estate["월"],
-                    deal_day=deal_price_of_real_estate["일"],
-                    area_for_exclusive_use=deal_price_of_real_estate["전용면적"],
-                    floor=deal_price_of_real_estate["층"],
-                    is_deal_canceled=deal_price_of_real_estate["해제여부"],
-                    deal_canceled_date=deal_price_of_real_estate["해제사유발생일"],
-                    type=self.type,
-                    real_estate_id=inserted_real_estate_model.id,
-                )
-
-                deal_dict = model_to_dict(deal_model)
-
-                validated_deal = validate_model(
-                    model=deal_model,
-                    data=deal_dict,
-                    serializer=DealSerializer,
+                validated_deal = self.create_validated_deal_model(
+                    deal_price_of_real_estate, inserted_real_estate_model
                 )
                 if not validated_deal:
                     logger.error(
@@ -125,3 +83,74 @@ class CollectDealPriceOfRealEstateService:
             except Exception as e:
                 logger.error(f"deal bulk_create params : {params}, e : {e}")
                 return False
+
+    def create_validated_deal_model(
+        self, deal_price_of_real_estate, inserted_real_estate_model
+    ):
+        deal_model = self.create_deal_model(
+            deal_price_of_real_estate, inserted_real_estate_model
+        )
+
+        deal_dict = model_to_dict(deal_model)
+
+        validated_deal_model = validate_model(
+            model=deal_model,
+            data=deal_dict,
+            serializer=DealSerializer,
+        )
+
+        return validated_deal_model
+
+    def create_validated_real_estate(self, deal_price_of_real_estate):
+        address_info = self.address_getter.get_address_info(
+            dong=deal_price_of_real_estate["법정동"],
+            lot_number=deal_price_of_real_estate["지번"],
+        )
+
+        real_estate_model = self.create_real_estate_model(
+            deal_price_of_real_estate, address_info
+        )
+
+        real_estate_dict = model_to_dict(real_estate_model)
+
+        validated_real_estate_model = validate_model(
+            model=real_estate_model,
+            data=real_estate_dict,
+            serializer=RealEstateSerializer,
+        )
+
+        return validated_real_estate_model
+
+    def create_deal_model(
+        self, deal_price_of_real_estate, inserted_real_estate_model
+    ) -> Deal:
+        return Deal(
+            deal_price=deal_price_of_real_estate["거래금액"],
+            deal_type=deal_price_of_real_estate["거래유형"],
+            deal_year=deal_price_of_real_estate["년"],
+            land_area=deal_price_of_real_estate["대지권면적"],
+            deal_month=deal_price_of_real_estate["월"],
+            deal_day=deal_price_of_real_estate["일"],
+            area_for_exclusive_use=deal_price_of_real_estate["전용면적"],
+            floor=deal_price_of_real_estate["층"],
+            is_deal_canceled=deal_price_of_real_estate["해제여부"],
+            deal_canceled_date=deal_price_of_real_estate["해제사유발생일"],
+            type=self.type,
+            real_estate_id=inserted_real_estate_model.id,
+        )
+
+    def create_real_estate_model(
+        self, deal_price_of_real_estate, address_info
+    ) -> RealEstate:
+        return RealEstate(
+            name=deal_price_of_real_estate["연립다세대"],
+            build_year=deal_price_of_real_estate["건축년도"],
+            regional_code=deal_price_of_real_estate["지역코드"],
+            lot_number=deal_price_of_real_estate["지번"],
+            road_name_address=address_info["road_name_address"],
+            latitude=address_info["latitude"],
+            longitude=address_info["longitude"],
+            point=Point(
+                float(address_info["latitude"]), float(address_info["longitude"])
+            ),
+        )
