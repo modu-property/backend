@@ -205,7 +205,7 @@ create database modu_property;
 CREATE EXTENSION postgis;
 SELECT postgis_full_version();
 ```
-![Alt text](image-3.png)
+![Alt text](z_images_for_readme/image-3.png)
 
 django.db.utils.DataError: invalid value for parameter "TimeZone": "UTC"  
 -> brew services restart postgresql@14 안됨  
@@ -219,7 +219,7 @@ django.db.utils.DataError: invalid value for parameter "TimeZone": "UTC"
 # open api
 http://localhost:8000/api/docs/  
 회원가입 테스트 시 content-type을 multipart/form-data로 지정해야 함  
-![Alt text](image-2.png)
+![Alt text](z_images_for_readme/image-2.png)
 
 # TODO
 23.12.05  
