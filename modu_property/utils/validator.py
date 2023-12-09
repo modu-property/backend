@@ -1,7 +1,10 @@
+import logging
 from typing import Union
 from django.db import models
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+
+logger = logging.getLogger("django")
 
 
 def validate_model(
@@ -19,11 +22,11 @@ def validate_model(
 
         return data
     except ValueError as e:
-        print(f"validate_model ValueError e : {e}, data : {data}")
+        logger.info(f"validate_model ValueError e : {e}, data : {data}")
         return False
     except ValidationError as e:
-        print(f"validate_model ValidationError e : {e}, data : {data}")
+        logger.info(f"validate_model ValidationError e : {e}, data : {data}")
         return False
     except Exception as e:
-        print(f"validate_model e : {e}")
+        logger.info(f"validate_model e : {e}")
         return False

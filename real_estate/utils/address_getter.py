@@ -1,6 +1,10 @@
+import logging
 import os
 from typing import Union
 import requests
+
+
+logger = logging.getLogger("django")
 
 
 class AddressGetter:
@@ -14,13 +18,13 @@ class AddressGetter:
         )
 
         if response.status_code != 200:
-            print("카카오 주소 변환 실패")
+            logger.error("카카오 주소 변환 실패")
             return False
 
         documents = response.json()["documents"]
 
         if not documents:
-            print("documents 없음")
+            logger.error("documents 없음")
             return False
 
         document = documents[0]

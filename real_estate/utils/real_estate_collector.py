@@ -1,8 +1,11 @@
 import json
+import logging
 from typing import Union
 
 import requests
 import xmltodict
+
+logger = logging.getLogger("django")
 
 
 class RealEstateCollector:
@@ -19,6 +22,6 @@ class RealEstateCollector:
 
             return json_response["response"]["body"]["items"]["item"]
 
-        print(response.status_code, "get_deal_price_of_real_estate 수집 실패")
+        logger.error(response.status_code, "get_deal_price_of_real_estate 수집 실패")
 
         return False

@@ -13,13 +13,14 @@ from real_estate.utils.real_estate_collector import RealEstateCollector
 일단 한 클래스에서 수집하고 나중에 필요하면 아파트, 빌라별로 클래스 생성
 """
 
+logger = logging.getLogger("django")
+
 
 class CollectDealPriceOfRealEstateService:
     def __init__(self, url: str, type: str) -> None:
         self.url = url
         self.type = type
         self.service_key = os.getenv("SERVICE_KEY")
-        self.logger = logging.getLogger("django")
 
         self.real_estate_collector = RealEstateCollector()
         self.address_getter = AddressGetter()
@@ -69,7 +70,7 @@ class CollectDealPriceOfRealEstateService:
                 serializer=RealEstateSerializer,
             )
             if not validated_real_estate:
-                print(
+                logger.error(
                     f"유효성 검사 실패 deal_price_of_real_estate : {deal_price_of_real_estate}"
                 )
                 return False
@@ -83,7 +84,7 @@ class CollectDealPriceOfRealEstateService:
                         real_estate_models
                     )
             except Exception as e:
-                print(f"real_estate bulk_create params : {params}, e : {e}")
+                logger.error(f"real_estate bulk_create params : {params}, e : {e}")
                 return False
 
             for inserted_real_estate_model in inserted_real_estate_models:
@@ -110,7 +111,7 @@ class CollectDealPriceOfRealEstateService:
                     serializer=DealSerializer,
                 )
                 if not validated_deal:
-                    print(
+                    logger.error(
                         f"유효성 검사 실패 deal_price_of_real_estate : {deal_price_of_real_estate}"
                     )
                     return False
@@ -122,5 +123,5 @@ class CollectDealPriceOfRealEstateService:
                     Deal.objects.bulk_create(deal_models)
                     return True
             except Exception as e:
-                print(f"deal bulk_create params : {params}, e : {e}")
+                logger.error(f"deal bulk_create params : {params}, e : {e}")
                 return False

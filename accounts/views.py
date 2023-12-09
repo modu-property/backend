@@ -1,3 +1,4 @@
+import logging
 import os
 from django.db import IntegrityError
 from django.contrib.auth.hashers import check_password, make_password
@@ -14,6 +15,8 @@ from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer,
 )
 
+logger = logging.getLogger("django")
+
 
 @extend_schema(
     summary="회원가입",
@@ -27,7 +30,6 @@ from rest_framework_simplejwt.serializers import (
 )
 @api_view(("POST",))
 def signup(request: Request) -> Response:
-    print(request.data)
     serializer = UserSerializer(data=request.data)
 
     if serializer.is_valid():
@@ -41,7 +43,7 @@ def signup(request: Request) -> Response:
 
             return Response("회원가입 성공")
         except IntegrityError as e:
-            print(e)
+            logger.info(e)
             return Response(f"{username} 이미 있는 이름입니다.", 409)
     return Response("회원가입 실패", 400)
 
@@ -96,5 +98,5 @@ def login(request: Request) -> Response:
                 )
 
         except Exception as e:
-            print(f"로그인 에러 : {e}")
+            logger.info(f"로그인 에러 : {e}")
             return Response("로그인 에러", status=400)

@@ -14,11 +14,10 @@ from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 from django.db.models import F
 
+logger = logging.getLogger("django")
+
 
 class GetDealPriceOfRealEstateService:
-    def __init__(self) -> None:
-        self.logger = logging.getLogger("django")
-
     def get_distance_tolerance(self, dto: GetDealPriceOfRealEstateDto):
         # TODO level은 임시로 정함, 바꿔야함
         zoom_levels = {
@@ -38,7 +37,6 @@ class GetDealPriceOfRealEstateService:
     def get_real_estates_by_lat_and_long(
         self, dto: GetDealPriceOfRealEstateDto, distance_tolerance: int
     ):
-        self.logger.debug("get_real_estates_by_lat_and_long!")
         center_point = Point(
             float(dto.latitude), float(dto.longitude), srid=4326
         )  # 위경도 받아서 지도의 중심으로 잡음
@@ -61,14 +59,13 @@ class GetDealPriceOfRealEstateService:
                 "area_for_exclusive_use_price_per_pyung",
             )
         )
-        self.logger.debug(real_estates)
+        logger.debug(real_estates)
 
         return real_estates
 
     def get_real_estates_by_keyword(self, dto: GetDealPriceOfRealEstateDto):
-        self.logger.debug("get_real_estates_by_keyword")
         real_estates = RealEstate.objects.all()
-        self.logger.debug(f"real_estate : {real_estates}")
+        logger.debug(f"real_estate : {real_estates}")
 
         configuration = manticoresearch.Configuration(host="http://0.0.0.0:9308")
 

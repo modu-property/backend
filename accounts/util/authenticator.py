@@ -1,6 +1,9 @@
+import logging
 import os
 import jwt
 from rest_framework.response import Response
+
+logger = logging.getLogger("django")
 
 
 def jwt_authenticator(fn):
@@ -18,7 +21,7 @@ def jwt_authenticator(fn):
 
             return fn(self, request, *args, **kwargs)
         except Exception as e:
-            print(f"jwt_authenticator e : {e}")
+            logger.info(f"jwt_authenticator e : {e}")
             return Response(f"jwt 오류 e : {e}", status=401)
 
     return wrapper
