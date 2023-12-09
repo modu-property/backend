@@ -1,15 +1,13 @@
-import json
 import logging
 import os
-from typing import Union
 from django.forms import model_to_dict
 from django.contrib.gis.geos import Point
-import requests
-import xmltodict
 from modu_property.utils.validator import validate_model
 
 from real_estate.models import Deal, RealEstate
 from real_estate.serializers import DealSerializer, RealEstateSerializer
+from real_estate.utils.address_getter import AddressGetter
+from real_estate.utils.real_estate_collector import RealEstateCollector
 
 """
 일단 한 클래스에서 수집하고 나중에 필요하면 아파트, 빌라별로 클래스 생성
@@ -23,52 +21,8 @@ class CollectDealPriceOfRealEstateService:
         self.service_key = os.getenv("SERVICE_KEY")
         self.logger = logging.getLogger("django")
 
-    def collect_deal_price_of_real_estate(
-        self, params: dict
-    ) -> Union[list[dict], bool]:
-        response = requests.get(self.url, params=params)
-
-        if response.status_code == 200:
-            content: dict = xmltodict.parse(response.content, encoding="utf-8")
-
-            # Convert dictionary to JSON
-            json_response: json = json.loads(json.dumps(content, indent=4))
-
-            return json_response["response"]["body"]["items"]["item"]
-
-        print(response.status_code, "get_deal_price_of_real_estate 수집 실패")
-
-        return False
-
-    def get_address_info(self, dong: str, lot_number: str) -> Union[dict, bool]:
-        headers = {"Authorization": f"KakaoAK {os.getenv('KAKAO_API_KEY')}"}
-        params = {"query": f"{dong} {lot_number}"}
-        response = requests.get(
-            "https://dapi.kakao.com/v2/local/search/address.json",
-            headers=headers,
-            params=params,
-        )
-
-        if response.status_code != 200:
-            print("카카오 주소 변환 실패")
-            return False
-
-        documents = response.json()["documents"]
-
-        if not documents:
-            print("documents 없음")
-            return False
-
-        document = documents[0]
-        road_name_address = document["road_address"]["address_name"]
-        latitude = document["road_address"]["y"]
-        longitude = document["road_address"]["x"]
-
-        return {
-            "road_name_address": road_name_address,
-            "latitude": latitude,
-            "longitude": longitude,
-        }
+        self.real_estate_collector = RealEstateCollector()
+        self.address_getter = AddressGetter()
 
     def execute(self, dong_code, deal_ymd):
         ## LAWD_CD : 지역코드. https://www.code.go.kr/index.do 의 법정동코드 10자리 중 앞 5자리
@@ -78,8 +32,8 @@ class CollectDealPriceOfRealEstateService:
             "LAWD_CD": dong_code,
             "DEAL_YMD": deal_ymd,
         }
-        deal_prices_of_real_estate = self.collect_deal_price_of_real_estate(
-            params=params
+        deal_prices_of_real_estate = (
+            self.real_estate_collector.collect_deal_price_of_real_estate(params=params)
         )
 
         if not deal_prices_of_real_estate:
@@ -89,7 +43,7 @@ class CollectDealPriceOfRealEstateService:
         deal_models = []
         for deal_price_of_real_estate in deal_prices_of_real_estate:
             # bulk_create를 하면 유효성 검사가 안되므로 미리 확인하고 진행해야함.
-            address_info = self.get_address_info(
+            address_info = self.address_getter.get_address_info(
                 dong=deal_price_of_real_estate["법정동"],
                 lot_number=deal_price_of_real_estate["지번"],
             )
