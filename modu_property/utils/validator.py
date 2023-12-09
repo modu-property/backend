@@ -22,11 +22,11 @@ def validate_model(
 
         return data
     except ValueError as e:
-        logger.info(f"validate_model ValueError e : {e}, data : {data}")
+        logger.error(f"validate_model ValueError e : {e}, data : {data}")
         return False
     except ValidationError as e:
-        logger.info(f"validate_model ValidationError e : {e}, data : {data}")
+        logger.error(f"validate_model ValidationError e : {e}, data : {data}")
         return False
     except Exception as e:
-        logger.info(f"validate_model e : {e}")
+        logger.error(f"validate_model e : {e}")
         return False

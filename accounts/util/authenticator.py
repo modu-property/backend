@@ -21,7 +21,7 @@ def jwt_authenticator(fn):
 
             return fn(self, request, *args, **kwargs)
         except Exception as e:
-            logger.info(f"jwt_authenticator e : {e}")
+            logger.error(f"jwt_authenticator e : {e}")
             return Response(f"jwt 오류 e : {e}", status=401)
 
     return wrapper

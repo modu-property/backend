@@ -43,7 +43,7 @@ def signup(request: Request) -> Response:
 
             return Response("회원가입 성공")
         except IntegrityError as e:
-            logger.info(e)
+            logger.error(e)
             return Response(f"{username} 이미 있는 이름입니다.", 409)
     return Response("회원가입 실패", 400)
 
@@ -98,5 +98,5 @@ def login(request: Request) -> Response:
                 )
 
         except Exception as e:
-            logger.info(f"로그인 에러 : {e}")
+            logger.error(f"로그인 에러 : {e}")
             return Response("로그인 에러", status=400)
