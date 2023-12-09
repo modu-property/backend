@@ -1,6 +1,8 @@
 from django.urls import reverse
 from real_estate.enum.deal_enum import DealType
-from tests.fixtures import *
+from tests.conftests.real_estate_conftest import *
+from tests.conftests.account_conftest import get_jwt
+from django.contrib.gis.geos import Point
 
 
 @pytest.mark.django_db(transaction=True)

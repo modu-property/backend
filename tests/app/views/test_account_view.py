@@ -1,5 +1,5 @@
 from django.urls import reverse
-from tests.fixtures import *
+from tests.conftests.account_conftest import *
 
 
 @pytest.mark.django_db(transaction=True)

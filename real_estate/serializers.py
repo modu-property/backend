@@ -1,13 +1,26 @@
 from decimal import Decimal
 from rest_framework import serializers
-from real_estate.models import RealEstate
+from real_estate.models import Deal, RealEstate
 
 
 class RealEstateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RealEstate
+        fields = (
+            "name",
+            "build_year",
+            "regional_code",
+            "lot_number",
+            "road_name_address",
+            "latitude",
+            "longitude",
+            "point",
+        )
+
+
+class DealSerializer(serializers.ModelSerializer):
     deal_price = serializers.SerializerMethodField()
     deal_type = serializers.SerializerMethodField()
-    latitude = serializers.SerializerMethodField()
-    longitude = serializers.SerializerMethodField()
     area_for_exclusive_use_pyung = serializers.SerializerMethodField(
         "convert_square_meter_to_pyung"
     )
@@ -22,29 +35,22 @@ class RealEstateSerializer(serializers.ModelSerializer):
         self.area_for_exclusive_use_pyung = None
 
     class Meta:
-        model = RealEstate
+        model = Deal
         fields = (
             "deal_price",
             "deal_type",
-            "build_year",
             "deal_year",
             "land_area",
-            "dong",
-            "name",
             "deal_month",
             "deal_day",
             "area_for_exclusive_use",
-            "lot_number",
-            "regional_code",
             "floor",
             "is_deal_canceled",
             "deal_canceled_date",
-            "broker_address",
-            "road_name_address",
-            "latitude",
-            "longitude",
             "area_for_exclusive_use_pyung",
             "area_for_exclusive_use_price_per_pyung",
+            "type",
+            "real_estate_id",
         )
 
     def get_deal_price(self, instance):
@@ -54,20 +60,6 @@ class RealEstateSerializer(serializers.ModelSerializer):
     def get_deal_type(self, instance):
         if not instance.deal_type:
             return None
-
-    def get_latitude(self, instance):
-        latitude = instance.latitude
-        integer, _decimal = instance.latitude.split(".")
-        if len(_decimal) > 6:
-            latitude = integer + "." + _decimal[:6]
-        return latitude
-
-    def get_longitude(self, instance):
-        longitude = instance.longitude
-        integer, _decimal = instance.longitude.split(".")
-        if len(_decimal) > 6:
-            longitude = integer + "." + _decimal[:6]
-        return longitude
 
     def convert_square_meter_to_pyung(self, instance):
         self.pyung = round(
