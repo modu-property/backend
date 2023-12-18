@@ -96,3 +96,12 @@ class MonthlyRent(DateTimeFields):
     price = models.PositiveIntegerField(
         help_text="반전세의 월세, 월세", null=False, blank=False
     )
+
+
+class RegionalCode(DateTimeFields):
+    class Meta:
+        db_table = "regional_code"
+
+    regional_code = models.CharField(
+        help_text="지역 코드", null=False, blank=False, max_length=6, unique=True
+    )

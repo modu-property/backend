@@ -1,27 +1,30 @@
-import json
 import logging
-from typing import Union
+import os
 
-import requests
-import xmltodict
+from typing import Union
+from PublicDataReader import TransactionPrice
+from pandas import DataFrame
+
+from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
 
 logger = logging.getLogger("django")
 
 
 class RealEstateCollector:
+    def __init__(self) -> None:
+        self.service_key = os.getenv("SERVICE_KEY")
+        self.api = TransactionPrice(self.service_key)
+
     def collect_deal_price_of_real_estate(
-        self, url: str, params: dict
-    ) -> Union[list[dict], bool]:
-        response = requests.get(url, params=params)
-
-        if response.status_code == 200:
-            content: dict = xmltodict.parse(response.content, encoding="utf-8")
-
-            # Convert dictionary to JSON
-            json_response: json = json.loads(json.dumps(content, indent=4))
-
-            return json_response["response"]["body"]["items"]["item"]
-
-        logger.error(response.status_code, "get_deal_price_of_real_estate 수집 실패")
-
-        return False
+        self, dto: CollectDealPriceOfRealEstateDto
+    ) -> Union[DataFrame, bool]:
+        try:
+            return self.api.get_data(
+                property_type=dto.property_type,
+                trade_type=dto.trade_type,
+                sigungu_code=dto.regional_code,
+                year_month=dto.year_month,
+            )
+        except Exception as e:
+            logger.error(e, "get_deal_price_of_real_estate 수집 실패")
+            return False

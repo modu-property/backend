@@ -51,12 +51,11 @@ def set_logging():
         },
         "handlers": {
             "console": {
-                "level": "INFO",
+                "level": env("LOG_LEVEL"),
                 "filters": ["require_debug_true"],
                 "class": "logging.StreamHandler",
             },
-            # 개발 서버에서만 사용하는 핸들러로 콘솔에 로그를 출력
-            "django.server": {
+            "django.server": {  # python manage.py runserver로 작동하는 개발 서버에서만 사용하는 핸들러로 콘솔에 로그를 출력
                 "level": env("LOG_LEVEL"),
                 "class": "logging.StreamHandler",
                 "formatter": "django.server",

@@ -130,10 +130,9 @@ searchd {
 ```
 
 real_estate 검색 테스트 준비
-* `insert real_estate.sql` 파일 실행해서 real_estate 테이블에 데이터 insert
-* docker compose 실행
-* manticore indexing
-* 검색 테스트 실행
+* docker compose 실행  
+* SERVER_ENV=local python manage.py insert_real_estates_for_searching_command  
+* 검색 테스트 실행  
 
 ```
 manticore terminal에서 실행할 명령어
@@ -220,6 +219,13 @@ django.db.utils.DataError: invalid value for parameter "TimeZone": "UTC"
 http://localhost:8000/api/docs/  
 회원가입 테스트 시 content-type을 multipart/form-data로 지정해야 함  
 ![Alt text](z_images_for_readme/image-2.png)
+
+# logging
+pytest 관련 로그는 pytest.ini에서 설정함  
+파일에 로그 저장하고 싶으면 pytest.ini에서 콘솔에 로그 capture하는거 막아야 함 `addopts=-p no:logging`  
+
+# 지역 코드 수집
+SERVER_ENV=local python manage.py collect_regional_code_command  
 
 # TODO
 23.12.05  

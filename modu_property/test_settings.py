@@ -4,17 +4,7 @@ load_dotenv(".env.test")
 
 import os
 
-# import pymysql
-
-# pymysql.install_as_MySQLdb()
-
-
-# project_folder = os.path.expanduser('~/my-project-dir')  # adjust as appropriate
-# load_dotenv(os.path.join(project_folder, '.env'))
-
 import datetime
-import json
-from pathlib import Path
 
 import environ
 import os
@@ -30,70 +20,10 @@ env = environ.Env(
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def set_logging():
-    return {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "filters": {
-            "require_debug_false": {
-                "()": "django.utils.log.RequireDebugFalse",
-            },
-            "require_debug_true": {
-                "()": "django.utils.log.RequireDebugTrue",
-            },
-        },
-        "formatters": {
-            "django.server": {
-                "()": "django.utils.log.ServerFormatter",
-                "format": "{asctime} {filename}:{funcName}:{lineno} [{levelname}] {message}",
-                "style": "{",
-            },
-        },
-        "handlers": {
-            "django.server": {
-                "level": env("LOG_LEVEL"),
-                "class": "logging.StreamHandler",
-                "formatter": "django.server",
-            },
-            "file": {
-                "level": env("LOG_LEVEL"),
-                "filters": ["require_debug_true"],
-                "class": "logging.handlers.RotatingFileHandler",
-                "filename": f"{BASE_DIR}/modu_property.log",
-                "maxBytes": 1024 * 1024 * 5,  # 5 MB
-                "backupCount": 5,
-                "formatter": "django.server",
-            },
-        },
-        "loggers": {
-            "django.server": {
-                "handlers": ["django.server"],
-                "level": env("LOG_LEVEL"),
-                "propagete": True,
-            },
-            "file": {
-                "handlers": ["file"],
-                "level": env("LOG_LEVEL"),
-                "propagete": True,
-            },
-        },
-    }
-
-
 # FROM .env.* file
 SERVER_ENV = os.environ.get("SERVER_ENV")
 print(f"SERVER_ENV : {SERVER_ENV}")
-if SERVER_ENV == "dev":
-    environ.Env.read_env(os.path.join(BASE_DIR, ".env.dev"))
-elif SERVER_ENV == "stage":
-    environ.Env.read_env(os.path.join(BASE_DIR, ".env.stage"))
-elif SERVER_ENV == "prod":
-    environ.Env.read_env(os.path.join(BASE_DIR, ".env.prod"))
-elif SERVER_ENV == "test":
-    environ.Env.read_env(os.path.join(BASE_DIR, ".env.test"))
-else:
-    environ.Env.read_env(os.path.join(BASE_DIR, ".env.local"))
-LOGGING = set_logging()
+environ.Env.read_env(os.path.join(BASE_DIR, ".env.test"))
 
 # False if not in os.environ because of casting above
 DEBUG = env("DEBUG")

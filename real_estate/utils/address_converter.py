@@ -7,8 +7,8 @@ import requests
 logger = logging.getLogger("django")
 
 
-class AddressGetter:
-    def get_address_info(self, dong: str, lot_number: str) -> Union[dict, bool]:
+class AddressConverter:
+    def convert_address(self, dong: str, lot_number: str) -> Union[dict, bool]:
         headers = {"Authorization": f"KakaoAK {os.getenv('KAKAO_API_KEY')}"}
         params = {"query": f"{dong} {lot_number}"}
         response = requests.get(

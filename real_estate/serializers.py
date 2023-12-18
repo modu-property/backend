@@ -19,7 +19,6 @@ class RealEstateSerializer(serializers.ModelSerializer):
 
 
 class DealSerializer(serializers.ModelSerializer):
-    deal_price = serializers.SerializerMethodField()
     deal_type = serializers.SerializerMethodField()
     area_for_exclusive_use_pyung = serializers.SerializerMethodField(
         "convert_square_meter_to_pyung"
@@ -31,7 +30,6 @@ class DealSerializer(serializers.ModelSerializer):
 
     def __init__(self, instance=None, data=..., **kwargs):
         super().__init__(instance, data, **kwargs)
-        self.deal_price = None
         self.area_for_exclusive_use_pyung = None
 
     class Meta:
@@ -53,10 +51,6 @@ class DealSerializer(serializers.ModelSerializer):
             "real_estate_id",
         )
 
-    def get_deal_price(self, instance):
-        self.deal_price = int(instance.deal_price.replace(",", ""))
-        return self.deal_price
-
     def get_deal_type(self, instance):
         if not instance.deal_type:
             return None
@@ -68,7 +62,7 @@ class DealSerializer(serializers.ModelSerializer):
         return self.pyung
 
     def calc_price_per_pyung(self, instance) -> Decimal:
-        return round(self.deal_price / self.pyung, 2)
+        return round(instance.deal_price / self.pyung, 2)
 
     def calc_is_deal_canceled(self, instance):
         if instance.is_deal_canceled == "O":

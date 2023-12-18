@@ -72,6 +72,7 @@ certifi = "^2023.7.22"
 postgis = "^1.0.4"
 drf-spectacular = "^0.26.5"
 pytest-mock = "^3.12.0"
+publicdatareader = "^1.0.25"
 
 
 [build-system]
