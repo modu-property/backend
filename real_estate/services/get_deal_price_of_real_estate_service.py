@@ -1,9 +1,9 @@
-import logging
 from typing import Union
 import manticoresearch
 
 from manticoresearch.api import search_api
 from manticoresearch.model.search_request import SearchRequest
+from modu_property.utils.loggers import logger
 from real_estate.dto.real_estate_dto import GetDealPriceOfRealEstateDto
 from real_estate.models import RealEstate
 from real_estate.serializers import (
@@ -13,8 +13,6 @@ from real_estate.serializers import (
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 from django.db.models import F
-
-logger = logging.getLogger("django")
 
 
 class GetDealPriceOfRealEstateService:

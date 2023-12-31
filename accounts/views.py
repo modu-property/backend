@@ -1,4 +1,3 @@
-import logging
 import os
 from django.db import IntegrityError
 from django.contrib.auth.hashers import check_password, make_password
@@ -15,7 +14,7 @@ from rest_framework_simplejwt.serializers import (
     TokenObtainPairSerializer,
 )
 
-logger = logging.getLogger("django")
+from modu_property.utils.loggers import logger
 
 
 @extend_schema(

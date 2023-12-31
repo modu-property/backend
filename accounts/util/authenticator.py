@@ -1,9 +1,8 @@
-import logging
 import os
 import jwt
 from rest_framework.response import Response
 
-logger = logging.getLogger("django")
+from modu_property.utils.loggers import logger
 
 
 def jwt_authenticator(fn):

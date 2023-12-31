@@ -3,6 +3,8 @@ from pandas import DataFrame
 import pytest
 from real_estate.models import Deal, RealEstate, MonthlyRent
 from django.contrib.gis.geos import Point
+import os
+from django.db import connections
 
 
 @pytest.fixture
@@ -105,3 +107,28 @@ def mock_collect_deal_price_of_real_estate():
     }
 
     return DataFrame.from_dict(dct)
+
+
+@pytest.fixture
+def insert_regional_codes():
+    def _insert_regional_codes(start: int = 0, end: int = 30000):
+        connection = connections["default"]
+
+        dir_path = "tests/conftests"
+        sql_file_name = "insert_regional_codes.sql"
+        sql_file = os.path.join(os.getcwd(), dir_path, sql_file_name)
+
+        # Read SQL commands from the file
+        with open(sql_file, "r") as file:
+            sql_commands = file.read()
+
+        # Split the SQL commands if there are multiple commands
+        commands = sql_commands.split(";")[start : end + 1]
+
+        # Execute each SQL command
+        with connection.cursor() as cursor:
+            for command in commands:
+                if command.strip():
+                    cursor.execute(command)
+
+    return _insert_regional_codes

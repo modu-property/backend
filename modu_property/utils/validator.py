@@ -1,10 +1,9 @@
-import logging
 from typing import Union
 from django.db import models
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-logger = logging.getLogger("django")
+from modu_property.utils.loggers import logger
 
 
 def validate_model(

@@ -29,7 +29,7 @@ class RealEstate(gis_models.Model):
         max_length=50,
     )
     road_name_address = models.CharField(
-        help_text="도로명 주소", null=False, blank=False, max_length=50
+        help_text="도로명 주소", null=True, blank=True, max_length=50
     )
     latitude = models.CharField(help_text="위도", null=False, blank=False, max_length=20)
     longitude = models.CharField(help_text="경도", null=False, blank=False, max_length=20)
@@ -98,10 +98,14 @@ class MonthlyRent(DateTimeFields):
     )
 
 
-class RegionalCode(DateTimeFields):
+class Region(DateTimeFields):
     class Meta:
-        db_table = "regional_code"
+        db_table = "region"
 
+    sido = models.CharField(help_text="시도명", max_length=10, null=True, blank=True)
     regional_code = models.CharField(
-        help_text="지역 코드", null=False, blank=False, max_length=6, unique=True
+        help_text="지역 코드", null=False, blank=False, max_length=6
     )
+    sigungu = models.CharField(help_text="시군구명", max_length=15, null=True, blank=True)
+    ubmyundong = models.CharField(help_text="읍면동", max_length=15, null=True, blank=True)
+    dongri = models.CharField(help_text="동리", max_length=15, null=True, blank=True)

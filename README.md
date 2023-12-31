@@ -225,7 +225,10 @@ pytest 관련 로그는 pytest.ini에서 설정함
 파일에 로그 저장하고 싶으면 pytest.ini에서 콘솔에 로그 capture하는거 막아야 함 `addopts=-p no:logging`  
 
 # 지역 코드 수집
-SERVER_ENV=local python manage.py collect_regional_code_command  
+SERVER_ENV=local python manage.py collect_regional_code_command
+
+# 부동산 매매 정보 수집
+SERVER_ENV=local python manage.py collect_deal_price_of_real_estate_command 서울특별시
 
 # TODO
 23.12.05  

@@ -4,11 +4,10 @@ import PublicDataReader as pdr
 from PublicDataReader import TransactionPrice
 from pandas import DataFrame
 
-from modu_property.utils.logger import logger
-from real_estate.models import RegionalCode
+from modu_property.utils.loggers import logger
+from real_estate.models import Region
 
 
-# django  command로 db에 한번 싹 넣기
 class AddressCollector:
     def __init__(self) -> None:
         self.service_key = os.getenv("SERVICE_KEY")
@@ -20,22 +19,27 @@ class AddressCollector:
         """
         table: DataFrame = pdr.code_bdong()
 
-        regional_codes = []
-        regional_code_models = []
-        # TODO : 일단 지역 코드만 수집하고 매매/전월세 전체 내역 다 가져오는지 확인
-        for index, row in table.iterrows():
+        region_models = []
+        for _, row in table.iterrows():
             if not row.get("말소일자"):
-                regional_code = row.get("시군구코드")
-                regional_codes.append(regional_code)
-
-        regional_codes = set(regional_codes)
-
-        for regional_code in regional_codes:
-            regional_code_models.append(RegionalCode(regional_code=regional_code))
+                sido = row.get("시도명", None)
+                regional_code = row.get("시군구코드", None)
+                sigungu = row.get("시군구명", None)
+                ubmyundong = row.get("읍면동명", None)
+                dongri = row.get("동리명", None)
+                region_models.append(
+                    Region(
+                        sido=sido,
+                        regional_code=regional_code,
+                        sigungu=sigungu,
+                        ubmyundong=ubmyundong,
+                        dongri=dongri,
+                    )
+                )
 
         try:
-            RegionalCode.objects.bulk_create(regional_code_models)
+            Region.objects.bulk_create(region_models)
             return True
         except Exception as e:
-            logger.info(f"collect_regional_info bulk_create 실패 e : {e}")
+            logger.error(f"collect_regional_info bulk_create 실패 e : {e}")
             return False

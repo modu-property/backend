@@ -1,13 +1,11 @@
-import logging
 import os
 
 from typing import Union
 from PublicDataReader import TransactionPrice
 from pandas import DataFrame
+from modu_property.utils.loggers import logger
 
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
-
-logger = logging.getLogger("django")
 
 
 class RealEstateCollector:

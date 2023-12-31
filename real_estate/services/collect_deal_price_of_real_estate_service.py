@@ -1,10 +1,10 @@
-import logging
-
 from django.forms import model_to_dict
 from django.contrib.gis.geos import Point
 from pandas import DataFrame
+from modu_property.utils.loggers import logger
 from modu_property.utils.validator import validate_model
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
+from datetime import datetime
 
 from real_estate.models import Deal, RealEstate
 from real_estate.serializers import DealSerializer, RealEstateSerializer
@@ -15,8 +15,6 @@ from real_estate.utils.real_estate_collector import RealEstateCollector
 일단 한 클래스에서 수집하고 나중에 필요하면 아파트, 빌라별로 클래스 생성
 """
 
-logger = logging.getLogger("django")
-
 
 class CollectDealPriceOfRealEstateService:
     def __init__(self) -> None:
@@ -24,17 +22,80 @@ class CollectDealPriceOfRealEstateService:
         self.address_converter = AddressConverter()
 
     def execute(self, dto: CollectDealPriceOfRealEstateDto):
+        # TODO : DB에 이미 있는 건 제외해야 함. 거래날짜, 정보로?
         deal_prices_of_real_estate: DataFrame = (
             self.real_estate_collector.collect_deal_price_of_real_estate(dto=dto)
         )
 
         if deal_prices_of_real_estate.empty:
             return
+        (
+            inserted_real_estate_models,
+            deal_price_of_real_estate_list,
+        ) = self.create_real_estates(
+            deal_prices_of_real_estate=deal_prices_of_real_estate
+        )
 
-        real_estate_models = []
+        inserted_real_estate_models_dict = self.get_inserted_real_estate_models_dict(
+            inserted_real_estate_models
+        )
+
+        deal_models = self.get_deal_models(
+            dto, deal_price_of_real_estate_list, inserted_real_estate_models_dict
+        )
+
+        try:
+            if deal_models:
+                Deal.objects.bulk_create(deal_models)
+                return True
+            logger.error(f"no deal models")
+        except Exception as e:
+            logger.error(f"deal bulk_create e : {e}")
+        finally:
+            return False
+
+    def get_deal_models(
+        self, dto, deal_price_of_real_estate_list, inserted_real_estate_models_dict
+    ):
         deal_models = []
-        deal_price_of_real_estates = []
-        for index, deal_price_of_real_estate in deal_prices_of_real_estate.iterrows():
+        for deal_price_of_real_estate in deal_price_of_real_estate_list:
+            regional_code = deal_price_of_real_estate["지역코드"]
+            lot_number = deal_price_of_real_estate["지번"]
+            unique_key = f"{regional_code}{lot_number}"
+
+            validated_deal = self.create_validated_deal_model(
+                deal_price_of_real_estate,
+                inserted_real_estate_models_dict[unique_key],
+                dto.trade_type,
+            )
+            if not validated_deal:
+                logger.error(
+                    f"유효성 검사 실패 deal_price_of_real_estate : {deal_price_of_real_estate}"
+                )
+                return False
+
+            deal_models.append(Deal(**validated_deal))
+        return deal_models
+
+    def get_inserted_real_estate_models_dict(self, inserted_real_estate_models):
+        inserted_real_estate_models_dict = {}
+        for inserted_real_estate_model in inserted_real_estate_models:
+            regional_code = inserted_real_estate_model.regional_code
+            lot_number = inserted_real_estate_model.lot_number
+            unique_key = f"{regional_code}{lot_number}"
+            inserted_real_estate_models_dict[unique_key] = inserted_real_estate_model
+        return inserted_real_estate_models_dict
+
+    def create_real_estates(self, deal_prices_of_real_estate: DataFrame):
+        deal_price_of_real_estate_list = []
+        unique_keys = {}
+        real_estate_models = []
+
+        for _, deal_price_of_real_estate in deal_prices_of_real_estate.iterrows():
+            regional_code = deal_price_of_real_estate["지역코드"]
+            lot_number = deal_price_of_real_estate["지번"]
+            unique_key = f"{regional_code}{lot_number}"
+
             validated_real_estate = self.create_validated_real_estate(
                 deal_price_of_real_estate
             )
@@ -44,8 +105,21 @@ class CollectDealPriceOfRealEstateService:
                 )
                 return False
 
-            real_estate_models.append(RealEstate(**validated_real_estate))
-            deal_price_of_real_estates.append(deal_price_of_real_estate)
+            if deal_price_of_real_estate.get("해제사유발생일"):
+                canceled_date = deal_price_of_real_estate.get("해제사유발생일")
+                y, m, d = canceled_date.split(".")
+                y = f"20{y}"
+
+                deal_price_of_real_estate["해제사유발생일"] = f"{y}-{m}-{d}"
+
+            if not deal_price_of_real_estate.get("해제여부"):
+                deal_price_of_real_estate["해제여부"] = False
+
+            deal_price_of_real_estate_list.append(deal_price_of_real_estate)
+
+            if unique_key not in unique_keys:
+                real_estate_models.append(RealEstate(**validated_real_estate))
+                unique_keys[unique_key] = ""
 
             inserted_real_estate_models = []
         try:
@@ -53,30 +127,9 @@ class CollectDealPriceOfRealEstateService:
                 inserted_real_estate_models = RealEstate.objects.bulk_create(
                     real_estate_models
                 )
+            return inserted_real_estate_models, deal_price_of_real_estate_list
         except Exception as e:
             logger.error(f"real_estate bulk_create e : {e}")
-            return False
-
-        for inserted_real_estate_model, deal_price_of_real_estate in zip(
-            inserted_real_estate_models, deal_price_of_real_estates
-        ):
-            validated_deal = self.create_validated_deal_model(
-                deal_price_of_real_estate, inserted_real_estate_model, dto.trade_type
-            )
-            if not validated_deal:
-                logger.error(
-                    f"유효성 검사 실패 deal_price_of_real_estate : {deal_price_of_real_estate}"
-                )
-                return False
-
-            deal_models.append(Deal(**validated_deal))
-
-        try:
-            if deal_models:
-                Deal.objects.bulk_create(deal_models)
-                return True
-        except Exception as e:
-            logger.error(f"deal bulk_create e : {e}")
             return False
 
     def create_validated_deal_model(
@@ -101,6 +154,9 @@ class CollectDealPriceOfRealEstateService:
             dong=deal_price_of_real_estate["법정동"],
             lot_number=deal_price_of_real_estate["지번"],
         )
+
+        if not address_info:
+            return False
 
         real_estate_model = self.create_real_estate_model(
             deal_price_of_real_estate, address_info

@@ -1,10 +1,8 @@
-import logging
 import os
 from typing import Union
 import requests
 
-
-logger = logging.getLogger("django")
+from modu_property.utils.loggers import logger
 
 
 class AddressConverter:
@@ -27,13 +25,21 @@ class AddressConverter:
             logger.error("documents 없음")
             return False
 
-        document = documents[0]
-        road_name_address = document["road_address"]["address_name"]
-        latitude = document["road_address"]["y"]
-        longitude = document["road_address"]["x"]
+        try:
+            document = documents[0]
+            road_name_address = (
+                document["road_address"]["address_name"]
+                if document.get("road_address")
+                else None
+            )
+            latitude = document["y"]
+            longitude = document["x"]
 
-        return {
-            "road_name_address": road_name_address,
-            "latitude": latitude,
-            "longitude": longitude,
-        }
+            return {
+                "road_name_address": road_name_address,
+                "latitude": latitude,
+                "longitude": longitude,
+            }
+        except Exception as e:
+            logger.error(f"주소 변환 실패 e : {e}")
+            return {}
