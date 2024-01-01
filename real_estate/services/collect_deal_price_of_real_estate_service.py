@@ -4,7 +4,6 @@ from pandas import DataFrame
 from modu_property.utils.loggers import logger
 from modu_property.utils.validator import validate_model
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
-from datetime import datetime
 
 from real_estate.models import Deal, RealEstate
 from real_estate.serializers import DealSerializer, RealEstateSerializer
@@ -22,13 +21,17 @@ class CollectDealPriceOfRealEstateService:
         self.address_converter = AddressConverter()
 
     def execute(self, dto: CollectDealPriceOfRealEstateDto):
-        # TODO : DB에 이미 있는 건 제외해야 함. 거래날짜, 정보로?
         deal_prices_of_real_estate: DataFrame = (
             self.real_estate_collector.collect_deal_price_of_real_estate(dto=dto)
         )
 
         if deal_prices_of_real_estate.empty:
             return
+
+        deal_prices_of_real_estate = self.delete_duplication(
+            dto, deal_prices_of_real_estate
+        )
+
         (
             inserted_real_estate_models,
             deal_price_of_real_estate_list,
@@ -51,8 +54,29 @@ class CollectDealPriceOfRealEstateService:
             logger.error(f"no deal models")
         except Exception as e:
             logger.error(f"deal bulk_create e : {e}")
-        finally:
-            return False
+        return False
+
+    def delete_duplication(self, dto, deal_prices_of_real_estate):
+        kv_db = {}
+        data_in_db = self.get_data_in_db(dto)
+        for data in data_in_db:
+            regional_code = data.regional_code
+            lot_number = data.lot_number
+            unique_key = f"{regional_code}{lot_number}"
+
+            kv_db[unique_key] = True
+
+        for index, deal_price_of_real_estate in deal_prices_of_real_estate.iterrows():
+            regional_code = deal_price_of_real_estate["지역코드"]
+            lot_number = deal_price_of_real_estate["지번"]
+            unique_key = f"{regional_code}{lot_number}"
+
+            if unique_key in kv_db:
+                deal_prices_of_real_estate = deal_prices_of_real_estate.drop(
+                    deal_prices_of_real_estate.index[index]
+                )
+
+        return deal_prices_of_real_estate
 
     def get_deal_models(
         self, dto, deal_price_of_real_estate_list, inserted_real_estate_models_dict
@@ -204,4 +228,17 @@ class CollectDealPriceOfRealEstateService:
             point=Point(
                 float(address_info["latitude"]), float(address_info["longitude"])
             ),
+        )
+
+    def get_data_in_db(self, dto):
+        return list(
+            RealEstate.objects.prefetch_related("deal")
+            .filter(
+                regional_code=dto.regional_code,
+                deal__deal_year=int(dto.year_month[:4]),
+                deal__deal_month=int(dto.year_month[4:]),
+                deal__type=dto.trade_type,
+                # deal__deal_type=None,
+            )
+            .all()
         )

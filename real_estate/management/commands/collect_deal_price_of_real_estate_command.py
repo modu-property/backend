@@ -1,6 +1,9 @@
 from datetime import datetime
+import threading
+import time
 from typing import List
 from django.core.management.base import BaseCommand
+from modu_property.utils.loggers import logger
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
 from real_estate.models import Region
 from django.db.models import Count
@@ -52,6 +55,8 @@ class Command(BaseCommand):
         return years_and_months
 
     def handle(self, *args, **options):
+        start = time.time()
+
         sido = options.get("sido")
         regions = []
         qs = Region.objects.values("sido", "regional_code").annotate(c=Count("id"))
@@ -79,7 +84,7 @@ class Command(BaseCommand):
             end_month=end_month,
         )
 
-        # TODO : multiprocessing 해야 할 듯...
+        threads = []
         for property_type in property_types:
             for trade_type in trade_types:
                 for year_and_month in years_and_months:
@@ -92,4 +97,12 @@ class Command(BaseCommand):
                                 regional_code=regional_code,
                             )
                         )
-                        self.service.execute(dto=dto)
+                        t = threading.Thread(target=self.service.execute, args=(dto,))
+                        t.start()
+                        threads.append(t)
+
+        for _thread in threads:
+            _thread.join()
+
+        end = time.time()
+        logger.info("수행시간: %f 초" % (end - start))

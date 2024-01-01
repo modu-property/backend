@@ -1,4 +1,5 @@
 import os
+from time import sleep
 from typing import Union
 import requests
 
@@ -7,6 +8,7 @@ from modu_property.utils.loggers import logger
 
 class AddressConverter:
     def convert_address(self, dong: str, lot_number: str) -> Union[dict, bool]:
+        sleep(0.001)
         headers = {"Authorization": f"KakaoAK {os.getenv('KAKAO_API_KEY')}"}
         params = {"query": f"{dong} {lot_number}"}
         response = requests.get(

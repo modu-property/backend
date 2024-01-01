@@ -4,8 +4,8 @@ from django.contrib.postgres.operations import CreateExtension
 from django.db import migrations
 from modu_property.common.models.models import DateTimeFields
 
-DEAL_TYPES = (("BROKERAGE_DEAL", "중개거래"), ("DIRECT_DEAL", "직거래"))
-TYPES = (("DEAL", "매매"), ("JEONSE", "전세"), ("MONTHLY_RENT", "월세"))
+DEAL_TYPES = (("BROKERAGE_DEAL", "BROKERAGE_DEAL"), ("DIRECT_DEAL", "DIRECT_DEAL"))
+TYPES = (("DEAL", "DEAL"), ("JEONSE", "JEONSE"), ("MONTHLY_RENT", "MONTHLY_RENT"))
 
 
 class Migration(migrations.Migration):
