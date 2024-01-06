@@ -7,7 +7,7 @@ import sys
 def main():
     settings = None
     server_env = os.getenv("SERVER_ENV")
-    print(server_env)
+    print(f"SERVER_ENV : {server_env}")
     if server_env == "testing":
         settings = "modu_property.testing_settings"
     elif server_env == "prod":

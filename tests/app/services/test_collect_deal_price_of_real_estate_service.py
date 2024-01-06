@@ -79,6 +79,5 @@ class TestCollectDealPriceOfRealEstateService:
             .all()
         )
 
-        # TODO 풍림팍사이드빌라가 없어야 함
         for real_estate in real_estates:
-            real_estate
+            assert real_estate1.name != real_estate

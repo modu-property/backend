@@ -1,7 +1,7 @@
 from django.forms import model_to_dict
 from django.contrib.gis.geos import Point
 from pandas import DataFrame
-from modu_property.utils.loggers import logger
+from modu_property.utils.loggers import logger, file_logger
 from modu_property.utils.validator import validate_model
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
 
@@ -25,12 +25,15 @@ class CollectDealPriceOfRealEstateService:
             self.real_estate_collector.collect_deal_price_of_real_estate(dto=dto)
         )
 
-        if deal_prices_of_real_estate.empty:
+        if deal_prices_of_real_estate is False or deal_prices_of_real_estate.empty:
             return
 
         deal_prices_of_real_estate = self.delete_duplication(
             dto, deal_prices_of_real_estate
         )
+
+        if deal_prices_of_real_estate.empty:
+            return
 
         (
             inserted_real_estate_models,
@@ -51,12 +54,12 @@ class CollectDealPriceOfRealEstateService:
             if deal_models:
                 Deal.objects.bulk_create(deal_models)
                 return True
-            logger.error(f"no deal models")
         except Exception as e:
             logger.error(f"deal bulk_create e : {e}")
         return False
 
     def delete_duplication(self, dto, deal_prices_of_real_estate):
+        file_logger.info("delete_duplication")
         kv_db = {}
         data_in_db = self.get_data_in_db(dto)
         for data in data_in_db:
@@ -66,15 +69,19 @@ class CollectDealPriceOfRealEstateService:
 
             kv_db[unique_key] = True
 
+        indexes_to_drop = []
         for index, deal_price_of_real_estate in deal_prices_of_real_estate.iterrows():
             regional_code = deal_price_of_real_estate["지역코드"]
             lot_number = deal_price_of_real_estate["지번"]
             unique_key = f"{regional_code}{lot_number}"
 
+            # kv_db에 없는 것들만 따로 dataframe 으로 만들기
             if unique_key in kv_db:
-                deal_prices_of_real_estate = deal_prices_of_real_estate.drop(
-                    deal_prices_of_real_estate.index[index]
-                )
+                indexes_to_drop.append(deal_prices_of_real_estate.index[index])
+            if index != deal_prices_of_real_estate.index[index]:
+                file_logger.info("@@@@@@@@@@@@@@@@@@ index 다름!!")
+
+        deal_prices_of_real_estate = deal_prices_of_real_estate.drop(indexes_to_drop)
 
         return deal_prices_of_real_estate
 
@@ -145,15 +152,17 @@ class CollectDealPriceOfRealEstateService:
                 real_estate_models.append(RealEstate(**validated_real_estate))
                 unique_keys[unique_key] = ""
 
-            inserted_real_estate_models = []
         try:
+            inserted_real_estate_models = []
             if real_estate_models:
                 inserted_real_estate_models = RealEstate.objects.bulk_create(
                     real_estate_models
                 )
             return inserted_real_estate_models, deal_price_of_real_estate_list
         except Exception as e:
-            logger.error(f"real_estate bulk_create e : {e}")
+            logger.error(
+                f"real_estate bulk_create e : {e} inserted_real_estate_models : {inserted_real_estate_models}"
+            )
             return False
 
     def create_validated_deal_model(

@@ -55,8 +55,6 @@ class Command(BaseCommand):
         return years_and_months
 
     def handle(self, *args, **options):
-        start = time.time()
-
         sido = options.get("sido")
         regions = []
         qs = Region.objects.values("sido", "regional_code").annotate(c=Count("id"))
@@ -73,9 +71,9 @@ class Command(BaseCommand):
         trade_types = self.get_trade_types()
 
         start_year = 2023
-        start_month = 2
+        start_month = 1
         end_year = 2023
-        end_month = 2
+        end_month = 6
 
         years_and_months = self.get_years_and_months(
             start_year=start_year,
@@ -84,10 +82,12 @@ class Command(BaseCommand):
             end_month=end_month,
         )
 
-        threads = []
-        for property_type in property_types:
-            for trade_type in trade_types:
-                for year_and_month in years_and_months:
+        for year_and_month in years_and_months:
+            start = time.time()
+            threads = []
+            dto = None
+            for property_type in property_types:
+                for trade_type in trade_types:
                     for regional_code in regional_codes:
                         dto: CollectDealPriceOfRealEstateDto = (
                             CollectDealPriceOfRealEstateDto(
@@ -101,8 +101,11 @@ class Command(BaseCommand):
                         t.start()
                         threads.append(t)
 
-        for _thread in threads:
-            _thread.join()
+            for _thread in threads:
+                _thread.join()
 
-        end = time.time()
-        logger.info("수행시간: %f 초" % (end - start))
+            end = time.time()
+            logger.info(
+                f"부동산 타입 {dto.property_type}, 연월 {dto.year_month}, 매매타입 {dto.trade_type}, 지역코드 {dto.regional_code} 수행시간: %f 초"
+                % (end - start)
+            )

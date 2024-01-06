@@ -68,12 +68,12 @@ def set_logging():
             "django.server": {
                 "handlers": ["django.server"],
                 "level": env("LOG_LEVEL"),
-                "propagete": True,
+                "propagate": True,
             },
             "file": {
                 "handlers": ["file"],
                 "level": env("LOG_LEVEL"),
-                "propagete": True,
+                "propagate": True,
             },
         },
     }

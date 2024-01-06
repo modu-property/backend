@@ -2,24 +2,31 @@ import os
 from time import sleep
 from typing import Union
 import requests
+from requests.adapters import HTTPAdapter
 
 from modu_property.utils.loggers import logger
 
 
 class AddressConverter:
     def convert_address(self, dong: str, lot_number: str) -> Union[dict, bool]:
-        sleep(0.001)
-        headers = {"Authorization": f"KakaoAK {os.getenv('KAKAO_API_KEY')}"}
-        params = {"query": f"{dong} {lot_number}"}
-        response = requests.get(
-            "https://dapi.kakao.com/v2/local/search/address.json",
-            headers=headers,
-            params=params,
-        )
+        sleep(0.005)
+        response = None
+        with requests.Session() as session:
+            adapter = HTTPAdapter(max_retries=5)
+            session.mount("http://", adapter)
+            session.mount("https://", adapter)
 
-        if response.status_code != 200:
-            logger.error("카카오 주소 변환 실패")
-            return False
+            headers = {"Authorization": f"KakaoAK {os.getenv('KAKAO_API_KEY')}"}
+            params = {"query": f"{dong} {lot_number}"}
+            response = session.get(
+                "https://dapi.kakao.com/v2/local/search/address.json",
+                headers=headers,
+                params=params,
+            )
+
+            if response.status_code != 200:
+                logger.error("카카오 주소 변환 실패")
+                return False
 
         documents = response.json()["documents"]
 
