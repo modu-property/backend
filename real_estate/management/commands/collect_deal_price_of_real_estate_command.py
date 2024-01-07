@@ -58,22 +58,27 @@ class Command(BaseCommand):
         sido = options.get("sido")
         regions = []
         qs = Region.objects.values("sido", "regional_code").annotate(c=Count("id"))
-        if sido:
-            regions = qs.filter(sido=sido)
-        else:
-            regions = qs.filter(sido__gt="", sigungu="").exclude(sido__contains="출장소")
 
-        regional_codes = []
-        for region in regions:
-            regional_codes.append(region.get("regional_code"))
+        sejong_regional_code = "36110"
+
+        if sido:
+            qs = qs.filter(sido=sido)
+            regions = qs.exclude(sido__contains="출장소").exclude(sigungu="")
+
+            regional_codes = list(
+                set([region.get("regional_code") for region in regions])
+            )
+        else:
+            regional_codes.append(sejong_regional_code)
 
         property_types = self.get_property_types()
         trade_types = self.get_trade_types()
 
+        # 2006년부터 수집
         start_year = 2023
         start_month = 1
         end_year = 2023
-        end_month = 6
+        end_month = 12
 
         years_and_months = self.get_years_and_months(
             start_year=start_year,
@@ -83,11 +88,11 @@ class Command(BaseCommand):
         )
 
         for year_and_month in years_and_months:
-            start = time.time()
-            threads = []
-            dto = None
             for property_type in property_types:
                 for trade_type in trade_types:
+                    start = time.time()
+                    threads = []
+                    dto = None
                     for regional_code in regional_codes:
                         dto: CollectDealPriceOfRealEstateDto = (
                             CollectDealPriceOfRealEstateDto(
@@ -101,11 +106,11 @@ class Command(BaseCommand):
                         t.start()
                         threads.append(t)
 
-            for _thread in threads:
-                _thread.join()
+                    for _thread in threads:
+                        _thread.join()
 
-            end = time.time()
-            logger.info(
-                f"부동산 타입 {dto.property_type}, 연월 {dto.year_month}, 매매타입 {dto.trade_type}, 지역코드 {dto.regional_code} 수행시간: %f 초"
-                % (end - start)
-            )
+                    end = time.time()
+                    logger.info(
+                        f"부동산 타입 {dto.property_type}, 연월 {dto.year_month}, 매매타입 {dto.trade_type}, 지역코드 {dto.regional_code} 수행시간: %f 초"
+                        % (end - start)
+                    )

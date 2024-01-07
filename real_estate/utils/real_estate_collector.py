@@ -17,12 +17,22 @@ class RealEstateCollector:
         self, dto: CollectDealPriceOfRealEstateDto
     ) -> Union[DataFrame, bool]:
         try:
-            return self.api.get_data(
-                property_type=dto.property_type,
-                trade_type=dto.trade_type,
-                sigungu_code=dto.regional_code,
-                year_month=dto.year_month,
-            )
+            return self.get_data(dto)
         except Exception as e:
-            logger.error(e, "get_deal_price_of_real_estate 수집 실패")
-            return False
+            logger.error(e, f"get_deal_price_of_real_estate 수집 실패 dto : {dto.__dict__}")
+            try:
+                logger.info(f"재시도 ")
+                return self.get_data(dto)
+            except Exception as e:
+                logger.error(
+                    e, f"get_deal_price_of_real_estate 수집 재시도 실패 dto : {dto.__dict__}"
+                )
+                return False
+
+    def get_data(self, dto):
+        return self.api.get_data(
+            property_type=dto.property_type,
+            trade_type=dto.trade_type,
+            sigungu_code=dto.regional_code,
+            year_month=dto.year_month,
+        )
