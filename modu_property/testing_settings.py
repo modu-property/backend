@@ -258,7 +258,7 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_BEAT_SCHEDULE = {
     "collect_property_news_every_5_minutes": {
-        "task": "modu_property.tasks.collect_property_news_task",
+        "task": "modu_property.tasks.collect_deal_price_of_real_estate_task",
         "schedule": crontab(minute="*/5"),
         "kwargs": {"display": 100},
     },

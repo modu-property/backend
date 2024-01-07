@@ -1,18 +1,5 @@
 # [ERD](https://www.erdcloud.com/d/egr2NSsXmeZ6HiJnJ)
 
-# Used
-* jwt
-* serializer
-* form
-* celery
-* redis
-* pytest
-* pytest-xdist
-* docker-compose
-* mysql
-* postgis
-* drf-spectacular
-
 # run server
 로컬 서버 : docker compose 권장
 * docker-compose -f docker-compose.local.yml up -d --build --force-recreate
@@ -29,7 +16,6 @@
 파일 검증 : 
 * docker-compose -f docker-compose.local.yml config
 * docker-compose -f docker-compose.dev.yml config
-
 
 # debugging
 >  .vscode 디렉토리에 launch.json 생성.  
@@ -75,7 +61,6 @@ celery 사용법
 # pytest
 `pytest`  
 병렬 실행 : `pytest -n {n}`
-
 
 # API
 ## 공공데이터
@@ -131,6 +116,7 @@ searchd {
 
 real_estate 검색 테스트 준비
 * docker compose 실행  
+로컬에서
 * SERVER_ENV=local python manage.py insert_real_estates_for_searching_command  
 * 검색 테스트 실행  
 
@@ -167,12 +153,8 @@ table 확인 curl
 curl -s 'http://127.0.0.1:9308/cli_json?show%20tables'
 
 로컬 터미널에서 manticore 컨테이너 mysql 호출
-curl --location 'http://127.0.0.1:9308/search' --header 'Content-Type: application/json' --data '{"index": "real_estate", "query": { "match": {"road_name_address":"*주흥*"}}}'
-
 curl --location 'http://127.0.0.1:9308/search' --header 'Content-Type: application/json' --data '{"index": "real_estate", "query": { "match": {"lot_number":"*반포*"}}}'
 
-curl --location 'http://127.0.0.1:9308/search' --header 'Content-Type: application/json' --data '{"index": "real_estate", "query": { "match": {"name":"*신천*"}}}'
-```
 
 # postgis
 spatial db를 위해 postgis 설치해야 함  
@@ -227,8 +209,11 @@ pytest 관련 로그는 pytest.ini에서 설정함
 # 지역 코드 수집
 SERVER_ENV=local python manage.py collect_regional_code_command
 
-# 부동산 매매 정보 수집
+# 전체/특정지역 부동산 매매 정보 수집 명령어
 SERVER_ENV=local python manage.py collect_deal_price_of_real_estate_command 서울특별시
+
+# 현재 연월의 부동산 매매 정보 수집 스케쥴러
+collect_deal_price_of_real_estate_task
 
 # TODO
 23.12.05  

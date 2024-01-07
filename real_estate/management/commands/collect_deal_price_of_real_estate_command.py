@@ -1,13 +1,13 @@
-from datetime import datetime
 import threading
 import time
-from typing import List
 from django.core.management.base import BaseCommand
 from modu_property.utils.loggers import logger
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
+from real_estate.enum.property_type_enum import PropertyType
+from real_estate.enum.trade_type_enum import TradeType
 from real_estate.models import Region
 from django.db.models import Count
-
+from modu_property.utils.time import TimeUtil
 from real_estate.services.collect_deal_price_of_real_estate_service import (
     CollectDealPriceOfRealEstateService,
 )
@@ -26,34 +26,6 @@ class Command(BaseCommand):
             help="서울특별시, 세종특별자치시, ...",
         )
 
-    def get_property_types(self):
-        return ["연립다세대"]
-        # return ["아파트", "오피스텔", "단독다가구", "연립다세대", "토지", "분양입주권", "공장창고"]
-
-    def get_trade_types(self):
-        # return ["매매", "전월세"]
-        return ["매매"]
-
-    def get_years_and_months(
-        self, start_year: int, start_month: int, end_year: int, end_month: int
-    ) -> List[str]:
-        from dateutil.relativedelta import relativedelta
-
-        years = end_year - start_year
-        months = end_month - start_month
-
-        total_months = years * 12 + months
-
-        years_and_months = [
-            datetime.strftime(
-                datetime.strptime(f"{start_year}{start_month}", "%Y%m")
-                + relativedelta(months=month),
-                "%Y%m",
-            )
-            for month in range(total_months + 1)
-        ]
-        return years_and_months
-
     def handle(self, *args, **options):
         sido = options.get("sido")
         regions = []
@@ -71,8 +43,8 @@ class Command(BaseCommand):
         else:
             regional_codes.append(sejong_regional_code)
 
-        property_types = self.get_property_types()
-        trade_types = self.get_trade_types()
+        property_types = PropertyType.get_property_types()
+        trade_types = TradeType.get_trade_types()
 
         # 2006년부터 수집
         start_year = 2023
@@ -80,7 +52,7 @@ class Command(BaseCommand):
         end_year = 2023
         end_month = 12
 
-        years_and_months = self.get_years_and_months(
+        years_and_months = TimeUtil.get_years_and_months(
             start_year=start_year,
             start_month=start_month,
             end_year=end_year,

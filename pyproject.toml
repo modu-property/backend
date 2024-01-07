@@ -73,6 +73,7 @@ postgis = "^1.0.4"
 drf-spectacular = "^0.26.5"
 pytest-mock = "^3.12.0"
 publicdatareader = "^1.0.25"
+pandas = "^2.1.4"
 
 
 [build-system]
