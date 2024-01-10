@@ -1,4 +1,4 @@
-FROM python:3.9 as python-base
+FROM python:3.9-slim as python-base
 
 RUN apt-get update \
     && apt-get install gdal-bin libgdal-dev -y
@@ -14,9 +14,6 @@ RUN pip install poetry
 RUN poetry export --without-hashes -f requirements.txt --output requirements.txt
 
 FROM python-base as app
-
-# RUN apt-get update \
-#     && apt-get install gdal-bin libgdal-dev -y
 
 WORKDIR /modu_property
 

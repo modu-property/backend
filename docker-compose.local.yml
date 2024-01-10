@@ -23,11 +23,14 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - PGPORT=5432
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
     network_mode: "host"
-    # extra_hosts:
-    #   - "host.docker.internal"
-    # networks:
-    #   - custom_network
+    depends_on:
+      - redis_broker
+      - celery_worker
+      - celery_beat
+      - manticore
+
 #   nginx:
 #     container_name: core_web
 #     restart: on-failure
@@ -40,49 +43,84 @@ services:
 #     depends_on:
 #       - django
 
-  # celery_worker:
-  #   container_name: celery_worker
-  #   build:
-  #     context: .
-  #     dockerfile: ./dockerfile-local
-  #   restart: always
-  #   volumes:
-  #     - .:/var/www/modu_property/worker
-  #   command:
-  #     - sh
-  #     - -c
-  #     - celery -A modu_property worker -l INFO --concurrency 1 -E
-  #     - tail -f /dev/null
-  #   depends_on:
-  #     - django
-  #     - redis_broker
-  #   env_file: .env.local
-  # celery_beat:
-  #   container_name: celery_beat
-  #   build:
-  #     context: .
-  #     dockerfile: ./dockerfile-local
-  #   volumes:
-  #     - .:/var/www/modu_property/beat
-  #   command:
-  #     - sh
-  #     - -c
-  #     - celery -A modu_property beat -l INFO
-  #     - tail -f /dev/null
-  #   links:
-  #     - celery_worker
-  #     - redis_broker
-  #   depends_on:
-  #     - django
-  #     - redis_broker
-  #     - celery_worker
-  #   env_file: .env.local
-  # redis_broker:
-  #   container_name: redis_broker
-  #   restart: unless-stopped
-  #   image: redis:7.0.5-alpine
-  #   expose:
-  #     - 6379
+  celery_worker:
+    container_name: celery_worker
+    build:
+      context: .
+      dockerfile: ./dockerfile-local
+    restart: always
+    volumes:
+      - .:/var/www/modu_property/worker
+    command:
+      - sh
+      - -c
+      - celery -A modu_property worker -l INFO --concurrency 1 -E
+      - tail -f /dev/null
+    depends_on:
+      # - django
+      - redis_broker
+    # environment:
+    #   - POSTGRES_DB=modu_property
+    #   - POSTGRES_USER=postgres
+    #   - POSTGRES_PASSWORD=postgres
+    #   - PGPORT=5432
+    env_file: .env.local
+    environment:
+      - POSTGRES_DB=modu_property
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PGPORT=5432
+      - DEBUG=1
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+      - CELERY_BROKER=redis://127.0.0.1:6379/0
+      - CELERY_BACKEND=redis://127.0.0.1:6379/0
+    network_mode: "host"
+    
+  celery_beat:
+    container_name: celery_beat
+    build:
+      context: .
+      dockerfile: ./dockerfile-local
+    volumes:
+      - .:/var/www/modu_property/beat
+    command:
+      - sh
+      - -c
+      - celery -A modu_property beat -l INFO
+      - tail -f /dev/null
+    depends_on:
+      - redis_broker
+      - celery_worker
+    env_file: .env.local
+    environment:
+      - POSTGRES_DB=modu_property
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - PGPORT=5432
+      - DEBUG=1
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+      - CELERY_BROKER=redis://127.0.0.1:6379/0
+    network_mode: "host"
+
+  flower:
+    container_name: celery_flower
+    image: mher/flower
+    environment:
+      # - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq
+      - CELERY_BROKER=redis://127.0.0.1:6379/0
+      - CELERY_BACKEND=redis://127.0.0.1:6379/0
+      - FLOWER_PORT=5555
+    ports:
+      - 5555:5555
+
+  redis_broker:
+    container_name: redis_broker
+    restart: unless-stopped
+    image: redis:7.0.5-alpine
+    expose:
+      - 6379
+    network_mode: "host"
+
   manticore:
     container_name: manticore
     image: manticoresearch/manticore
@@ -106,5 +144,6 @@ services:
       - ./manticore/log:/var/log/manticore
       - ./manticore/index:/var/index/manticore
     network_mode: "host"
+
 volumes:
   static_volume:
