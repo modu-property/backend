@@ -5,17 +5,9 @@ import sys
 
 
 def main():
-    settings = None
     server_env = os.getenv("SERVER_ENV")
     print(f"SERVER_ENV : {server_env}")
-    if server_env == "testing":
-        settings = "modu_property.testing_settings"
-    elif server_env == "prod":
-        settings = "modu_property.prod_settings"
-    elif server_env == "local":
-        settings = "modu_property.local_settings"
-    elif server_env == "test":
-        settings = "modu_property.test_settings"
+    settings = f"modu_property.settings.{server_env}_settings"
 
     """Run administrative tasks."""
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", settings)

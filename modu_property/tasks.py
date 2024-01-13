@@ -12,6 +12,8 @@ from django.db.models import Count
 from real_estate.services.collect_deal_price_of_real_estate_service import (
     CollectDealPriceOfRealEstateService,
 )
+from manticore.manticore_client import ManticoreClient
+
 
 # TODO : 1시간마다 현재연월/전체법정동코드 싹 수집
 
@@ -49,6 +51,7 @@ def collect_deal_price_of_real_estate_task(
                     regional_code=regional_code,
                 )
                 t = threading.Thread(target=service.execute, args=(dto,))
+
                 t.start()
                 threads.append(t)
 
@@ -60,3 +63,9 @@ def collect_deal_price_of_real_estate_task(
                 f"부동산 타입 {dto.property_type}, 연월 {dto.year_month}, 매매타입 {dto.trade_type}, 지역코드 {dto.regional_code} 수행시간: %f 초"
                 % (end - start)
             )
+
+    start = time.time()
+    manticore_client = ManticoreClient()
+    manticore_client.run_indexer()
+    end = time.time()
+    logger.info(f"run manticore indexer 수행시간: %f 초" % (end - start))

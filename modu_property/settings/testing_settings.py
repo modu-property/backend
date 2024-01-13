@@ -1,32 +1,17 @@
 from dotenv import load_dotenv
 
-load_dotenv("../.env")
-
+load_dotenv(".env.testing")
 import os
-
-import pymysql
-
-pymysql.install_as_MySQLdb()
-
-# project_folder = os.path.expanduser('~/my-project-dir')  # adjust as appropriate
-# load_dotenv(os.path.join(project_folder, '.env'))
-
 import datetime
-import json
-from pathlib import Path
-
 import environ
-import os
 
 from celery.schedules import crontab
 
-env = environ.Env(
-    # set casting, default value
-    DEBUG=(bool, False)
-)
 
 # Set the project base directory
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+LOG_LEVEL = os.getenv("LOG_LEVEL")
 
 
 def set_logging():
@@ -49,71 +34,70 @@ def set_logging():
             },
         },
         "handlers": {
-            "django.server": {
-                "level": env("LOG_LEVEL"),
+            "console": {
+                "level": LOG_LEVEL,
+                "filters": ["require_debug_true"],
+                "class": "logging.StreamHandler",
+            },
+            "django.server": {  # python manage.py runserver로 작동하는 개발 서버에서만 사용하는 핸들러로 콘솔에 로그를 출력
+                "level": LOG_LEVEL,
                 "class": "logging.StreamHandler",
                 "formatter": "django.server",
             },
             "file": {
-                "level": env("LOG_LEVEL"),
+                "level": LOG_LEVEL,
                 "filters": ["require_debug_true"],
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": f"{BASE_DIR}/modu_property.log",
-                "maxBytes": 1024 * 1024 * 5,  # 5 MB
+                "filename": "modu_property/logs/modu_property.log",
+                "maxBytes": 1024 * 1024 * 50,  # 50 MB
                 "backupCount": 5,
                 "formatter": "django.server",
             },
         },
         "loggers": {
+            "django": {
+                "handlers": ["console"],
+                "level": "DEBUG",
+                "propagate": True,
+            },
             "django.server": {
                 "handlers": ["django.server"],
-                "level": env("LOG_LEVEL"),
+                "level": LOG_LEVEL,
                 "propagate": True,
             },
             "file": {
                 "handlers": ["file"],
-                "level": env("LOG_LEVEL"),
+                "level": LOG_LEVEL,
                 "propagate": True,
             },
         },
     }
 
 
-# FROM .env.* file
-SERVER_ENV = os.environ.get("SERVER_ENV")
-print(f"SERVER_ENV : {SERVER_ENV}")
-if SERVER_ENV == "dev":
-    environ.Env.read_env(os.path.join(BASE_DIR, ".env.dev"))
-elif SERVER_ENV == "stage":
-    environ.Env.read_env(os.path.join(BASE_DIR, ".env.stage"))
-elif SERVER_ENV == "prod":
-    environ.Env.read_env(os.path.join(BASE_DIR, ".env.prod"))
-elif SERVER_ENV == "test":
-    environ.Env.read_env(os.path.join(BASE_DIR, ".env.test"))
-else:
-    environ.Env.read_env(os.path.join(BASE_DIR, ".env.local"))
+SERVER_ENV = os.getenv("SERVER_ENV")
+environ.Env.read_env(os.path.join(BASE_DIR, ".env.testing"))
+
 LOGGING = set_logging()
 
 # False if not in os.environ because of casting above
-DEBUG = env("DEBUG")
+DEBUG = os.getenv("DEBUG")
 
 # Raises Django's ImproperlyConfigured
 # exception if SECRET_KEY not in os.environ
-SECRET_KEY = env("SECRET_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY")
 
-CELERY_BROKER_URL = env("CELERY_BROKER_URL")
-ENGINE = env("DB_ENGINE")
-NAME = env("DB_NAME")
-DB_USER = env("DB_USER")
-DB_PASSWORD = env("DB_PASSWORD")
-DB_HOST = env("DB_HOST")
-DB_PORT = env("DB_PORT")
-DJANGO_ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS", default="").split(" ")
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
+ENGINE = os.getenv("DB_ENGINE")
+NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+DJANGO_ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", default="").split(" ")
 ALLOWED_HOSTS = DJANGO_ALLOWED_HOSTS
-DB_USER = env("DB_USER", default="")
+DB_USER = os.getenv("DB_USER", default="")
 
 # Application definition
-
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -125,23 +109,25 @@ INSTALLED_APPS = [
     "accounts",
     "modu_property",
     "django_celery_beat",
-    "rest_framework"
-    # "rest_framework_simplejwt",
+    "rest_framework",
+    "rest_framework_simplejwt",
     "django.contrib.gis",
+    "drf_spectacular",
 ]
 
 # TODO : rest_framework_simplejwt 설정 필요 없으면 제거
-# REST_FRAMEWORK = {
-#     "DEFAULT_AUTHENTICATION_CLASSES": (
-#         "rest_framework_simplejwt.authentication.JWTAuthentication",
-#     )
-# }
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication"
+    ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    # "django.middleware.csrf.CsrfViewMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -167,7 +153,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "modu_property.wsgi.application"
 
-
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
@@ -179,7 +164,7 @@ DATABASES = {
         "PASSWORD": DB_PASSWORD,
         "HOST": DB_HOST,
         "PORT": DB_PORT,
-    },
+    }
 }
 
 
@@ -230,6 +215,9 @@ SIMPLE_JWT = {
     "SIGNING_KEY": SECRET_KEY,
     "ALGORITHM": "HS256",
     "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
 }
 
 AUTH_USER_MODEL = "accounts.User"
@@ -243,9 +231,28 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_BEAT_SCHEDULE = {
-    "collect_property_news_every_5_minutes": {
+    "collect_deal_price_of_real_estate_every_1_hour": {
         "task": "modu_property.tasks.collect_deal_price_of_real_estate_task",
-        "schedule": crontab(minute="*/5"),
-        "kwargs": {"display": 100},
+        "schedule": crontab(minute="*/30"),
+        "kwargs": {"sido": "서울특별시"},
     },
+}
+
+from glob import glob
+
+_libgdal = glob("/usr/lib/libgdal.so.*")
+_libgeos_c = glob("/usr/lib/libgeos_c.so.*")
+GDAL_LIBRARY_PATH = ""
+GEOS_LIBRARY_PATH = ""
+if _libgdal:
+    GDAL_LIBRARY_PATH = _libgdal[0]
+if _libgeos_c:
+    GEOS_LIBRARY_PATH = _libgeos_c[0]
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "모두의 부동산 API",
+    "DESCRIPTION": "부동산 계산기. 시세. 검색. 매칭",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    # OTHER SETTINGS
 }

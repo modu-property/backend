@@ -1,7 +1,13 @@
+# 이미 설치된 package는 생략해서 pip install 속도 향상
+# syntax=docker/dockerfile:experimental
+
 FROM python:3.9-slim as python-base
 
 RUN apt-get update \
-    && apt-get install gdal-bin libgdal-dev -y
+&& apt-get install default-mysql-client gdal-bin libgdal-dev docker.io -yqq
+
+# 같은 호스트 내 프로세스 간 소켓 통신을 하기 위함. celery worker -> manticore
+VOLUME ["/var/run/docker.sock"]
 
 FROM python-base as poetry-base
 
@@ -17,8 +23,10 @@ FROM python-base as app
 
 WORKDIR /modu_property
 
+COPY . .
+
 COPY --from=poetry-base /modu_property/requirements.txt .
 
-RUN pip install -r /modu_property/requirements.txt
+RUN pip install --upgrade pip
 
-COPY . /modu_property
+RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt

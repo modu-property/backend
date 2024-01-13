@@ -24,12 +24,12 @@ urlpatterns = [
     path(
         "real-estate/<str:type>", app_views.RealEstateView.as_view(), name="real-estate"
     ),
-    path("accounts/", include("accounts.urls")),
-    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("accounts", include("accounts.urls")),
+    path("api/token", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/refresh", TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/schema", SpectacularAPIView.as_view(), name="schema"),
     path(
-        "api/docs/",
+        "api/docs",
         SpectacularSwaggerView.as_view(url_name="schema"),
         name="swagger-ui",
     ),

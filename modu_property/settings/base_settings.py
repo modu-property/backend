@@ -1,33 +1,8 @@
-from dotenv import load_dotenv
-
-load_dotenv(".env.testing")
-
 import os
-
-# import pymysql
-
-# pymysql.install_as_MySQLdb()
-
-
-# project_folder = os.path.expanduser('~/my-project-dir')  # adjust as appropriate
-# load_dotenv(os.path.join(project_folder, '.env'))
-
 import datetime
-import json
-from pathlib import Path
-
-import environ
-import os
-
 from celery.schedules import crontab
 
-env = environ.Env(
-    # set casting, default value
-    DEBUG=(bool, False)
-)
-
-# Set the project base directory
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+LOG_LEVEL = os.getenv("LOG_LEVEL")
 
 
 def set_logging():
@@ -51,20 +26,20 @@ def set_logging():
         },
         "handlers": {
             "console": {
-                "level": env("LOG_LEVEL"),
-                "filters": ["require_debug_true"],
+                "level": "INFO",
+                "filters": ["require_debug_false"],
                 "class": "logging.StreamHandler",
             },
-            "django.server": {  # python manage.py runserver로 작동하는 개발 서버에서만 사용하는 핸들러로 콘솔에 로그를 출력
-                "level": env("LOG_LEVEL"),
+            "django.server": {
+                "level": LOG_LEVEL,
                 "class": "logging.StreamHandler",
                 "formatter": "django.server",
             },
             "file": {
-                "level": env("LOG_LEVEL"),
-                "filters": ["require_debug_true"],
+                "level": LOG_LEVEL,
+                "filters": ["require_debug_false"],
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": f"{BASE_DIR}/modu_property.log",
+                "filename": "modu_property/logs/modu_property.log",
                 "maxBytes": 1024 * 1024 * 5,  # 5 MB
                 "backupCount": 5,
                 "formatter": "django.server",
@@ -72,50 +47,46 @@ def set_logging():
         },
         "loggers": {
             "django": {
-                "handlers": ["console", "file"],
-                "level": env("LOG_LEVEL"),
+                "handlers": ["console"],
+                "level": "DEBUG",
+                "propagate": True,
             },
             "django.server": {
                 "handlers": ["django.server"],
-                "level": env("LOG_LEVEL"),
+                "level": LOG_LEVEL,
+                "propagate": True,
+            },
+            "file": {
+                "handlers": ["file"],
+                "level": LOG_LEVEL,
                 "propagate": True,
             },
         },
     }
 
 
-# FROM .env.* file
 SERVER_ENV = os.environ.get("SERVER_ENV")
-print(f"SERVER_ENV : {SERVER_ENV}")
-if SERVER_ENV == "testing":
-    environ.Env.read_env(os.path.join(BASE_DIR, ".env.testing"))
-elif SERVER_ENV == "stage":
-    environ.Env.read_env(os.path.join(BASE_DIR, ".env.stage"))
-elif SERVER_ENV == "prod":
-    environ.Env.read_env(os.path.join(BASE_DIR, ".env.prod"))
-elif SERVER_ENV == "test":
-    environ.Env.read_env(os.path.join(BASE_DIR, ".env.test"))
-else:
-    environ.Env.read_env(os.path.join(BASE_DIR, ".env.local"))
+
 LOGGING = set_logging()
 
-# False if not in os.environ because of casting above
-DEBUG = env("DEBUG")
+DEBUG = os.getenv("DEBUG")
+
+LOG_LEVEL = os.getenv("LOG_LEVEL")
 
 # Raises Django's ImproperlyConfigured
 # exception if SECRET_KEY not in os.environ
-SECRET_KEY = env("SECRET_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY")
 
-CELERY_BROKER_URL = env("CELERY_BROKER_URL")
-ENGINE = env("DB_ENGINE")
-NAME = env("DB_NAME")
-DB_USER = env("DB_USER")
-DB_PASSWORD = env("DB_PASSWORD")
-DB_HOST = env("DB_HOST")
-DB_PORT = env("DB_PORT")
-DJANGO_ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS", default="").split(" ")
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
+ENGINE = os.getenv("DB_ENGINE")
+NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+DJANGO_ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", default="").split(" ")
 ALLOWED_HOSTS = DJANGO_ALLOWED_HOSTS
-DB_USER = env("DB_USER", default="")
+DB_USER = os.getenv("DB_USER", default="")
 
 # Application definition
 
@@ -139,7 +110,7 @@ INSTALLED_APPS = [
 # TODO : rest_framework_simplejwt 설정 필요 없으면 제거
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication"
+        # "rest_framework_simplejwt.authentication.JWTAuthentication"
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
@@ -187,12 +158,8 @@ DATABASES = {
         "PASSWORD": DB_PASSWORD,
         "HOST": DB_HOST,
         "PORT": DB_PORT,
-        # "TEST": {
-        #     "NAME": f"test_{NAME}",
-        # },
-    }
+    },
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -217,11 +184,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "UTC"
-
 USE_I18N = True
-
 USE_TZ = True
 
 
@@ -264,6 +228,7 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
+
 from glob import glob
 
 _libgdal = glob("/usr/lib/libgdal.so.*")
@@ -280,5 +245,6 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "부동산 계산기. 시세. 검색. 매칭",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
-    # OTHER SETTINGS
 }
+
+# CORS_ORIGIN_ALLOW_ALL = True

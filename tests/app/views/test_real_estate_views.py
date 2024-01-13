@@ -145,6 +145,11 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
 
 @pytest.mark.django_db(transaction=True)
 def test_get_real_estates_with_keyword_view(client, get_jwt):
+    """
+    !!로컬 데이터 사라지므로 주의!!
+    터미널에서 아래 명령어 실행해야 함
+    SERVER_ENV=local python manage.py insert_real_estates_for_searching_command
+    """
     url = reverse("real-estate", kwargs={"type": "deal"})
 
     _jwt = get_jwt

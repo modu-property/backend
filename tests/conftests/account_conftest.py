@@ -2,7 +2,7 @@ import datetime
 import jwt
 import pytest
 
-from modu_property.test_settings import SECRET_KEY
+from modu_property.settings.test_settings import SECRET_KEY
 from django.contrib.auth.hashers import make_password
 from accounts.models import User
 

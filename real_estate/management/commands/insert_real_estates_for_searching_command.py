@@ -145,7 +145,7 @@ class Command(BaseCommand):
         real_estate_deal4.save()
 
     def handle(self, *args, **options):
-        if os.getenv("SERVER_ENV") in ["local"]:
+        if os.getenv("SERVER_ENV") in ["local", "test"]:
             self.delete_real_estate_deal()
             self.delete_real_estate()
             self.create_real_estate_and_real_estate_deal()

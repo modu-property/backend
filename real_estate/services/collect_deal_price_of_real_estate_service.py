@@ -53,21 +53,21 @@ class CollectDealPriceOfRealEstateService:
         try:
             if deal_models:
                 Deal.objects.bulk_create(deal_models)
-                return True
+            return True
         except Exception as e:
             logger.error(f"deal bulk_create e : {e}")
         return False
 
     def delete_duplication(self, dto, deal_prices_of_real_estate):
         file_logger.info("delete_duplication")
-        kv_db = {}
+        unique_keys_in_db = {}
         data_in_db = self.get_data_in_db(dto)
         for data in data_in_db:
             regional_code = data.regional_code
             lot_number = data.lot_number
             unique_key = f"{regional_code}{lot_number}"
 
-            kv_db[unique_key] = True
+            unique_keys_in_db[unique_key] = True
 
         indexes_to_drop = []
         for index, deal_price_of_real_estate in deal_prices_of_real_estate.iterrows():
@@ -75,11 +75,8 @@ class CollectDealPriceOfRealEstateService:
             lot_number = deal_price_of_real_estate["지번"]
             unique_key = f"{regional_code}{lot_number}"
 
-            # kv_db에 없는 것들만 따로 dataframe 으로 만들기
-            if unique_key in kv_db:
+            if unique_key in unique_keys_in_db:
                 indexes_to_drop.append(deal_prices_of_real_estate.index[index])
-            if index != deal_prices_of_real_estate.index[index]:
-                file_logger.info("@@@@@@@@@@@@@@@@@@ index 다름!!")
 
         deal_prices_of_real_estate = deal_prices_of_real_estate.drop(indexes_to_drop)
 

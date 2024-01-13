@@ -1,3 +1,78 @@
+import json
+import os
+import subprocess
+from modu_property.utils.loggers import logger
+import manticoresearch
+from manticoresearch.api import index_api
+from manticoresearch.model.bulk_response import BulkResponse
+from manticoresearch.model.error_response import ErrorResponse
+
+
+class ManticoreClient:
+    def __init__(self) -> None:
+        self.configuration = manticoresearch.Configuration(host="http://0.0.0.0:9308")
+
+    def run_indexer(self):
+        logger.info("run_indexer")
+
+        # with manticoresearch.ApiClient(self.configuration) as api_client:
+        #     api_instance = index_api.IndexApi(api_client)
+
+        # body = (
+        #     "["
+        #     '{"insert": {"index": "real_estate", "doc": {"lot_number": "Title 1", "road_name_address": "asdf", "name": "name1"}}},{"insert": {"index": "real_estate", "doc": {"title": "Title 2", "road_name_address": "aaaa", "name": "name2"}}}'
+        #     "]"
+        # )  # str
+        # body_list = [
+        #     {
+        #         "insert": {
+        #             "index": "real_estate",
+        #             "doc": {
+        #                 "lot_number": "Title 1",
+        #                 "road_name_address": "asdf",
+        #                 "name": "name1",
+        #             },
+        #         }
+        #     },
+        #     {
+        #         "insert": {
+        #             "index": "real_estate",
+        #             "doc": {
+        #                 "title": "Title 2",
+        #                 "road_name_address": "aaaa",
+        #                 "name": "name2",
+        #             },
+        #         }
+        #     },
+        # ]
+        # body = {
+        #     "insert": {
+        #         "index": "real_estate",
+        #         "doc": {
+        #             "id": 1,
+        #             "lot_number": "Title 1",
+        #             "road_name_address": "asdf",
+        #             "name": "name1",
+        #         },
+        #     }
+        # }
+        # # body_list = "\n".join(map(json.dumps, body_list))
+
+        # # example passing only required values which don't have defaults set
+        # try:
+        #     # Bulk index operations
+        #     # api_response = api_instance.bulk(body_list)
+        #     api_response = api_instance.insert(body)
+        #     logger.info(api_response)
+        # except manticoresearch.ApiException as e:
+        #     print("Exception when calling IndexApi->bulk: %s\n" % e)
+        try:
+            dir_path = os.path.dirname(os.path.realpath(__file__))
+            subprocess.run(["bash", f"{dir_path}/run_indexer.sh"])
+        except Exception as e:
+            logger.error(f"run_indexer e : {e}")
+
+
 # from __future__ import print_function
 
 # import manticoresearch

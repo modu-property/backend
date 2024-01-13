@@ -2,16 +2,16 @@
 
 # run server
 로컬 서버 : docker compose 권장
-* docker-compose -f docker-compose.local.yml up -d --build --force-recreate
+* docker-compose -f docker-compose.local.yml up -d --build
 * export SERVER_ENV=local
-* SERVER_ENV=local python manage.py runserver --settings modu_property.local_settings 
+* SERVER_ENV=local python manage.py runserver --settings modu_property.settings.local_settings 
 
 테스팅 서버
-* docker-compose -f docker-compose.testing.yml up -d --build --force-recreate
+* docker-compose -f docker-compose.testing.yml up -d --build
 
 # docker-compose
 * docker-compose.local.yml에서 manticore, django service의 network_mode: "host"로 수정
-* docker-compose -f docker-compose.local.yml up -d --build --force-recreate
+* docker-compose -f docker-compose.local.yml up -d --build
 
 파일 검증 : 
 * docker-compose -f docker-compose.local.yml config
@@ -32,7 +32,7 @@
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
-            "args": ["runserver", "--settings", "modu_property.local_settings"],
+            "args": ["runserver", "--settings", "modu_property.settings.local_settings"],
             "env": {"DEBUG": "False"},
             "envFile": "${workspaceFolder}/.env.local",
             "console": "integratedTerminal",
@@ -114,9 +114,9 @@ searchd {
 }
 ```
 
-real_estate 검색 테스트 준비
+real_estate 검색 테스트 준비  
 * docker compose 실행  
-로컬에서
+로컬에서  
 * SERVER_ENV=local python manage.py insert_real_estates_for_searching_command  
 * 검색 테스트 실행  
 
@@ -165,13 +165,13 @@ brew install postgis gdal libgeoip
 SERVER_ENV 설정하기
 ## local용
 * migration
-    * SERVER_ENV=local python manage.py makemigrations --settings=modu_property.local_settings
+    * SERVER_ENV=local python manage.py makemigrations --settings=modu_property.settings.local_settings
 * migrate
-    * SERVER_ENV=local python manage.py migrate --settings=modu_property.local_settings
+    * SERVER_ENV=local python manage.py migrate --settings=modu_property.settings.local_settings
 
 ## testing용 (ec2, RDS)
 * migrate
-    * SERVER_ENV=testing python manage.py migrate --settings=modu_property.testing_settings
+    * SERVER_ENV=testing python manage.py migrate --settings=modu_property.settings.testing_settings
 
 # postgres 접속
 psql -h 127.0.0.1 -U postgres -d modu_property -p 5432
