@@ -21,3 +21,5 @@ COPY . .
 COPY --from=poetry-base /modu_property/requirements.txt .
 RUN pip install --upgrade pip
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
+
+RUN ./manticore/replace_manticore_conf.py
