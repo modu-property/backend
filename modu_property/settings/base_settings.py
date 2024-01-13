@@ -26,11 +26,11 @@ def set_logging():
         },
         "handlers": {
             "console": {
-                "level": "INFO",
+                "level": LOG_LEVEL,
                 "filters": ["require_debug_false"],
                 "class": "logging.StreamHandler",
             },
-            "django.server": {
+            "django.server": {  # python manage.py runserver로 작동하는 개발 서버에서만 사용하는 핸들러로 콘솔에 로그를 출력
                 "level": LOG_LEVEL,
                 "class": "logging.StreamHandler",
                 "formatter": "django.server",
@@ -40,7 +40,7 @@ def set_logging():
                 "filters": ["require_debug_false"],
                 "class": "logging.handlers.RotatingFileHandler",
                 "filename": "modu_property/logs/modu_property.log",
-                "maxBytes": 1024 * 1024 * 5,  # 5 MB
+                "maxBytes": 1024 * 1024 * 50,  # 50 MB
                 "backupCount": 5,
                 "formatter": "django.server",
             },
@@ -76,7 +76,6 @@ LOG_LEVEL = os.getenv("LOG_LEVEL")
 # Raises Django's ImproperlyConfigured
 # exception if SECRET_KEY not in os.environ
 SECRET_KEY = os.getenv("SECRET_KEY")
-
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
 ENGINE = os.getenv("DB_ENGINE")
 NAME = os.getenv("DB_NAME")
@@ -221,10 +220,10 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_BEAT_SCHEDULE = {
-    "collect_property_news_every_5_minutes": {
+    "collect_deal_price_of_real_estate_every_30_minutes": {
         "task": "modu_property.tasks.collect_deal_price_of_real_estate_task",
-        "schedule": crontab(minute="*/5"),
-        "kwargs": {"display": 100},
+        "schedule": crontab(minute="*/30"),
+        "kwargs": {"sido": "서울특별시"},
     },
 }
 

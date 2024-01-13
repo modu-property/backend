@@ -2,16 +2,16 @@
 
 # run server
 로컬 서버 : docker compose 권장
-* docker-compose -f docker-compose.local.yml up -d --build
+* docker-compose -f docker-compose.local.yml up -d --build  --force-recreate
 * export SERVER_ENV=local
 * SERVER_ENV=local python manage.py runserver --settings modu_property.settings.local_settings 
 
 테스팅 서버
-* docker-compose -f docker-compose.testing.yml up -d --build
+* docker-compose -f docker-compose.testing.yml up -d --build  --force-recreate
 
 # docker-compose
 * docker-compose.local.yml에서 manticore, django service의 network_mode: "host"로 수정
-* docker-compose -f docker-compose.local.yml up -d --build
+* docker-compose -f docker-compose.local.yml up -d --build --force-recreate
 
 파일 검증 : 
 * docker-compose -f docker-compose.local.yml config

@@ -10,23 +10,14 @@ RUN apt-get update \
 VOLUME ["/var/run/docker.sock"]
 
 FROM python-base as poetry-base
-
 WORKDIR /modu_property
-
 COPY pyproject.toml pyproject.toml
-
 RUN pip install poetry
-
 RUN poetry export --without-hashes -f requirements.txt --output requirements.txt
 
 FROM python-base as app
-
 WORKDIR /modu_property
-
 COPY . .
-
 COPY --from=poetry-base /modu_property/requirements.txt .
-
 RUN pip install --upgrade pip
-
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
