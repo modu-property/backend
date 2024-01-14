@@ -4,6 +4,8 @@ from celery.schedules import crontab
 
 LOG_LEVEL = os.getenv("LOG_LEVEL")
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 def set_logging():
     return {
@@ -39,7 +41,7 @@ def set_logging():
                 "level": LOG_LEVEL,
                 "filters": ["require_debug_false"],
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": "modu_property/logs/modu_property.log",
+                "filename": f"{BASE_DIR}/modu_property/logs/modu_property.log",
                 "maxBytes": 1024 * 1024 * 50,  # 50 MB
                 "backupCount": 5,
                 "formatter": "django.server",

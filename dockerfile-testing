@@ -17,6 +17,5 @@ RUN poetry export --without-hashes -f requirements.txt --output requirements.txt
 FROM python-base as app
 WORKDIR /modu_property
 COPY . .
-RUN touch ./modu_property/logs/modu_property.log
 COPY --from=poetry-base /modu_property/requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
