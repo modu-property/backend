@@ -4,7 +4,6 @@
 로컬 서버 : docker compose 권장
 * docker compose -f docker-compose.local.yml up -d
 * docker compose -f docker-compose.local.yml up -d --build
-* export SERVER_ENV=local
 * SERVER_ENV=local python manage.py runserver --settings modu_property.settings.local_settings 
 
 테스팅 서버

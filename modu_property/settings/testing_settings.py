@@ -4,14 +4,6 @@ load_dotenv(".env.testing")
 
 from .base_settings import *
 
-LOGGING["filters"] = {
-    "require_debug_false": {
-        "()": "django.utils.log.RequireDebugFalse",
-    },
-    "require_debug_true": {
-        "()": "django.utils.log.RequireDebugTrue",
-    },
-}
 
 LOGGING["handlers"] = {
     "console": {
@@ -52,3 +44,5 @@ LOGGING["loggers"] = {
         "propagate": True,
     },
 }
+
+LOGGING
