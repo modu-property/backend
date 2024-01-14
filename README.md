@@ -1,25 +1,7 @@
 # [ERD](https://www.erdcloud.com/d/egr2NSsXmeZ6HiJnJ)
 
-# run server
-로컬 서버 : docker compose 권장
-* docker compose -f docker-compose.local.yml up -d
-* docker compose -f docker-compose.local.yml up -d --build
-* docker compose -f docker-compose.local.yml up -d --build --force-recreate
-* SERVER_ENV=local python manage.py runserver --settings modu_property.settings.local_settings 
-
-테스팅 서버
-* docker-compose -f docker-compose.testing.yml up -d --build
-* docker-compose -f docker-compose.testing.yml up -d --build --force-recreate
-
-# docker-compose
-* docker-compose.local.yml에서 manticore, django service의 network_mode: "host"로 수정
-
-파일 검증 : 
-* docker compose -f docker-compose.local.yml config
-* docker-compose -f docker-compose.testing.yml config
-* docker-compose -f docker-compose.dev.yml config
-
-# debugging
+# 설정
+## debugging
 >  .vscode 디렉토리에 launch.json 생성.  
  아래 입력 후 브레이크포인트 찍고 F5 클릭
 ```json
@@ -46,33 +28,63 @@
 }
 ```
 
-# pycharm setting
-run server  
-![img.png](z_images_for_readme/img.png)
-run celery  
-![img_1.png](z_images_for_readme/img_1.png)
-run celery task  
-![img_2.png](z_images_for_readme/img_2.png)
-result  
-![img_3.png](z_images_for_readme/img_3.png)
+## docker-compose
+* docker-compose.local.yml에서 manticore, django service의 network_mode: "host"로 수정
 
-celery 사용법
-* celery beat 실행해서 redis 큐에 주기적으로 task 넣기
-* celery worker 실행해서 redis 큐에 있는 task 실행
+파일 검증 : 
+* docker compose -f docker-compose.local.yml config
+* docker-compose -f docker-compose.testing.yml config
+* docker-compose -f docker-compose.dev.yml config
 
-# pytest
-`pytest`  
-병렬 실행 : `pytest -n {n}`
+## postgis
+spatial db를 위해 postgis 설치해야 함  
+brew install postgresql 이미 설치 됐으면 스킵, 실행 brew services start postgresql@14  
+brew install postgis gdal libgeoip  
 
-# API
-## 공공데이터
-[국토교통부_연립다세대 매매 실거래자료](https://www.data.go.kr/tcs/dss/selectApiDataDetailView.do?publicDataPk=15058038)  
-[국토교통부_연립다세대 전월세 자료](https://www.data.go.kr/tcs/dss/selectApiDataDetailView.do?publicDataPk=15058016)  
-[국토교통부_아파트매매 실거래자료](https://www.data.go.kr/iim/api/selectAPIAcountView.do)  
-[국토교통부_아파트 전월세 자료](https://www.data.go.kr/iim/api/selectAPIAcountView.do)  
+# run server
+로컬 서버 : docker compose 권장
+* docker compose -f docker-compose.local.yml up -d
+* docker compose -f docker-compose.local.yml up -d --build
+* docker compose -f docker-compose.local.yml up -d --build --force-recreate
+* SERVER_ENV=local python manage.py runserver --settings modu_property.settings.local_settings 
 
-## 카카오 API
-* 구주소 -> 신주소 변환 및 위도경도 구하기 : [로컬](https://developers.kakao.com/docs/latest/ko/local/common)
+테스팅 서버
+* docker-compose -f docker-compose.testing.yml up -d --build
+* docker-compose -f docker-compose.testing.yml up -d --build --force-recreate
+
+# migrate
+SERVER_ENV 설정하기
+## local용
+* migration
+    * SERVER_ENV=local python manage.py makemigrations --settings=modu_property.settings.local_settings
+* migrate
+    * SERVER_ENV=local python manage.py migrate --settings=modu_property.settings.local_settings
+
+## testing용 (ec2, RDS)
+* migrate
+    로컬에서 testing 컨테이너 띄우고 장고 컨테이너 접속, migrate
+    * docker exec -it {container id} sh
+    * SERVER_ENV=testing python3 manage.py migrate --settings=modu_property.settings.testing_settings
+
+# postgres 접속
+psql -h 127.0.0.1 -U postgres -d modu_property -p 5432
+
+psql 안되면
+```sh
+createdb --owner=postgres --encoding=utf8 user
+psql postgres;
+CREATE USER postgres SUPERUSER;
+CREATE DATABASE postgres WITH OWNER postgres;
+create database modu_property;
+CREATE EXTENSION postgis;
+SELECT postgis_full_version();
+```
+![Alt text](z_images_for_readme/image-3.png)
+
+django.db.utils.DataError: invalid value for parameter "TimeZone": "UTC"  
+-> brew services restart postgresql@14 안됨  
+->  brew link postgresql@14, brew link --overwrite postgresql   
+`DB 싹 지웠다가 재설치 시도함`
 
 # search engine
 manticore search   
@@ -90,7 +102,6 @@ searchd {
     pid_file = /opt/homebrew/var/run/manticore/searchd.pid
     data_dir = /opt/homebrew/var/manticore  # plain table이라 이거 없어야 함
 }
-
 
 searchd {
     # Manticore Search server listening address and port
@@ -156,45 +167,21 @@ curl -s 'http://127.0.0.1:9308/cli_json?show%20tables'
 
 로컬 터미널에서 manticore 컨테이너 mysql 호출
 curl --location 'http://127.0.0.1:9308/search' --header 'Content-Type: application/json' --data '{"index": "real_estate", "query": { "match": {"lot_number":"*반포*"}}}'
-
-
-# postgis
-spatial db를 위해 postgis 설치해야 함  
-brew install postgresql 이미 설치 됐으면 스킵, 실행 brew services start postgresql@14  
-brew install postgis gdal libgeoip  
-
-# migrate
-SERVER_ENV 설정하기
-## local용
-* migration
-    * SERVER_ENV=local python manage.py makemigrations --settings=modu_property.settings.local_settings
-* migrate
-    * SERVER_ENV=local python manage.py migrate --settings=modu_property.settings.local_settings
-
-## testing용 (ec2, RDS)
-* migrate
-    장고 컨테이너 접속
-    * SERVER_ENV=testing python3 manage.py migrate --settings=modu_property.settings.testing_settings
-
-# postgres 접속
-psql -h 127.0.0.1 -U postgres -d modu_property -p 5432
-
-psql 안되면
-```sh
-createdb --owner=postgres --encoding=utf8 user
-psql postgres;
-CREATE USER postgres SUPERUSER;
-CREATE DATABASE postgres WITH OWNER postgres;
-create database modu_property;
-CREATE EXTENSION postgis;
-SELECT postgis_full_version();
 ```
-![Alt text](z_images_for_readme/image-3.png)
 
-django.db.utils.DataError: invalid value for parameter "TimeZone": "UTC"  
--> brew services restart postgresql@14 안됨  
-->  brew link postgresql@14, brew link --overwrite postgresql   
-`DB 싹 지웠다가 재설치 시도함`
+# pytest
+`pytest`  
+병렬 실행 : `pytest -n {n}`
+
+# API
+## 공공데이터
+[국토교통부_연립다세대 매매 실거래자료](https://www.data.go.kr/tcs/dss/selectApiDataDetailView.do?publicDataPk=15058038)  
+[국토교통부_연립다세대 전월세 자료](https://www.data.go.kr/tcs/dss/selectApiDataDetailView.do?publicDataPk=15058016)  
+[국토교통부_아파트매매 실거래자료](https://www.data.go.kr/iim/api/selectAPIAcountView.do)  
+[국토교통부_아파트 전월세 자료](https://www.data.go.kr/iim/api/selectAPIAcountView.do)  
+
+## 카카오 API
+* 구주소 -> 신주소 변환 및 위도경도 구하기 : [로컬](https://developers.kakao.com/docs/latest/ko/local/common)
 
 ## pre-commit
 커밋할 때 black 적용 안되어 있으면 커밋 실패하게 하는 용도로 씀.  
@@ -203,22 +190,22 @@ django.db.utils.DataError: invalid value for parameter "TimeZone": "UTC"
 # open api
 http://localhost:8000/api/docs/  
 회원가입 테스트 시 content-type을 multipart/form-data로 지정해야 함  
-![Alt text](z_images_for_readme/image-2.png)
 
 # logging
 pytest 관련 로그는 pytest.ini에서 설정함  
 파일에 로그 저장하고 싶으면 pytest.ini에서 콘솔에 로그 capture하는거 막아야 함 `addopts=-p no:logging`  
 
-# 지역 코드 수집
+# 데이터 수집
+## 지역 코드 수집. 법정동이 바뀌지 않는 이상 DB에 한번 적용하면 됨.
 SERVER_ENV=local python manage.py collect_regional_code_command
 
-# 전체/특정지역 부동산 매매 정보 수집 명령어
+## 전체/특정지역 부동산 매매 정보 수집 명령어
 > 전국의 빌라, 아파트에 대해 2016년부터 현재까지 수집하도록 함
 
-`SERVER_ENV=local python manage.py collect_deal_price_of_real_estate_command 서울특별시`
+python manage.py collect_deal_price_of_real_estate_command 서울특별시
 
 # 현재 연월의 부동산 매매 정보 수집 스케쥴러
-> collect_deal_price_of_real_estate_command으로 전체 수집을 했다면, collect_deal_price_of_real_estate_task 스케쥴러로 최신 데이터 수집함
+> collect_deal_price_of_real_estate_command 으로 전체 수집을 했다면, collect_deal_price_of_real_estate_task 스케쥴러로 최신 데이터 수집함
 
 # TODO
 23.12.05  

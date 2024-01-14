@@ -34,7 +34,9 @@ services:
 
   celery_worker:
     container_name: celery_worker
-    image: django
+    build:
+      context: .
+      dockerfile: ./dockerfile-testing
     restart: always
     volumes:
       - .:/var/www/modu_property/worker
@@ -42,7 +44,7 @@ services:
       - sh
       - -c
       - celery -A modu_property worker -l INFO --concurrency 1 -E
-      # - tail -f /dev/null
+      - tail -f /dev/null
     depends_on:
       - django
       - redis_broker
@@ -51,14 +53,16 @@ services:
     
   celery_beat:
     container_name: celery_beat
-    image: django
+    build:
+      context: .
+      dockerfile: ./dockerfile-testing
     volumes:
       - .:/var/www/modu_property/beat
     command:
       - sh
       - -c
       - celery -A modu_property beat -l INFO
-      # - tail -f /dev/null
+      - tail -f /dev/null
     depends_on:
       - django
       - redis_broker
