@@ -41,7 +41,7 @@ def set_logging():
                 "level": LOG_LEVEL,
                 "filters": ["require_debug_false"],
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": f"{BASE_DIR}/modu_property/logs/modu_property.log",
+                "filename": f"{BASE_DIR}/logs/modu_property.log",
                 "maxBytes": 1024 * 1024 * 50,  # 50 MB
                 "backupCount": 5,
                 "formatter": "django.server",
