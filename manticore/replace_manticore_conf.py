@@ -45,8 +45,11 @@ def restore_original_file():
     )
 
 
-copyfile(f"./manticore/manticore_{SERVER_ENV}.conf", "./manticore/manticore_tmp.conf")
-config_contents = read_file()
-open_and_modify_file(config_contents)
-restore_original_file()
-os.remove("./manticore/manticore_tmp.conf")
+def replace_manticore_conf():
+    copyfile(
+        f"./manticore/manticore_{SERVER_ENV}.conf", "./manticore/manticore_tmp.conf"
+    )
+    config_contents = read_file()
+    open_and_modify_file(config_contents)
+    restore_original_file()
+    os.remove("./manticore/manticore_tmp.conf")

@@ -3,6 +3,8 @@
 import os
 import sys
 
+from manticore.replace_manticore_conf import replace_manticore_conf
+
 
 def main():
     server_env = os.getenv("SERVER_ENV")
@@ -11,6 +13,9 @@ def main():
 
     """Run administrative tasks."""
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", settings)
+
+    replace_manticore_conf()
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
