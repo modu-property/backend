@@ -1,4 +1,3 @@
-# 이미 설치된 package는 생략해서 pip install 속도 향상
 # syntax=docker/dockerfile:experimental
 
 FROM python:3.9-slim as python-base
@@ -19,7 +18,4 @@ FROM python-base as app
 WORKDIR /modu_property
 COPY . .
 COPY --from=poetry-base /modu_property/requirements.txt .
-RUN pip install --upgrade pip
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
-
-RUN ./manticore/replace_manticore_conf.py
