@@ -11,11 +11,11 @@ searchd {
 
 source real_estate_source {
     type = pgsql
-    sql_host = 127.0.0.1
-    sql_port = 5432
-    sql_user = postgres
-    sql_pass = postgres
-    sql_db = modu_property
+    sql_host = $DB_HOST
+    sql_port = $DB_PORT
+    sql_user = $DB_USER
+    sql_pass = $DB_PASSWORD
+    sql_db = $DB_NAME
 
     sql_query = select id, lot_number, road_name_address, name from real_estate
 

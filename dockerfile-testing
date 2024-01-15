@@ -3,7 +3,7 @@
 FROM python:3.9-slim as python-base
 
 RUN apt-get update \
-&& apt-get install default-mysql-client gdal-bin libgdal-dev docker.io -yqq
+&& apt-get install default-mysql-client gdal-bin libgdal-dev docker.io gettext -yqq 
 
 # 같은 호스트 내 프로세스 간 소켓 통신을 하기 위함. celery worker -> manticore
 VOLUME ["/var/run/docker.sock"]
@@ -19,3 +19,5 @@ WORKDIR /modu_property
 COPY . .
 COPY --from=poetry-base /modu_property/requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
+
+RUN touch ./manticore/_manticore.conf

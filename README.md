@@ -2,7 +2,7 @@
 
 # 설정
 ## debugging
->  .vscode 디렉토리에 launch.json 생성.  
+.vscode 디렉토리에 launch.json 생성.  
  아래 입력 후 브레이크포인트 찍고 F5 클릭
 ```json
 {
@@ -200,12 +200,11 @@ pytest 관련 로그는 pytest.ini에서 설정함
 SERVER_ENV=local python manage.py collect_regional_code_command
 
 ## 전체/특정지역 부동산 매매 정보 수집 명령어
-> 전국의 빌라, 아파트에 대해 2016년부터 현재까지 수집하도록 함
-
+전국의 빌라, 아파트에 대해 2016년부터 현재까지 수집하도록 함  
 python manage.py collect_deal_price_of_real_estate_command 서울특별시
 
 # 현재 연월의 부동산 매매 정보 수집 스케쥴러
-> collect_deal_price_of_real_estate_command 으로 전체 수집을 했다면, collect_deal_price_of_real_estate_task 스케쥴러로 최신 데이터 수집함
+collect_deal_price_of_real_estate_command 으로 전체 수집을 했다면, collect_deal_price_of_real_estate_task 스케쥴러로 최신 데이터 수집함
 
 # TODO
 23.12.05  

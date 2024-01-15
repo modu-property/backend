@@ -1,6 +1,7 @@
 import threading
 import time
 from django.core.management.base import BaseCommand
+from manticore.manticore_client import ManticoreClient
 from modu_property.utils.loggers import logger
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
 from real_estate.enum.property_type_enum import PropertyType
@@ -50,7 +51,7 @@ class Command(BaseCommand):
         start_year = 2023
         start_month = 1
         end_year = 2023
-        end_month = 12
+        end_month = 1
 
         years_and_months = TimeUtil.get_years_and_months(
             start_year=start_year,
@@ -86,3 +87,9 @@ class Command(BaseCommand):
                         f"부동산 타입 {dto.property_type}, 연월 {dto.year_month}, 매매타입 {dto.trade_type}, 지역코드 {dto.regional_code} 수행시간: %f 초"
                         % (end - start)
                     )
+
+                    start = time.time()
+                    manticore_client = ManticoreClient()
+                    manticore_client.run_indexer()
+                    end = time.time()
+                    logger.info(f"run manticore indexer 수행시간: %f 초" % (end - start))
