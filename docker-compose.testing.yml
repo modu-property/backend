@@ -14,7 +14,7 @@ services:
       - sh
       - -c
       - |
-        envsubst < ./manticore/manticore.conf.template > ./manticore/_manticore.conf
+        envsubst < ./manticore/manticore.conf.template > ./manticore/manticore.conf
         export SERVER_ENV=testing
         gunicorn modu_property.wsgi:application --bind 0.0.0.0:8000 --workers 4 --threads 4
     volumes:
@@ -44,7 +44,7 @@ services:
         hard: -1
     volumes:
       - ./manticore/data:/var/lib/manticore
-      - ./manticore/_manticore.conf:/etc/manticoresearch/_manticore.conf
+      - ./manticore/manticore.conf:/etc/manticoresearch/manticore.conf
       - ./manticore/log:/var/log/manticore
       - ./manticore/index:/var/index/manticore
     network_mode: "host"

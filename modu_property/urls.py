@@ -20,7 +20,7 @@ from real_estate.views import real_estate_views as app_views
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
-    path("admin/", admin.site.urls, name="admin"),
+    path("admin", admin.site.urls, name="admin"),
     path(
         "real-estate/<str:type>", app_views.RealEstateView.as_view(), name="real-estate"
     ),

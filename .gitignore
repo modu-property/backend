@@ -188,4 +188,4 @@ cython_debug/
 .vscode
 
 /manticore/data
-/manticore/_manticore.conf
+/manticore/manticore.conf

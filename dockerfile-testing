@@ -19,5 +19,3 @@ WORKDIR /modu_property
 COPY . .
 COPY --from=poetry-base /modu_property/requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
-
-RUN touch ./manticore/_manticore.conf
