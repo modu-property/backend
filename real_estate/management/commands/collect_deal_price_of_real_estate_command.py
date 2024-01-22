@@ -1,3 +1,4 @@
+import os
 import threading
 import time
 from django.core.management.base import BaseCommand
@@ -28,6 +29,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        total_period = 0
         sido = options.get("sido")
         regions = []
         qs = Region.objects.values("sido", "regional_code").annotate(c=Count("id"))
@@ -48,10 +50,10 @@ class Command(BaseCommand):
         trade_types = TradeType.get_trade_types()
 
         # 2006년부터 수집
-        start_year = 2023
+        start_year = 2006
         start_month = 1
-        end_year = 2023
-        end_month = 1
+        end_year = 2007
+        end_month = 12
 
         years_and_months = TimeUtil.get_years_and_months(
             start_year=start_year,
@@ -75,21 +77,33 @@ class Command(BaseCommand):
                                 regional_code=regional_code,
                             )
                         )
-                        t = threading.Thread(target=self.service.execute, args=(dto,))
-                        t.start()
-                        threads.append(t)
+                        if os.getenv("SERVER_ENV") != "test":
+                            t = threading.Thread(
+                                target=self.service.execute, args=(dto,)
+                            )
+                            t.start()
+                            threads.append(t)
+                        else:
+                            self.service.execute(dto=dto)
 
-                    for _thread in threads:
-                        _thread.join()
+                    if os.getenv("SERVER_ENV") != "test":
+                        for _thread in threads:
+                            _thread.join()
 
                     end = time.time()
+                    period = end - start
+                    total_period += period
                     logger.info(
                         f"부동산 타입 {dto.property_type}, 연월 {dto.year_month}, 매매타입 {dto.trade_type}, 지역코드 {dto.regional_code} 수행시간: %f 초"
-                        % (end - start)
+                        % (period)
                     )
 
                     start = time.time()
                     manticore_client = ManticoreClient()
                     manticore_client.run_indexer()
                     end = time.time()
-                    logger.info(f"run manticore indexer 수행시간: %f 초" % (end - start))
+                    period = end - start
+                    total_period += period
+                    logger.info(f"run manticore indexer 수행시간: %f 초" % (period))
+
+        logger.info(f"total_period : %f초" % (total_period))

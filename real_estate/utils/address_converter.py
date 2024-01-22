@@ -9,15 +9,16 @@ from modu_property.utils.loggers import logger
 
 class AddressConverter:
     def convert_address(self, dong: str, lot_number: str) -> Union[dict, bool]:
-        sleep(0.005)
+        sleep(0.0001)
         response = None
+        _query = f"{dong} {lot_number}"
         with requests.Session() as session:
-            adapter = HTTPAdapter(max_retries=5)
+            adapter = HTTPAdapter(max_retries=1)
             session.mount("http://", adapter)
             session.mount("https://", adapter)
 
             headers = {"Authorization": f"KakaoAK {os.getenv('KAKAO_API_KEY')}"}
-            params = {"query": f"{dong} {lot_number}"}
+            params = {"query": _query}
             response = session.get(
                 "https://dapi.kakao.com/v2/local/search/address.json",
                 headers=headers,
@@ -25,13 +26,13 @@ class AddressConverter:
             )
 
             if response.status_code != 200:
-                logger.error("카카오 주소 변환 실패")
+                logger.error(f"카카오 주소 변환 실패 response : {response.__dict__}")
                 return False
 
         documents = response.json()["documents"]
 
         if not documents:
-            logger.error("documents 없음")
+            logger.error(f"documents 없음 response : {response} _query : {_query}")
             return False
 
         try:

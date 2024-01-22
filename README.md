@@ -201,7 +201,7 @@ SERVER_ENV=local python manage.py collect_regional_code_command
 
 ## 전체/특정지역 부동산 매매 정보 수집 명령어
 전국의 빌라, 아파트에 대해 2016년부터 현재까지 수집하도록 함  
-python manage.py collect_deal_price_of_real_estate_command 서울특별시
+SERVER_ENV=local python manage.py collect_deal_price_of_real_estate_command 서울특별시
 
 # 현재 연월의 부동산 매매 정보 수집 스케쥴러
 collect_deal_price_of_real_estate_command 으로 전체 수집을 했다면, collect_deal_price_of_real_estate_task 스케쥴러로 최신 데이터 수집함

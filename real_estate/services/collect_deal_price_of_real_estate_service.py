@@ -35,12 +35,17 @@ class CollectDealPriceOfRealEstateService:
         if deal_prices_of_real_estate.empty:
             return
 
+        result = self.create_real_estates(
+            deal_prices_of_real_estate=deal_prices_of_real_estate
+        )
+
+        if not result:
+            return
+
         (
             inserted_real_estate_models,
             deal_price_of_real_estate_list,
-        ) = self.create_real_estates(
-            deal_prices_of_real_estate=deal_prices_of_real_estate
-        )
+        ) = result
 
         inserted_real_estate_models_dict = self.get_inserted_real_estate_models_dict(
             inserted_real_estate_models

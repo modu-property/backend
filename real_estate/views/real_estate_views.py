@@ -32,6 +32,13 @@ class RealEstateView(ListAPIView):
                 required=False,
             ),
             OpenApiParameter(
+                name="id",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description="real_estate_id",
+                required=False,
+            ),
+            OpenApiParameter(
                 name="latitude",
                 type=float,
                 location=OpenApiParameter.QUERY,

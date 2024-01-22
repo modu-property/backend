@@ -27,6 +27,7 @@ class DealSerializer(serializers.ModelSerializer):
         "calc_price_per_pyung"
     )
     is_deal_canceled = serializers.SerializerMethodField("calc_is_deal_canceled")
+    floor = serializers.SerializerMethodField("stringify_floor")
 
     def __init__(self, instance=None, data=..., **kwargs):
         super().__init__(instance, data, **kwargs)
@@ -68,6 +69,10 @@ class DealSerializer(serializers.ModelSerializer):
         if instance.is_deal_canceled == "O":
             return True
         return False
+
+    def stringify_floor(self, instance):
+        self.floor = str(instance.floor)
+        return self.floor
 
 
 class GetRealEstateRequestSerializer(serializers.Serializer):

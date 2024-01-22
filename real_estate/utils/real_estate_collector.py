@@ -1,4 +1,5 @@
 import os
+from time import sleep
 
 from typing import Union
 from PublicDataReader import TransactionPrice
@@ -17,17 +18,11 @@ class RealEstateCollector:
         self, dto: CollectDealPriceOfRealEstateDto
     ) -> Union[DataFrame, bool]:
         try:
+            sleep(0.0001)
             return self.get_data(dto)
         except Exception as e:
             logger.error(e, f"get_deal_price_of_real_estate 수집 실패 dto : {dto.__dict__}")
-            try:
-                logger.info(f"재시도 ")
-                return self.get_data(dto)
-            except Exception as e:
-                logger.error(
-                    e, f"get_deal_price_of_real_estate 수집 재시도 실패 dto : {dto.__dict__}"
-                )
-                return False
+            return False
 
     def get_data(self, dto):
         return self.api.get_data(
