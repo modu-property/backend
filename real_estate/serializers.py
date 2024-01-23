@@ -36,6 +36,7 @@ class DealSerializer(serializers.ModelSerializer):
     class Meta:
         model = Deal
         fields = (
+            "id",
             "deal_price",
             "deal_type",
             "deal_year",
@@ -85,7 +86,7 @@ class GetRealEstateRequestSerializer(serializers.Serializer):
     type = serializers.ChoiceField(choices=TYPE_CHOICES)
     latitude = serializers.FloatField()
     longitude = serializers.FloatField()
-    zoom_level = serializers.IntegerField()
+    zoom_level = serializers.IntegerField(max_value=6, min_value=0)
     keyword = serializers.CharField(allow_blank=True)
 
 
@@ -102,3 +103,11 @@ class GetRealEstatesOnMapResponseSerializer(serializers.Serializer):
     longitude = serializers.CharField(max_length=20)
     area_for_exclusive_use_pyung = serializers.CharField(max_length=6)
     area_for_exclusive_use_price_per_pyung = serializers.CharField(max_length=8)
+
+
+class GetRealEstateByIdSerializer(serializers.ModelSerializer):
+    deals = DealSerializer(many=True)
+
+    class Meta:
+        model = RealEstate
+        fields = "__all__"

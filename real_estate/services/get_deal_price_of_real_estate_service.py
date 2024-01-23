@@ -1,14 +1,18 @@
 from typing import Union
+from django.forms import model_to_dict
 import manticoresearch
 
 from manticoresearch.api import search_api
 from manticoresearch.model.search_request import SearchRequest
 from modu_property.utils.loggers import logger
+from modu_property.utils.validator import validate_model
 from real_estate.dto.real_estate_dto import GetDealPriceOfRealEstateDto
 from real_estate.models import RealEstate
 from real_estate.serializers import (
+    GetRealEstateByIdSerializer,
     GetRealEstatesOnMapResponseSerializer,
     GetRealEstatesOnSearchTabResponseSerializer,
+    RealEstateSerializer,
 )
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
@@ -17,18 +21,14 @@ from django.db.models import F
 
 class GetDealPriceOfRealEstateService:
     def get_distance_tolerance(self, dto: GetDealPriceOfRealEstateDto):
-        # TODO level은 임시로 정함, 바꿔야함
+        # TODO level은 임시로 정함, 바꿔야함, 1,2 정도의 레벨은 하나하나 보여주지 말고 뭉쳐서 개수만 표현해야할듯..
         zoom_levels = {
-            1: 1000 * 1000,
-            2: 1000 * 500,
-            3: 1000 * 250,
-            4: 1000 * 100,
-            5: 1000 * 50,
-            6: 1000 * 25,
-            7: 1000 * 10,
-            8: 1000 * 5,
-            9: 1000 * 2,
-            10: 1000 * 1,
+            1: 10 * 10,
+            2: 8 * 8,
+            3: 6 * 6,
+            4: 4 * 4,
+            5: 2 * 2,
+            6: 1 * 1,
         }
         return zoom_levels[dto.zoom_level]
 
@@ -40,12 +40,12 @@ class GetDealPriceOfRealEstateService:
         )  # 위경도 받아서 지도의 중심으로 잡음
 
         real_estates = (
-            RealEstate.objects.prefetch_related("deal")
+            RealEstate.objects.prefetch_related("deals")
             .annotate(
                 distance=Distance("point", center_point),
-                area_for_exclusive_use_pyung=F("deal__area_for_exclusive_use_pyung"),
+                area_for_exclusive_use_pyung=F("deals__area_for_exclusive_use_pyung"),
                 area_for_exclusive_use_price_per_pyung=F(
-                    "deal__area_for_exclusive_use_price_per_pyung"
+                    "deals__area_for_exclusive_use_price_per_pyung"
                 ),
             )
             .filter(distance__lte=distance_tolerance)
@@ -89,12 +89,24 @@ class GetDealPriceOfRealEstateService:
 
         return real_estates
 
+    def get_real_estate_deals(self, id: int):
+        try:
+            real_estate_deal = (
+                RealEstate.objects.filter(id=id).all().prefetch_related("deals").get()
+            )
+            serializer = GetRealEstateByIdSerializer(real_estate_deal)
+            return serializer.data
+        except Exception as e:
+            logger.error(f"get_real_estate_deals e : {e}")
+            return False
+
     def execute(
         self, dto: GetDealPriceOfRealEstateDto
     ) -> Union[
         list,
         GetRealEstatesOnMapResponseSerializer,
         GetRealEstatesOnSearchTabResponseSerializer,
+        dict,
     ]:
         # zoom_level에 맞게 반경 지정하는 메서드 만들기
         # keyword가 있으면 그 검색어에 맞는 거 추출(manticore 사용?)하고 그곳의 latitude, longitude 구해서 반경 내에 속하는 것들 추출
@@ -118,3 +130,8 @@ class GetDealPriceOfRealEstateService:
                 return GetRealEstatesOnSearchTabResponseSerializer(
                     data=list(real_estates), many=True
                 )
+        elif dto.id:
+            real_estate = self.get_real_estate_deals(id=dto.id)
+            return real_estate
+
+        return False

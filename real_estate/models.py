@@ -81,7 +81,7 @@ class Deal(DateTimeFields):
 
     real_estate = models.ForeignKey(
         "RealEstate",
-        related_name="deal",
+        related_name="deals",
         on_delete=models.DO_NOTHING,
     )
 

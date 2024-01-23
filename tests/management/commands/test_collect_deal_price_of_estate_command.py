@@ -16,7 +16,7 @@ def test_collect_deal_price_of_estate_command(insert_regional_codes):
     # Command().handle()
     # Command().handle(sido="서울특별시")
 
-    real_estates = RealEstate.objects.prefetch_related("deal").all()
+    real_estates = RealEstate.objects.prefetch_related("deals").all()
 
     for real_estate in real_estates:
         real_estate: RealEstate = real_estate

@@ -68,12 +68,12 @@ class TestCollectDealPriceOfRealEstateService:
         assert result == True
 
         real_estates = (
-            RealEstate.objects.prefetch_related("deal")
+            RealEstate.objects.prefetch_related("deals")
             .filter(
                 regional_code=dto.regional_code,
-                deal__deal_year=int(dto.year_month[:4]),
-                deal__deal_month=int(dto.year_month[4:]),
-                deal__type=dto.trade_type,
+                deals__deal_year=int(dto.year_month[:4]),
+                deals__deal_month=int(dto.year_month[4:]),
+                deals__type=dto.trade_type,
                 # deal__deal_type=None,
             )
             .all()

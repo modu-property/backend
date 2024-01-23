@@ -129,7 +129,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
     query_params = {
         "latitude": 37.5054,
         "longitude": 127.0216,
-        "zoom_level": 9,
+        "zoom_level": 6,
         "keyword": "",
     }
 
@@ -144,6 +144,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
 
 
 @pytest.mark.django_db(transaction=True)
+# @pytest.mark.skip()
 def test_get_real_estates_with_keyword_view(client, get_jwt):
     """
     !!로컬 데이터 사라지므로 주의!!
@@ -157,6 +158,67 @@ def test_get_real_estates_with_keyword_view(client, get_jwt):
     headers = {"HTTP_AUTHORIZATION": f"Bearer {_jwt}"}
     query_params = {
         "keyword": "반포",
+    }
+
+    response = client.get(url, data=query_params, **headers)
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db(transaction=True)
+def test_get_real_estate_deal_with_id(client, get_jwt, create_real_estate, create_deal):
+    real_estate1 = create_real_estate(
+        id=1,
+        name="테스트빌라 1",
+        build_year=1990,
+        regional_code="11650",
+        lot_number="서울특별시 서초구 사평대로53길 22 (반포동)",
+        road_name_address="서울특별시 서초구 반포동 739",
+        latitude="37.5054",
+        longitude="127.0216",
+        point=Point(37.5054, 127.0216),
+    )
+
+    create_deal(
+        real_estate_id=real_estate1.id,
+        deal_price=10000,
+        deal_type="DIRECT_DEAL",
+        deal_year=2023,
+        land_area=100,
+        deal_month=3,
+        deal_day=21,
+        area_for_exclusive_use=80,
+        floor=3,
+        is_deal_canceled=False,
+        deal_canceled_date=None,
+        area_for_exclusive_use_pyung="30.30",
+        area_for_exclusive_use_price_per_pyung="330",
+        type=DealType.DEAL,
+    )
+
+    create_deal(
+        real_estate_id=real_estate1.id,
+        deal_price=20000,
+        deal_type="BROKERAGE_DEAL",
+        deal_year=2023,
+        land_area=200,
+        deal_month=12,
+        deal_day=30,
+        area_for_exclusive_use=150,
+        floor=5,
+        is_deal_canceled=False,
+        deal_canceled_date=None,
+        area_for_exclusive_use_pyung="60.60",
+        area_for_exclusive_use_price_per_pyung="329.99",
+        type=DealType.DEAL,
+    )
+
+    url = reverse("real-estate", kwargs={"type": "deal"})
+
+    _jwt = get_jwt
+
+    headers = {"HTTP_AUTHORIZATION": f"Bearer {_jwt}"}
+    query_params = {
+        "id": 1,
     }
 
     response = client.get(url, data=query_params, **headers)

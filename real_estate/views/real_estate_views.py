@@ -4,6 +4,7 @@ from rest_framework.generics import ListAPIView
 from accounts.util.authenticator import jwt_authenticator
 from real_estate.dto.real_estate_dto import GetDealPriceOfRealEstateDto
 from real_estate.serializers import (
+    GetRealEstateByIdSerializer,
     GetRealEstateRequestSerializer,
     GetRealEstatesOnMapResponseSerializer,
     GetRealEstatesOnSearchTabResponseSerializer,
@@ -17,6 +18,8 @@ from drf_spectacular.utils import (
     OpenApiParameter,
     PolymorphicProxySerializer,
 )
+from rest_framework.serializers import BaseSerializer
+from modu_property.utils.loggers import logger
 
 
 class RealEstateView(ListAPIView):
@@ -74,6 +77,7 @@ class RealEstateView(ListAPIView):
                 serializers=[
                     GetRealEstatesOnSearchTabResponseSerializer,
                     GetRealEstatesOnMapResponseSerializer,
+                    GetRealEstateByIdSerializer,
                 ],
                 resource_type_field_name=None,
             ),
@@ -95,21 +99,34 @@ class RealEstateView(ListAPIView):
             "zoom_level": request.query_params.get("zoom_level", 0),
             "keyword": request.query_params.get("keyword", ""),
         }
-        serializer = GetRealEstateRequestSerializer(data=request_data)
 
-        if serializer.is_valid():
-            validated_data = serializer.validated_data
-            dto = GetDealPriceOfRealEstateDto(**validated_data)
-            real_estates_response_serializer = (
-                GetDealPriceOfRealEstateService().execute(dto=dto)
-            )
+        try:
+            serializer = GetRealEstateRequestSerializer(data=request_data)
+        except Exception as e:
+            logger.error(f"RealEstateView e : {e}")
+            return JsonResponse(data={}, status=400)
 
-            if not real_estates_response_serializer:
-                return JsonResponse(data={}, status=404)
+        is_valid = serializer.is_valid()
+        if not is_valid:
+            logger.error(f"serializer.errors {serializer.errors}")
 
-            if real_estates_response_serializer.is_valid():
+        validated_data = serializer.validated_data
+        dto = GetDealPriceOfRealEstateDto(**validated_data)
+        result = GetDealPriceOfRealEstateService().execute(dto=dto)
+
+        if not result:
+            return JsonResponse(data={}, status=404)
+
+        if isinstance(result, BaseSerializer):
+            if result.is_valid():
                 return JsonResponse(
-                    data=real_estates_response_serializer.validated_data,
+                    data=result.validated_data,
                     status=200,
                     safe=False,
                 )
+
+        return JsonResponse(
+            data=result,
+            status=200,
+            safe=False,
+        )

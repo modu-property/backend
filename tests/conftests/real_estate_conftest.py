@@ -10,6 +10,7 @@ from django.db import connections
 @pytest.fixture
 def create_real_estate():
     def _create_real_estate(
+        id: int,
         name: str,
         build_year: int,
         regional_code: str,
@@ -20,6 +21,7 @@ def create_real_estate():
         point: Point,
     ):
         real_estate = RealEstate(
+            id=id,
             name=name,
             build_year=build_year,
             regional_code=regional_code,
