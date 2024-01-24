@@ -206,6 +206,9 @@ SERVER_ENV=local python manage.py collect_deal_price_of_real_estate_command 서�
 # 현재 연월의 부동산 매매 정보 수집 스케쥴러
 collect_deal_price_of_real_estate_command 으로 전체 수집을 했다면, collect_deal_price_of_real_estate_task 스케쥴러로 최신 데이터 수집함
 
+# ngrok
+`ngrok http --host-header=localhost 80`
+
 # TODO
 23.12.05  
 * https://www.notion.so/2-5ddb861b8a5d468eac0b71b1238a41aa  

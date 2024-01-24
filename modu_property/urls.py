@@ -22,7 +22,14 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 urlpatterns = [
     path("admin", admin.site.urls, name="admin"),
     path(
-        "real-estate/<str:type>", app_views.RealEstateView.as_view(), name="real-estate"
+        "real-estates/<str:type>",
+        app_views.RealEstateView.as_view(),
+        name="real-estate",
+    ),
+    path(
+        "real-estate/<int:id>",
+        app_views.GetRealEstateView.as_view(),
+        name="get-real-estate",
     ),
     path("accounts", include("accounts.urls")),
     path("api/token", TokenObtainPairView.as_view(), name="token_obtain_pair"),

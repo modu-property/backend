@@ -165,7 +165,7 @@ def test_get_real_estates_with_keyword_view(client, get_jwt):
 
 
 @pytest.mark.django_db(transaction=True)
-def test_get_real_estate_deal_with_id(client, get_jwt, create_real_estate, create_deal):
+def test_get_real_estate(client, get_jwt, create_real_estate, create_deal):
     real_estate1 = create_real_estate(
         id=1,
         name="테스트빌라 1",
@@ -212,17 +212,16 @@ def test_get_real_estate_deal_with_id(client, get_jwt, create_real_estate, creat
         type=DealType.DEAL,
     )
 
-    url = reverse("real-estate", kwargs={"type": "deal"})
+    url = reverse("get-real-estate", kwargs={"id": real_estate1.id})
 
     _jwt = get_jwt
 
     headers = {"HTTP_AUTHORIZATION": f"Bearer {_jwt}"}
-    query_params = {
-        "id": 1,
-    }
 
-    response = client.get(url, data=query_params, **headers)
+    response = client.get(url, **headers)
     assert response.status_code == 200
+    _json = response.json()
+    assert _json["id"] == real_estate1.id
 
 
 # @pytest.mark.django_db

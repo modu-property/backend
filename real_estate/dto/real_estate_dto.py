@@ -9,3 +9,8 @@ class GetDealPriceOfRealEstateDto:
     longitude: float
     zoom_level: int
     keyword: str
+
+
+@dataclass
+class GetRealEstateDto:
+    id: int

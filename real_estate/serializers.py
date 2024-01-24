@@ -105,7 +105,7 @@ class GetRealEstatesOnMapResponseSerializer(serializers.Serializer):
     area_for_exclusive_use_price_per_pyung = serializers.CharField(max_length=8)
 
 
-class GetRealEstateByIdSerializer(serializers.ModelSerializer):
+class GetRealEstateResponseSerializer(serializers.ModelSerializer):
     deals = DealSerializer(many=True)
 
     class Meta:

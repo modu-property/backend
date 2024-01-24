@@ -2,15 +2,19 @@ from django.http import JsonResponse
 from rest_framework.request import Request
 from rest_framework.generics import ListAPIView
 from accounts.util.authenticator import jwt_authenticator
-from real_estate.dto.real_estate_dto import GetDealPriceOfRealEstateDto
+from real_estate.dto.real_estate_dto import (
+    GetDealPriceOfRealEstateDto,
+    GetRealEstateDto,
+)
 from real_estate.serializers import (
-    GetRealEstateByIdSerializer,
+    GetRealEstateResponseSerializer,
     GetRealEstateRequestSerializer,
     GetRealEstatesOnMapResponseSerializer,
     GetRealEstatesOnSearchTabResponseSerializer,
 )
 from real_estate.services.get_deal_price_of_real_estate_service import (
     GetDealPriceOfRealEstateService,
+    GetRealEstateService,
 )
 from drf_spectacular.utils import (
     extend_schema,
@@ -20,6 +24,7 @@ from drf_spectacular.utils import (
 )
 from rest_framework.serializers import BaseSerializer
 from modu_property.utils.loggers import logger
+from rest_framework.views import APIView
 
 
 class RealEstateView(ListAPIView):
@@ -77,7 +82,7 @@ class RealEstateView(ListAPIView):
                 serializers=[
                     GetRealEstatesOnSearchTabResponseSerializer,
                     GetRealEstatesOnMapResponseSerializer,
-                    GetRealEstateByIdSerializer,
+                    GetRealEstateResponseSerializer,
                 ],
                 resource_type_field_name=None,
             ),
@@ -127,6 +132,66 @@ class RealEstateView(ListAPIView):
 
         return JsonResponse(
             data=result,
+            status=200,
+            safe=False,
+        )
+
+
+class GetRealEstateView(APIView):
+    @extend_schema(
+        summary="부동산 id로 단일 부동산, 거래내역 조회",
+        description="id로 real_estate_id 입력",
+        parameters=[
+            OpenApiParameter(
+                name="id",
+                type=int,
+                location=OpenApiParameter.PATH,
+                description="real_estate_id",
+                required=True,
+            )
+        ],
+        request=GetRealEstateRequestSerializer,
+        responses={
+            200: PolymorphicProxySerializer(
+                component_name="RealEstate",
+                serializers=[
+                    GetRealEstateResponseSerializer,
+                ],
+                resource_type_field_name=None,
+            ),
+            400: OpenApiResponse(description="bad request"),
+        },
+    )
+    def get(
+        self,
+        request: Request,
+        *args,
+        **kwargs,
+    ) -> JsonResponse:
+        logger.info(request)
+        id = int(kwargs["id"]) if kwargs.get("id") else 0
+
+        request_data = {"id": id}
+
+        try:
+            serializer = GetRealEstateRequestSerializer(data=request_data)
+        except Exception as e:
+            logger.error(f"RealEstateView e : {e}")
+            return JsonResponse(data={}, status=400)
+
+        is_valid = serializer.is_valid()
+        if not is_valid:
+            logger.error(f"serializer.errors {serializer.errors}")
+
+        validated_data = serializer.validated_data
+        dto = GetRealEstateDto(**validated_data)
+        real_estate = GetRealEstateService().execute(dto=dto)
+
+        if not real_estate:
+            return JsonResponse(data={}, status=404)
+
+        return JsonResponse(
+            data=real_estate,
             status=200,
             safe=False,
         )

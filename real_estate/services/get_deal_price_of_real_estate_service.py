@@ -6,10 +6,14 @@ from manticoresearch.api import search_api
 from manticoresearch.model.search_request import SearchRequest
 from modu_property.utils.loggers import logger
 from modu_property.utils.validator import validate_model
-from real_estate.dto.real_estate_dto import GetDealPriceOfRealEstateDto
+from real_estate.dto.real_estate_dto import (
+    GetDealPriceOfRealEstateDto,
+    GetRealEstateDto,
+)
 from real_estate.models import RealEstate
+from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.serializers import (
-    GetRealEstateByIdSerializer,
+    GetRealEstateResponseSerializer,
     GetRealEstatesOnMapResponseSerializer,
     GetRealEstatesOnSearchTabResponseSerializer,
     RealEstateSerializer,
@@ -17,6 +21,21 @@ from real_estate.serializers import (
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 from django.db.models import F
+
+
+class GetRealEstateService:
+    def __init__(self) -> None:
+        self.repository = RealEstateRepository()
+
+    def execute(self, dto: GetRealEstateDto):
+        real_estate = self.repository.get_real_estate(id=dto.id)
+
+        try:
+            serializer = GetRealEstateResponseSerializer(real_estate)
+            return serializer.data
+        except Exception as e:
+            logger.error(f"GetRealEstateService e : {e}")
+            return {}
 
 
 class GetDealPriceOfRealEstateService:
