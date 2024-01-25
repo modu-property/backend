@@ -2,7 +2,7 @@ from django.forms import model_to_dict
 from django.contrib.gis.geos import Point
 from pandas import DataFrame
 from modu_property.utils.loggers import logger, file_logger
-from modu_property.utils.validator import validate_model
+from modu_property.utils.validator import validate_data
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
 
 from real_estate.models import Deal, RealEstate
@@ -176,7 +176,7 @@ class CollectDealPriceOfRealEstateService:
 
         deal_dict = model_to_dict(deal_model)
 
-        validated_deal_model = validate_model(
+        validated_deal_model = validate_data(
             model=deal_model,
             data=deal_dict,
             serializer=DealSerializer,
@@ -199,7 +199,7 @@ class CollectDealPriceOfRealEstateService:
 
         real_estate_dict = model_to_dict(real_estate_model)
 
-        validated_real_estate_model = validate_model(
+        validated_real_estate_model = validate_data(
             model=real_estate_model,
             data=real_estate_dict,
             serializer=RealEstateSerializer,

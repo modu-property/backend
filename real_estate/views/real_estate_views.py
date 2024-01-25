@@ -1,9 +1,9 @@
-from typing import Any, OrderedDict, Union
+from typing import Any
 from django.http import JsonResponse
 from rest_framework.request import Request
 from rest_framework.generics import ListAPIView
 from accounts.util.authenticator import jwt_authenticator
-from modu_property.utils.validator import validate_model
+from modu_property.utils.validator import validate_data
 from real_estate.dto.real_estate_dto import (
     GetRealEstateDto,
     GetRealEstatesOnMapDto,
@@ -68,28 +68,21 @@ class GetRealEstateView(APIView):
         logger.info(request)
         id = int(kwargs["id"]) if kwargs.get("id") else 0
 
-        request_data = {"id": id}
+        request_data: dict = {"id": id}
 
-        try:
-            serializer = GetRealEstateRequestSerializer(data=request_data)
-        except Exception as e:
-            logger.error(f"RealEstateView e : {e}")
+        data: Any = validate_data(
+            data=request_data,
+            serializer=GetRealEstateRequestSerializer,
+        )
+        if not data:
             return JsonResponse(data={}, status=400)
 
-        is_valid = serializer.is_valid()
-        if not is_valid:
-            logger.error(f"serializer.errors {serializer.errors}")
-
-        validated_data = serializer.validated_data
-        dto = GetRealEstateDto(**validated_data)
-        real_estate = GetRealEstateService().execute(dto=dto)
-
-        if not real_estate:
-            return JsonResponse(data={}, status=404)
+        dto = GetRealEstateDto(**data)
+        result: ServiceResultDto = GetRealEstateService().execute(dto=dto)
 
         return JsonResponse(
-            data=real_estate,
-            status=200,
+            data=result.data,
+            status=result.status_code,
             safe=False,
         )
 
@@ -139,20 +132,14 @@ class GetRealEstatesOnSearchView(ListAPIView):
             "keyword": request.query_params.get("keyword", ""),
         }
 
-        try:
-            serializer = GetRealEstatesOnSearchRequestSerializer(data=request_data)
-        except Exception as e:
-            logger.error(f"GetRealEstatesOnSearchRequestSerializer e : {e} ")
+        data: Any = validate_data(
+            data=request_data,
+            serializer=GetRealEstatesOnSearchRequestSerializer,
+        )
+        if not data:
             return JsonResponse(data={}, status=400)
 
-        is_valid = serializer.is_valid()
-        if not is_valid:
-            logger.error(
-                f"GetRealEstatesOnSearchRequestSerializer invalid : {serializer.errors}"
-            )
-
-        validated_data = serializer.validated_data
-        dto = GetRealEstatesOnSearchDto(**validated_data)
+        dto = GetRealEstatesOnSearchDto(**data)
         result: ServiceResultDto = GetRealEstatesOnSearchService().execute(dto=dto)
 
         return JsonResponse(
@@ -215,27 +202,21 @@ class GetRealEstatesOnMapView(ListAPIView):
         *args,
         **kwargs,
     ) -> JsonResponse:
-        request_data = {
+        request_data: dict = {
             "type": kwargs["type"],
             "latitude": request.query_params.get("latitude", 0.0),
             "longitude": request.query_params.get("longitude", 0.0),
             "zoom_level": request.query_params.get("zoom_level", 0),
         }
 
-        try:
-            serializer = GetRealEstatesOnMapRequestSerializer(data=request_data)
-        except Exception as e:
-            logger.error(f"RealEGetRealEstatesOnMapRequestSerializerstateView e : {e}")
+        data: Any = validate_data(
+            data=request_data,
+            serializer=GetRealEstatesOnMapRequestSerializer,
+        )
+        if not data:
             return JsonResponse(data={}, status=400)
 
-        is_valid = serializer.is_valid()
-        if not is_valid:
-            logger.error(
-                f"GetRealEstatesOnMapRequestSerializer invalid : {serializer.errors}"
-            )
-
-        validated_data: Union[dict, Any] = serializer.validated_data
-        dto = GetRealEstatesOnMapDto(**validated_data)
+        dto = GetRealEstatesOnMapDto(**data)
         result: ServiceResultDto = GetRealEstatesOnMapService().execute(dto=dto)
 
         return JsonResponse(

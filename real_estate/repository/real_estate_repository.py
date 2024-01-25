@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, Optional, Union
 from real_estate.dto.real_estate_dto import GetRealEstatesOnMapDto
 from real_estate.models import RealEstate
 from modu_property.utils.loggers import logger
@@ -9,14 +9,14 @@ from django.db.models import QuerySet
 
 
 class RealEstateRepository:
-    def get_real_estate(self, id: int) -> Union[RealEstate, bool]:
+    def get_real_estate(self, id: int) -> Optional[RealEstate]:
         try:
             return (
                 RealEstate.objects.filter(id=id).all().prefetch_related("deals").get()
             )
         except Exception as e:
             logger.error(f"get_real_estate e : {e}")
-            return False
+            return None
 
     def get_real_estates(self):
         return RealEstate.objects.all()

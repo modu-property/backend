@@ -222,47 +222,28 @@ def test_get_real_estate(client, get_jwt, create_real_estate, create_deal):
 
     response = client.get(url, **headers)
     assert response.status_code == 200
-    _json = response.json()
-    assert _json["id"] == real_estate1.id
 
+    data = response.json()
+    real_estate = data.get("data")
+    assert real_estate["id"] == real_estate1.id
+    assert real_estate["name"] == real_estate1.name
+    assert real_estate["build_year"] == real_estate1.build_year
+    assert real_estate["regional_code"] == real_estate1.regional_code
+    assert real_estate["lot_number"] == real_estate1.lot_number
+    assert real_estate["road_name_address"] == real_estate1.road_name_address
+    assert real_estate["latitude"] == real_estate1.latitude
+    assert real_estate["longitude"] == real_estate1.longitude
+    assert "SRID=4326;POINT" in real_estate["point"]
+    assert "deals" in real_estate
 
-# @pytest.mark.django_db
-# def test_create_post_view_when_invalid_request_then_400(client, get_jwt):
-#     url = reverse("create_post")
-
-#     _jwt = get_jwt
-
-#     headers = {"HTTP_Authorization": _jwt}
-#     data = {"title": "test_title", "content": ""}
-
-#     response = client.post(path=url, **headers, data=data)
-#     assert response.status_code == 400
-
-
-# @pytest.mark.django_db
-# def test_get_post_view(client, create_post):
-#     url = reverse("get_post", kwargs={"id": 1})
-#     response = client.get(url)
-#     assert response.status_code == 200
-#     assert response.data["title"] == "test_title"
-
-
-# @pytest.mark.django_db
-# def test_get_post_view_when_no_post_then_404(client):
-#     url = reverse("get_post", kwargs={"id": 1})
-#     response = client.get(url)
-#     assert response.status_code == 404
-
-
-# @pytest.mark.django_db
-# def test_get_post_list(client, create_post):
-#     url = reverse("get_post_list")
-#     response = client.get(url)
-#     assert response.status_code == 200
-
-
-# @pytest.mark.django_db
-# def test_get_post_list_when_no_post_then_404(client):
-#     url = reverse("get_post_list")
-#     response = client.get(url)
-#     assert response.status_code == 404
+    deals = real_estate["deals"]
+    for deal in deals:
+        assert "deal_price" in deal
+        assert "deal_type" in deal
+        assert "deal_year" in deal
+        assert "land_area" in deal
+        assert "deal_month" in deal
+        assert "deal_day" in deal
+        assert "area_for_exclusive_use_pyung" in deal
+        assert "area_for_exclusive_use_price_per_pyung" in deal
+        assert "type" in deal

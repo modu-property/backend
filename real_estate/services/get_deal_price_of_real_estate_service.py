@@ -1,14 +1,16 @@
-from typing import Any, Union
+from typing import Any, Optional, Union
+
 from manticore.manticore_client import ManticoreClient
 
 from modu_property.utils.loggers import logger
-from modu_property.utils.validator import validate_model
+from modu_property.utils.validator import validate_data
 from real_estate.dto.real_estate_dto import (
     GetRealEstateDto,
     GetRealEstatesOnMapDto,
     GetRealEstatesOnSearchDto,
 )
 from real_estate.dto.service_result_dto import ServiceResultDto
+from real_estate.models import RealEstate
 from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.serializers import (
     GetRealEstateResponseSerializer,
@@ -22,15 +24,21 @@ class GetRealEstateService:
     def __init__(self) -> None:
         self.repository = RealEstateRepository()
 
-    def execute(self, dto: GetRealEstateDto):
-        real_estate = self.repository.get_real_estate(id=dto.id)
+    def execute(self, dto: GetRealEstateDto) -> ServiceResultDto:
+        real_estate: Optional[RealEstate] = self.repository.get_real_estate(id=dto.id)
 
-        try:
-            serializer = GetRealEstateResponseSerializer(real_estate)
-            return serializer.data
-        except Exception as e:
-            logger.error(f"GetRealEstateService e : {e}")
-            return {}
+        if not real_estate:
+            return ServiceResultDto(status_code=404)
+
+        data: Any = validate_data(
+            model=real_estate,
+            serializer=GetRealEstateResponseSerializer,
+        )
+        if not data:
+            return ServiceResultDto(
+                message="GetRealEstateResponseSerializer 에러", status_code=400
+            )
+        return ServiceResultDto(data=data)
 
 
 class GetRealEstatesOnSearchService:
@@ -38,19 +46,19 @@ class GetRealEstatesOnSearchService:
         self.manticoresearch_client = ManticoreClient()
 
     def execute(self, dto: GetRealEstatesOnSearchDto) -> ServiceResultDto:
-        real_estates = self.get_real_estates(dto=dto)
+        real_estates: list = self.get_real_estates(dto=dto)
         if real_estates:
-            serializer = GetRealEstatesOnSearchResponseSerializer(
-                data=list(real_estates), many=True
+            data: Any = validate_data(
+                data=list(real_estates),
+                serializer=GetRealEstatesOnSearchResponseSerializer,
+                many=True,
             )
-            if serializer.is_valid():
-                return ServiceResultDto(data=serializer.data)
-            else:
-                logger.error(f"GetRealEstatesOnSearchService e : {serializer.errors}")
+            if not data:
                 return ServiceResultDto(
                     message="GetRealEstatesOnSearchResponseSerializer 에러",
                     status_code=400,
                 )
+            return ServiceResultDto(data=data)
         return ServiceResultDto(status_code=404)
 
     def get_real_estates(self, dto: GetRealEstatesOnSearchDto) -> list:
@@ -84,7 +92,7 @@ class GetRealEstatesOnMapService:
             distance_tolerance=distance_tolerance, center_point=center_point
         )
         if real_estates:
-            data: Union[dict, bool, Any] = validate_model(
+            data: Union[dict, bool, Any] = validate_data(
                 data=real_estates,
                 serializer=GetRealEstatesOnMapResponseSerializer,
                 many=True,
