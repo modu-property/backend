@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.urls import reverse
 from real_estate.enum.deal_enum import DealType
 from tests.conftests.real_estate_conftest import *
@@ -121,7 +122,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         type=DealType.DEAL,
     )
 
-    url = reverse("real-estate", kwargs={"type": "deal"})
+    url = reverse("get-real-estates-on-map", kwargs={"type": "deal"})
 
     _jwt = get_jwt
 
@@ -133,9 +134,11 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         "keyword": "",
     }
 
-    response = client.get(url, data=query_params, **headers)
+    response: JsonResponse = client.get(url, data=query_params, **headers)
     assert response.status_code == 200
-    real_estates = response.json()
+
+    data = response.json()
+    real_estates = data.get("data")
     for real_estate in real_estates:
         assert "latitude" in real_estate
         assert "longitude" in real_estate
@@ -151,7 +154,7 @@ def test_get_real_estates_with_keyword_view(client, get_jwt):
     터미널에서 아래 명령어 실행해야 함
     SERVER_ENV=local python manage.py insert_real_estates_for_searching_command
     """
-    url = reverse("real-estate", kwargs={"type": "deal"})
+    url = reverse("get-real-estates-on-search", kwargs={"type": "deal"})
 
     _jwt = get_jwt
 
@@ -167,7 +170,6 @@ def test_get_real_estates_with_keyword_view(client, get_jwt):
 @pytest.mark.django_db(transaction=True)
 def test_get_real_estate(client, get_jwt, create_real_estate, create_deal):
     real_estate1 = create_real_estate(
-        id=1,
         name="테스트빌라 1",
         build_year=1990,
         regional_code="11650",

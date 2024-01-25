@@ -2,15 +2,19 @@ from dataclasses import dataclass
 
 
 @dataclass
-class GetDealPriceOfRealEstateDto:
+class GetRealEstateDto:
     id: int
+
+
+@dataclass
+class GetRealEstatesOnSearchDto:
     type: str
-    latitude: float
-    longitude: float
-    zoom_level: int
     keyword: str
 
 
 @dataclass
-class GetRealEstateDto:
-    id: int
+class GetRealEstatesOnMapDto:
+    type: str
+    latitude: float
+    longitude: float
+    zoom_level: int

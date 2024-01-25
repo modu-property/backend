@@ -77,7 +77,35 @@ class DealSerializer(serializers.ModelSerializer):
 
 
 class GetRealEstateRequestSerializer(serializers.Serializer):
+    id = serializers.IntegerField(min_value=1)
+
+
+class GetRealEstateResponseSerializer(serializers.ModelSerializer):
+    deals = DealSerializer(many=True)
+
+    class Meta:
+        model = RealEstate
+        fields = "__all__"
+
+
+class GetRealEstatesOnSearchRequestSerializer(serializers.Serializer):
+    TYPE_CHOICES = (
+        ("deal", "deal"),
+        ("jeonse", "jeonse"),
+        ("monthly_rent", "monthly_rent"),
+    )
+    type = serializers.ChoiceField(choices=TYPE_CHOICES)
+    keyword = serializers.CharField()
+
+
+class GetRealEstatesOnSearchResponseSerializer(serializers.Serializer):
     id = serializers.IntegerField()
+    lot_number = serializers.CharField(max_length=30)
+    name = serializers.CharField(max_length=30)
+    road_name_address = serializers.CharField(max_length=30)
+
+
+class GetRealEstatesOnMapRequestSerializer(serializers.Serializer):
     TYPE_CHOICES = (
         ("deal", "deal"),
         ("jeonse", "jeonse"),
@@ -87,14 +115,6 @@ class GetRealEstateRequestSerializer(serializers.Serializer):
     latitude = serializers.FloatField()
     longitude = serializers.FloatField()
     zoom_level = serializers.IntegerField(max_value=6, min_value=0)
-    keyword = serializers.CharField(allow_blank=True)
-
-
-class GetRealEstatesOnSearchTabResponseSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    lot_number = serializers.CharField(max_length=30)
-    name = serializers.CharField(max_length=30)
-    road_name_address = serializers.CharField(max_length=30)
 
 
 class GetRealEstatesOnMapResponseSerializer(serializers.Serializer):
@@ -103,11 +123,3 @@ class GetRealEstatesOnMapResponseSerializer(serializers.Serializer):
     longitude = serializers.CharField(max_length=20)
     area_for_exclusive_use_pyung = serializers.CharField(max_length=6)
     area_for_exclusive_use_price_per_pyung = serializers.CharField(max_length=8)
-
-
-class GetRealEstateResponseSerializer(serializers.ModelSerializer):
-    deals = DealSerializer(many=True)
-
-    class Meta:
-        model = RealEstate
-        fields = "__all__"

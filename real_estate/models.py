@@ -16,7 +16,7 @@ class RealEstate(gis_models.Model):
     class Meta:
         db_table = "real_estate"
 
-    id = models.BigAutoField(primary_key=True)
+    id = models.BigAutoField(primary_key=True, auto_created=True)
     name = models.CharField(help_text="부동산 이름", null=True, blank=True, max_length=30)
     build_year = models.SmallIntegerField(help_text="건축년도", null=False, blank=False)
     regional_code = models.CharField(
@@ -40,7 +40,7 @@ class Deal(DateTimeFields):
     class Meta:
         db_table = "deal"
 
-    id = models.BigAutoField(primary_key=True)
+    id = models.BigAutoField(primary_key=True, auto_created=True)
 
     deal_price = models.PositiveIntegerField(
         help_text="거래금액(전월세 보증금)", null=False, blank=False

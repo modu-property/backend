@@ -1,16 +1,21 @@
-from typing import Union
+from typing import Any, Union
 from django.db import models
-from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from modu_property.utils.loggers import logger
 
 
 def validate_model(
-    model: models.Model, data: dict, serializer: serializers.ModelSerializer
-) -> Union[dict, bool]:
+    data: Union[list[dict], bool],
+    serializer,
+    model: Union[models.Model, None] = None,
+    many: bool = False,
+) -> Union[dict, bool, Any]:
     try:
-        serializer = serializer(instance=model, data=data)
+        if model:
+            serializer = serializer(instance=model, data=data, many=many)
+        else:
+            serializer = serializer(data=data, many=many)
 
         if not serializer.is_valid(raise_exception=True):
             return False
