@@ -7,7 +7,7 @@ from requests.adapters import HTTPAdapter
 from modu_property.utils.loggers import logger
 
 
-class KakaoAddressConverter:
+class AddressConverter:
     def convert_address(self, dong: str, lot_number: str) -> Union[dict, bool]:
         sleep(0.0001)
         response = None
@@ -32,7 +32,7 @@ class KakaoAddressConverter:
         documents = response.json()["documents"]
 
         if not documents:
-            logger.error(f"documents 없음 response : {response} _query : {_query}")
+            # logger.error(f"documents 없음 response : {response} _query : {_query}")
             return False
 
         try:

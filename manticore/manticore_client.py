@@ -10,7 +10,9 @@ from manticoresearch.model.search_request import SearchRequest
 
 class ManticoreClient:
     def __init__(self) -> None:
-        self.configuration = manticoresearch.Configuration(host="http://0.0.0.0:9308")
+        self.configuration = manticoresearch.Configuration(
+            host=f"http://{os.getenv('HTTP_HOST')}:{os.getenv('HTTP_PORT')}"
+        )
         self.api_client = manticoresearch.ApiClient(self.configuration)
         self.search_instance = search_api.SearchApi(self.api_client)
 

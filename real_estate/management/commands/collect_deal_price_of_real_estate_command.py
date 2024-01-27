@@ -50,10 +50,10 @@ class Command(BaseCommand):
         trade_types = TradeType.get_trade_types()
 
         # 2006년부터 수집
-        start_year = 2006
+        start_year = 2016
         start_month = 1
-        end_year = 2007
-        end_month = 12
+        end_year = 2016
+        end_month = 1
 
         years_and_months = TimeUtil.get_years_and_months(
             start_year=start_year,

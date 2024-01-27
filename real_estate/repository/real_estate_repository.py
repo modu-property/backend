@@ -19,7 +19,7 @@ class RealEstateRepository:
             return None
 
     def get_real_estates(self):
-        return RealEstate.objects.all()
+        return RealEstate.objects.prefetch_related("deals").all()
 
     def get_real_estates_by_latitude_and_longitude(
         self, distance_tolerance: int, center_point: Point

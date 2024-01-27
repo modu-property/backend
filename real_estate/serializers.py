@@ -12,6 +12,7 @@ class RealEstateSerializer(serializers.ModelSerializer):
             "regional_code",
             "lot_number",
             "road_name_address",
+            "address",
             "latitude",
             "longitude",
             "point",
@@ -102,7 +103,7 @@ class GetRealEstatesOnSearchResponseSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     lot_number = serializers.CharField(max_length=30)
     name = serializers.CharField(max_length=30)
-    road_name_address = serializers.CharField(max_length=30)
+    road_name_address = serializers.CharField(max_length=30, allow_blank=True)
     address = serializers.CharField(max_length=30)
     latitude = serializers.FloatField()
     longitude = serializers.FloatField()

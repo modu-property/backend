@@ -21,7 +21,6 @@ services:
       - .:/modu_property/
     extra_hosts:
       - "host.docker.internal:host-gateway"
-      # - "nginx:host-gateway"
 
   manticore:
     container_name: manticore

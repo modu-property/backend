@@ -7,7 +7,7 @@ from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
 
 from real_estate.models import Deal, RealEstate
 from real_estate.serializers import DealSerializer, RealEstateSerializer
-from real_estate.utils.address_converter import KakaoAddressConverter
+from real_estate.utils.address_converter import AddressConverter
 from real_estate.utils.real_estate_collector import RealEstateCollector
 
 """
@@ -18,7 +18,7 @@ from real_estate.utils.real_estate_collector import RealEstateCollector
 class CollectDealPriceOfRealEstateService:
     def __init__(self) -> None:
         self.real_estate_collector = RealEstateCollector()
-        self.address_converter = KakaoAddressConverter()
+        self.address_converter = AddressConverter()
 
     def execute(self, dto: CollectDealPriceOfRealEstateDto):
         deal_prices_of_real_estate: DataFrame = (

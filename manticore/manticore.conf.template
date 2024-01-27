@@ -11,7 +11,7 @@ searchd {
 
 source real_estate_source {
     type = pgsql
-    sql_host = $DB_HOST
+    sql_host = $DB_HOST_FOR_MANTICORE
     sql_port = $DB_PORT
     sql_user = $DB_USER
     sql_pass = $DB_PASSWORD

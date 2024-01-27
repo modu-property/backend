@@ -3,6 +3,7 @@ import pytest
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
 from real_estate.enum.deal_enum import DealType
 from real_estate.models import RealEstate
+from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.services.collect_deal_price_of_real_estate_service import (
     CollectDealPriceOfRealEstateService,
 )
@@ -23,6 +24,11 @@ class TestCollectDealPriceOfRealEstateService:
         create_real_estate,
         create_deal,
     ):
+        """
+        풍림팍사이드빌라를 미리 DB에 생성하고
+        mock_collect_deal_price_of_real_estate로 수집 목킹해서 3개 빌라를 반환함
+        풍림팍사이드빌라가 이미 DB에 있어서 제외하고 2개 빌라 저장함
+        """
         mocker.patch(
             "real_estate.utils.real_estate_collector.RealEstateCollector.collect_deal_price_of_real_estate",
             return_value=mock_collect_deal_price_of_real_estate,
@@ -34,6 +40,7 @@ class TestCollectDealPriceOfRealEstateService:
             regional_code="11110",
             lot_number="134-2",
             road_name_address="서울 종로구 자하문로 99-3",
+            address="서울특별시 종로구 청운동 134-2",
             latitude="37.5848604533872",
             longitude="126.969812605749",
             point=Point(37.5848604533872, 126.969812605749),
@@ -67,17 +74,6 @@ class TestCollectDealPriceOfRealEstateService:
 
         assert result == True
 
-        real_estates = (
-            RealEstate.objects.prefetch_related("deals")
-            .filter(
-                regional_code=dto.regional_code,
-                deals__deal_year=int(dto.year_month[:4]),
-                deals__deal_month=int(dto.year_month[4:]),
-                deals__type=dto.trade_type,
-                # deal__deal_type=None,
-            )
-            .all()
-        )
+        real_estates = RealEstateRepository().get_real_estates()
 
-        for real_estate in real_estates:
-            assert real_estate1.name != real_estate
+        assert len(real_estates) == 3

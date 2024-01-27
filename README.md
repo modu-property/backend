@@ -43,10 +43,10 @@ brew install postgis gdal libgeoip
 
 # run server
 로컬 서버 : docker compose 권장
-* docker compose -f docker-compose.local.yml up -d
-* docker compose -f docker-compose.local.yml up -d --build
-* docker compose -f docker-compose.local.yml up -d --build --force-recreate
-* SERVER_ENV=local python manage.py runserver --settings modu_property.settings.local_settings 
+* docker compose -f docker-compose.local.yml up -d  
+* docker compose -f docker-compose.local.yml up -d --build  
+* docker compose -f docker-compose.local.yml up -d --build --force-recreate  
+* SERVER_ENV=local python manage.py runserver --settings modu_property.settings.local_settings  
 
 테스팅 서버
 * docker-compose -f docker-compose.testing.yml up -d --build
@@ -149,6 +149,8 @@ manticore terminal에서 실행할 명령어
     FATAL: failed to lock /var/lib/manticore/property_villa.spl: Resource temporarily unavailable, will not index. Try --rotate option.
     -> 
     * indexer --config /etc/manticoresearch/manticore.conf --all --rotate
+또는  
+SERVER_ENV=local python run_indexer.py  
 
 * searchd 준비 됐는지 상태 확인
     * searchd --config /etc/manticoresearch/manticore.conf
@@ -172,8 +174,11 @@ min_prefix_len = 1
 table 확인 curl
 curl -s 'http://127.0.0.1:9308/cli_json?show%20tables'
 
-로컬 터미널에서 manticore 컨테이너 mysql 호출
-curl --location 'http://127.0.0.1:9308/search' --header 'Content-Type: application/json' --data '{"index": "real_estate", "query": { "match": {"lot_number":"*반포*"}}}'
+# 로컬 터미널에서 manticore 컨테이너 mysql 호출
+curl --location 'http://127.0.0.1:9308/search' --header 'Content-Type: application/json' --data '{"index": "real_estate", "query": { "match": {"*":"*반포*"}}}'
+
+# django container 안에서 실행. DB_HOST_FOR_MANTICORE가 host.docker.internal인 경우.
+curl --location 'http://host.docker.internal:9308/search' --header 'Content-Type: application/json' --data '{"index": "real_estate", "query": { "match": {"*":"*반포*"}}}'
 ```
 
 # pytest

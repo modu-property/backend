@@ -32,6 +32,7 @@ def test_collect_deal_price_of_estate_command(insert_regional_codes):
             isinstance(real_estate.road_name_address, str)
             or real_estate.road_name_address is None
         )
+        assert isinstance(real_estate.address, str) or real_estate.address is None
         assert isinstance(real_estate.latitude, str)
         assert isinstance(real_estate.longitude, str)
         assert isinstance(real_estate.point, Point)
