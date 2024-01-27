@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     operations = [CreateExtension("postgis")]
 
 
-class RealEstate(gis_models.Model):
+class RealEstate(DateTimeFields, gis_models.Model):
     class Meta:
         db_table = "real_estate"
 
@@ -31,6 +31,7 @@ class RealEstate(gis_models.Model):
     road_name_address = models.CharField(
         help_text="도로명 주소", null=True, blank=True, max_length=50
     )
+    address = models.CharField(help_text="주소", null=True, blank=True, max_length=50)
     latitude = models.CharField(help_text="위도", null=False, blank=False, max_length=20)
     longitude = models.CharField(help_text="경도", null=False, blank=False, max_length=20)
     point = gis_models.PointField(geography=True, null=False, blank=False)

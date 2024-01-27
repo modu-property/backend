@@ -17,11 +17,14 @@ source real_estate_source {
     sql_pass = $DB_PASSWORD
     sql_db = $DB_NAME
 
-    sql_query = select id, lot_number, road_name_address, name from real_estate
+    sql_query = select id, name, lot_number, road_name_address, address, latitude, longitude from real_estate
 
     sql_field_string = lot_number
     sql_field_string = road_name_address
+    sql_field_string = address
     sql_field_string = name
+    sql_field_string = latitude
+    sql_field_string = longitude
 }
 
 index real_estate {

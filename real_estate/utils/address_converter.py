@@ -7,7 +7,7 @@ from requests.adapters import HTTPAdapter
 from modu_property.utils.loggers import logger
 
 
-class AddressConverter:
+class KakaoAddressConverter:
     def convert_address(self, dong: str, lot_number: str) -> Union[dict, bool]:
         sleep(0.0001)
         response = None
@@ -42,11 +42,15 @@ class AddressConverter:
                 if document.get("road_address")
                 else None
             )
+            address = (
+                document["address"]["address_name"] if document.get("address") else None
+            )
             latitude = document["y"]
             longitude = document["x"]
 
             return {
                 "road_name_address": road_name_address,
+                "address": address,
                 "latitude": latitude,
                 "longitude": longitude,
             }

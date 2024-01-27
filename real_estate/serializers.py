@@ -103,6 +103,9 @@ class GetRealEstatesOnSearchResponseSerializer(serializers.Serializer):
     lot_number = serializers.CharField(max_length=30)
     name = serializers.CharField(max_length=30)
     road_name_address = serializers.CharField(max_length=30)
+    address = serializers.CharField(max_length=30)
+    latitude = serializers.FloatField()
+    longitude = serializers.FloatField()
 
 
 class GetRealEstatesOnMapRequestSerializer(serializers.Serializer):

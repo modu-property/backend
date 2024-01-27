@@ -110,12 +110,11 @@ class GetRealEstatesOnMapService:
     def get_distance_tolerance(self, dto: GetRealEstatesOnMapDto):
         # TODO level은 임시로 정함, 바꿔야함, 1,2 정도의 레벨은 하나하나 보여주지 말고 뭉쳐서 개수만 표현해야할듯..
         zoom_levels: dict[int, int] = {
-            1: 10 * 10,
-            2: 8 * 8,
-            3: 6 * 6,
-            4: 4 * 4,
-            5: 2 * 2,
-            6: 1 * 1,
+            1: 50 * 1000,
+            2: 25 * 1000,
+            3: 15 * 1000,
+            4: 10 * 1000,
+            5: 5 * 1000,
+            6: 1 * 1000,
         }
-        # zoom_levels.
         return zoom_levels.get(dto.zoom_level, 1)

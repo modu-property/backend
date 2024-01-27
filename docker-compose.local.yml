@@ -19,9 +19,9 @@ services:
         gunicorn modu_property.wsgi:application --bind 0.0.0.0:8000 --workers 1 --threads 1
     volumes:
       - .:/modu_property/
-    network_mode: "host"
     extra_hosts:
-      - "nginx:127.0.0.1"
+      - "host.docker.internal:host-gateway"
+      # - "nginx:host-gateway"
 
   manticore:
     container_name: manticore
@@ -46,9 +46,10 @@ services:
       - ./manticore/manticore.conf:/etc/manticoresearch/manticore.conf
       - ./manticore/log:/var/log/manticore
       - ./manticore/index:/var/index/manticore
-    network_mode: "host"
     depends_on:
       - django
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   nginx:
     container_name: core_web
@@ -60,7 +61,8 @@ services:
       - "80:80"
     depends_on:
       - django
-    network_mode: "host"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   celery_worker:
     container_name: celery_worker
@@ -77,7 +79,8 @@ services:
       - django
       - redis_broker
     env_file: .env.local
-    network_mode: "host"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     
   celery_beat:
     container_name: celery_beat
@@ -94,7 +97,8 @@ services:
       - redis_broker
       - celery_worker
     env_file: .env.local
-    network_mode: "host"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   flower:
     container_name: celery_flower
@@ -102,7 +106,8 @@ services:
     env_file: .env.local
     ports:
       - 5555:5555
-    network_mode: "host"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - celery_beat
 
@@ -112,4 +117,5 @@ services:
     image: redis:7.0.5-alpine
     expose:
       - 6379
-    network_mode: "host"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

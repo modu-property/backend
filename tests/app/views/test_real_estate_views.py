@@ -151,8 +151,10 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
 def test_get_real_estates_with_keyword_view(client, get_jwt):
     """
     !!로컬 데이터 사라지므로 주의!!
-    터미널에서 아래 명령어 실행해야 함
+    터미널에서 아래 명령어 실행
     SERVER_ENV=local python manage.py insert_real_estates_for_searching_command
+    manticore container에서 indexing
+    indexer --config /etc/manticoresearch/manticore.conf --all --rotate
     """
     url = reverse("get-real-estates-on-search", kwargs={"type": "deal"})
 

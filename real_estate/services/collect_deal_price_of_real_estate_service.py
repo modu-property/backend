@@ -7,7 +7,7 @@ from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
 
 from real_estate.models import Deal, RealEstate
 from real_estate.serializers import DealSerializer, RealEstateSerializer
-from real_estate.utils.address_converter import AddressConverter
+from real_estate.utils.address_converter import KakaoAddressConverter
 from real_estate.utils.real_estate_collector import RealEstateCollector
 
 """
@@ -18,7 +18,7 @@ from real_estate.utils.real_estate_collector import RealEstateCollector
 class CollectDealPriceOfRealEstateService:
     def __init__(self) -> None:
         self.real_estate_collector = RealEstateCollector()
-        self.address_converter = AddressConverter()
+        self.address_converter = KakaoAddressConverter()
 
     def execute(self, dto: CollectDealPriceOfRealEstateDto):
         deal_prices_of_real_estate: DataFrame = (
@@ -193,8 +193,9 @@ class CollectDealPriceOfRealEstateService:
         if not address_info:
             return False
 
-        real_estate_model = self.create_real_estate_model(
-            deal_price_of_real_estate, address_info
+        real_estate_model: RealEstate = self.create_real_estate_model(
+            deal_price_of_real_estate=deal_price_of_real_estate,
+            address_info=address_info,
         )
 
         real_estate_dict = model_to_dict(real_estate_model)
@@ -234,6 +235,7 @@ class CollectDealPriceOfRealEstateService:
             regional_code=deal_price_of_real_estate["지역코드"],
             lot_number=deal_price_of_real_estate["지번"],
             road_name_address=address_info["road_name_address"],
+            address=address_info["address"],
             latitude=address_info["latitude"],
             longitude=address_info["longitude"],
             point=Point(
