@@ -94,6 +94,7 @@ DB_USER = os.getenv("DB_USER", default="")
 # Application definition
 
 INSTALLED_APPS = [
+    "drf_spectacular",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -107,7 +108,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "django.contrib.gis",
-    "drf_spectacular",
+    "corsheaders",
 ]
 
 # TODO : rest_framework_simplejwt 설정 필요 없으면 제거
@@ -119,6 +120,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -250,4 +252,19 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:8000",
+#     "http://127.0.0.1:8000",
+#     "http://localhost:80",
+#     "http://127.0.0.1:80",
+#     "http://localhost:3000",
+#     "http://127.0.0.1:3000",
+#     "http://host.docker.internal:8000",
+# ]
+
 # CORS_ORIGIN_ALLOW_ALL = True
+
+# CORS_ALLOW_METHODS = [
+#     "GET",
+#     "POST",
+# ]

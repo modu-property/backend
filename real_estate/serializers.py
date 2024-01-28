@@ -54,11 +54,11 @@ class DealSerializer(serializers.ModelSerializer):
             "real_estate_id",
         )
 
-    def get_deal_type(self, instance):
+    def get_deal_type(self, instance) -> None:
         if not instance.deal_type:
             return None
 
-    def convert_square_meter_to_pyung(self, instance):
+    def convert_square_meter_to_pyung(self, instance) -> Decimal:
         self.pyung = round(
             Decimal(instance.area_for_exclusive_use) / Decimal(3.305785), 2
         )
@@ -67,12 +67,12 @@ class DealSerializer(serializers.ModelSerializer):
     def calc_price_per_pyung(self, instance) -> Decimal:
         return round(instance.deal_price / self.pyung, 2)
 
-    def calc_is_deal_canceled(self, instance):
+    def calc_is_deal_canceled(self, instance) -> bool:
         if instance.is_deal_canceled == "O":
             return True
         return False
 
-    def stringify_floor(self, instance):
+    def stringify_floor(self, instance) -> str:
         self.floor = str(instance.floor)
         return self.floor
 
@@ -86,7 +86,7 @@ class GetRealEstateResponseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RealEstate
-        fields = "__all__"
+        exclude = ("point",)
 
 
 class GetRealEstatesOnSearchRequestSerializer(serializers.Serializer):
