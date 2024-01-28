@@ -122,6 +122,8 @@ class GetRealEstatesOnMapRequestSerializer(serializers.Serializer):
 
 
 class GetRealEstatesOnMapResponseSerializer(serializers.Serializer):
+    deals = DealSerializer(many=True)
+
     id = serializers.IntegerField()
     latitude = serializers.CharField(max_length=20)
     longitude = serializers.CharField(max_length=20)

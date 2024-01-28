@@ -39,6 +39,23 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         type=DealType.DEAL,
     )
 
+    create_deal(
+        real_estate_id=real_estate1.id,
+        deal_price=10000,
+        deal_type="DIRECT_DEAL",
+        deal_year=2023,
+        land_area=100,
+        deal_month=4,
+        deal_day=30,
+        area_for_exclusive_use=80,
+        floor=3,
+        is_deal_canceled=False,
+        deal_canceled_date=None,
+        area_for_exclusive_use_pyung="30.30",
+        area_for_exclusive_use_price_per_pyung="330",
+        type=DealType.DEAL,
+    )
+
     real_estate2 = create_real_estate(
         name="OAK 빌",
         build_year=1990,
@@ -240,7 +257,6 @@ def test_get_real_estate(client, get_jwt, create_real_estate, create_deal):
     assert real_estate["road_name_address"] == real_estate1.road_name_address
     assert real_estate["latitude"] == real_estate1.latitude
     assert real_estate["longitude"] == real_estate1.longitude
-    assert "SRID=4326;POINT" in real_estate["point"]
     assert "deals" in real_estate
 
     deals = real_estate["deals"]

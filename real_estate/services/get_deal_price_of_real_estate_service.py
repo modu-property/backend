@@ -18,6 +18,7 @@ from real_estate.serializers import (
     GetRealEstatesOnSearchResponseSerializer,
 )
 from django.contrib.gis.geos import Point
+from django.db.models import QuerySet
 
 
 class GetRealEstateService:
@@ -87,13 +88,13 @@ class GetRealEstatesOnMapService:
         )  # 위경도 받아서 지도의 중심으로 잡음
 
         real_estates: Union[
-            list[dict], bool
+            QuerySet, bool
         ] = self.repository.get_real_estates_by_latitude_and_longitude(
             distance_tolerance=distance_tolerance, center_point=center_point
         )
         if real_estates:
             data: Union[dict, bool, Any] = validate_data(
-                data=real_estates,
+                model=real_estates,
                 serializer=GetRealEstatesOnMapResponseSerializer,
                 many=True,
             )
