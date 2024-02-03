@@ -15,7 +15,6 @@ services:
       - -c
       - |
         envsubst < ./manticore/manticore.conf.template > ./manticore/manticore.conf
-        python manage.py migrate &&
         gunicorn modu_property.wsgi:application --bind 0.0.0.0:8000 --workers 1 --threads 1
     volumes:
       - .:/modu_property/
@@ -84,6 +83,7 @@ services:
   celery_beat:
     container_name: celery_beat
     image: django
+    restart: always
     volumes:
       - .:/var/www/modu_property/beat
     command:

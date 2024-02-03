@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from django.urls import reverse
-from real_estate.enum.deal_enum import DealType
+from real_estate.enum.deal_enum import BrokerageTypesEnum, DealTypesForDBEnum
+from real_estate.enum.real_estate_enum import RealEstateTypesForDBEnum
 from tests.conftests.real_estate_conftest import *
 from tests.conftests.account_conftest import get_jwt
 from django.contrib.gis.geos import Point
@@ -17,6 +18,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         lot_number="서울특별시 서초구 반포동 739",
         road_name_address="서울특별시 서초구 사평대로53길 22 (반포동)",
         address="서울특별시 서초구 반포동 739",
+        real_estate_type=RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value,
         latitude="37.5054",
         longitude="127.0216",
         point=Point(37.5054, 127.0216),
@@ -25,7 +27,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
     create_deal(
         real_estate_id=real_estate1.id,
         deal_price=10000,
-        deal_type="DIRECT_DEAL",
+        brokerage_type=BrokerageTypesEnum.BROKERAGE.value,
         deal_year=2023,
         land_area=100,
         deal_month=3,
@@ -36,13 +38,13 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         deal_canceled_date=None,
         area_for_exclusive_use_pyung="30.30",
         area_for_exclusive_use_price_per_pyung="330",
-        type=DealType.DEAL,
+        deal_type=DealTypesForDBEnum.DEAL.value,
     )
 
     create_deal(
         real_estate_id=real_estate1.id,
         deal_price=10000,
-        deal_type="DIRECT_DEAL",
+        brokerage_type=BrokerageTypesEnum.BROKERAGE.value,
         deal_year=2023,
         land_area=100,
         deal_month=4,
@@ -53,7 +55,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         deal_canceled_date=None,
         area_for_exclusive_use_pyung="30.30",
         area_for_exclusive_use_price_per_pyung="330",
-        type=DealType.DEAL,
+        deal_type=DealTypesForDBEnum.DEAL.value,
     )
 
     real_estate2 = create_real_estate(
@@ -63,6 +65,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         lot_number="서울특별시 서초구 반포동 734-32 반포엠",
         road_name_address="서울특별시 서초구 사평대로53길 30 (반포동)",
         address="서울특별시 서초구 반포동 734-32 반포엠",
+        real_estate_type=RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value,
         latitude="37.5056",
         longitude="127.0215",
         point=Point(37.5056, 127.0215),
@@ -71,7 +74,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
     create_deal(
         real_estate_id=real_estate2.id,
         deal_price=20000,
-        deal_type="BROKERAGE_DEAL",
+        brokerage_type=BrokerageTypesEnum.BROKERAGE.value,
         deal_year=2023,
         land_area=200,
         deal_month=12,
@@ -82,7 +85,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         deal_canceled_date=None,
         area_for_exclusive_use_pyung="60.60",
         area_for_exclusive_use_price_per_pyung="329.99",
-        type=DealType.DEAL,
+        deal_type=DealTypesForDBEnum.DEAL.value,
     )
 
     real_estate3 = create_real_estate(
@@ -92,6 +95,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         lot_number="서울특별시 강남구 논현동 175-19",
         road_name_address="서울특별시 강남구 봉은사로25길 34 (논현동)",
         address="서울특별시 강남구 논현동 175-19",
+        real_estate_type=RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value,
         latitude="37.5094",
         longitude="127.0321",
         point=Point(37.5094, 127.0321),
@@ -100,7 +104,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
     create_deal(
         real_estate_id=real_estate3.id,
         deal_price=30000,
-        deal_type="BROKERAGE_DEAL",
+        brokerage_type=BrokerageTypesEnum.BROKERAGE.value,
         deal_year=2022,
         land_area=150,
         deal_month=1,
@@ -111,7 +115,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         deal_canceled_date=None,
         area_for_exclusive_use_pyung="60.60",
         area_for_exclusive_use_price_per_pyung="329.99",
-        type=DealType.DEAL,
+        deal_type=DealTypesForDBEnum.DEAL.value,
     )
 
     real_estate4 = create_real_estate(
@@ -121,6 +125,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         lot_number="부산광역시 남구 대연동 1724-1",
         road_name_address="부산광역시 남구 유엔로157번나길 48 (대연동, 지산로얄빌라)",
         address="부산광역시 남구 대연동 1724-1",
+        real_estate_type=RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value,
         latitude="35.133",
         longitude="129.0959",
         point=Point(35.133, 129.0959),
@@ -129,7 +134,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
     create_deal(
         real_estate_id=real_estate4.id,
         deal_price=30000,
-        deal_type="BROKERAGE_DEAL",
+        brokerage_type=BrokerageTypesEnum.BROKERAGE.value,
         deal_year=2022,
         land_area=150,
         deal_month=1,
@@ -140,10 +145,10 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         deal_canceled_date=None,
         area_for_exclusive_use_pyung="60.60",
         area_for_exclusive_use_price_per_pyung="329.99",
-        type=DealType.DEAL,
+        deal_type=DealTypesForDBEnum.DEAL.value,
     )
 
-    url = reverse("get-real-estates-on-map", kwargs={"type": "deal"})
+    url = reverse("get-real-estates-on-map", kwargs={"deal_type": "deal"})
 
     _jwt = get_jwt
 
@@ -165,6 +170,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         assert "longitude" in real_estate
         assert "area_for_exclusive_use_pyung" in real_estate
         assert "area_for_exclusive_use_price_per_pyung" in real_estate
+        assert "real_estate_type" in real_estate
 
 
 @pytest.mark.django_db(transaction=True)
@@ -177,13 +183,13 @@ def test_get_real_estates_with_keyword_view(client, get_jwt):
     manticore container에서 indexing
     indexer --config /etc/manticoresearch/manticore.conf --all --rotate
     """
-    url = reverse("get-real-estates-on-search", kwargs={"type": "deal"})
+    url = reverse("get-real-estates-on-search", kwargs={"deal_type": "deal"})
 
     _jwt = get_jwt
 
     headers = {"HTTP_AUTHORIZATION": f"Bearer {_jwt}"}
     query_params = {
-        "keyword": "반포",
+        "keyword": "강남",
     }
 
     response = client.get(url, data=query_params, **headers)
@@ -199,6 +205,7 @@ def test_get_real_estate(client, get_jwt, create_real_estate, create_deal):
         lot_number="서울특별시 서초구 반포동 739",
         road_name_address="서울특별시 서초구 사평대로53길 22 (반포동)",
         address="서울특별시 서초구 반포동 739",
+        real_estate_type=RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value,
         latitude="37.5054",
         longitude="127.0216",
         point=Point(37.5054, 127.0216),
@@ -207,7 +214,7 @@ def test_get_real_estate(client, get_jwt, create_real_estate, create_deal):
     create_deal(
         real_estate_id=real_estate1.id,
         deal_price=10000,
-        deal_type="DIRECT_DEAL",
+        brokerage_type=BrokerageTypesEnum.DIRECT.value,
         deal_year=2023,
         land_area=100,
         deal_month=3,
@@ -218,13 +225,13 @@ def test_get_real_estate(client, get_jwt, create_real_estate, create_deal):
         deal_canceled_date=None,
         area_for_exclusive_use_pyung="30.30",
         area_for_exclusive_use_price_per_pyung="330",
-        type=DealType.DEAL,
+        deal_type=DealTypesForDBEnum.DEAL.value,
     )
 
     create_deal(
         real_estate_id=real_estate1.id,
         deal_price=20000,
-        deal_type="BROKERAGE_DEAL",
+        brokerage_type=BrokerageTypesEnum.BROKERAGE.value,
         deal_year=2023,
         land_area=200,
         deal_month=12,
@@ -235,7 +242,7 @@ def test_get_real_estate(client, get_jwt, create_real_estate, create_deal):
         deal_canceled_date=None,
         area_for_exclusive_use_pyung="60.60",
         area_for_exclusive_use_price_per_pyung="329.99",
-        type=DealType.DEAL,
+        deal_type=DealTypesForDBEnum.DEAL.value,
     )
 
     url = reverse("get-real-estate", kwargs={"id": real_estate1.id})
@@ -255,6 +262,7 @@ def test_get_real_estate(client, get_jwt, create_real_estate, create_deal):
     assert real_estate["regional_code"] == real_estate1.regional_code
     assert real_estate["lot_number"] == real_estate1.lot_number
     assert real_estate["road_name_address"] == real_estate1.road_name_address
+    assert real_estate["real_estate_type"] == real_estate1.real_estate_type
     assert real_estate["latitude"] == real_estate1.latitude
     assert real_estate["longitude"] == real_estate1.longitude
     assert "deals" in real_estate
@@ -262,11 +270,11 @@ def test_get_real_estate(client, get_jwt, create_real_estate, create_deal):
     deals = real_estate["deals"]
     for deal in deals:
         assert "deal_price" in deal
-        assert "deal_type" in deal
+        assert "brokerage_type" in deal
         assert "deal_year" in deal
         assert "land_area" in deal
         assert "deal_month" in deal
         assert "deal_day" in deal
         assert "area_for_exclusive_use_pyung" in deal
         assert "area_for_exclusive_use_price_per_pyung" in deal
-        assert "type" in deal
+        assert "deal_type" in deal

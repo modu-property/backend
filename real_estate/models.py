@@ -2,17 +2,15 @@ from django.db import models
 from django.contrib.gis.db import models as gis_models
 from django.contrib.postgres.operations import CreateExtension
 from django.db import migrations
-from modu_property.common.models.models import DateTimeFields
-
-DEAL_TYPES = (("BROKERAGE_DEAL", "BROKERAGE_DEAL"), ("DIRECT_DEAL", "DIRECT_DEAL"))
-TYPES = (("DEAL", "DEAL"), ("JEONSE", "JEONSE"), ("MONTHLY_RENT", "MONTHLY_RENT"))
+from real_estate.enum.deal_enum import DEAL_TYPES, BROKERAGE_TYPES
+from real_estate.enum.real_estate_enum import REAL_ESTATE_TYPES
 
 
 class Migration(migrations.Migration):
     operations = [CreateExtension("postgis")]
 
 
-class RealEstate(DateTimeFields, gis_models.Model):
+class RealEstate(gis_models.Model):
     class Meta:
         db_table = "real_estate"
 
@@ -32,12 +30,19 @@ class RealEstate(DateTimeFields, gis_models.Model):
         help_text="도로명 주소", null=True, blank=True, max_length=50
     )
     address = models.CharField(help_text="주소", null=True, blank=True, max_length=50)
+    real_estate_type = models.CharField(
+        help_text="부동산 타입",
+        choices=REAL_ESTATE_TYPES,
+        max_length=20,
+    )
     latitude = models.CharField(help_text="위도", null=False, blank=False, max_length=20)
     longitude = models.CharField(help_text="경도", null=False, blank=False, max_length=20)
     point = gis_models.PointField(geography=True, null=False, blank=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
-class Deal(DateTimeFields):
+class Deal(models.Model):
     class Meta:
         db_table = "deal"
 
@@ -46,12 +51,12 @@ class Deal(DateTimeFields):
     deal_price = models.PositiveIntegerField(
         help_text="거래금액(전월세 보증금)", null=False, blank=False
     )
-    deal_type = models.CharField(
+    brokerage_type = models.CharField(
         help_text="중개/직거래(거래유형)",
         null=True,
         blank=True,
-        choices=DEAL_TYPES,
-        max_length=14,
+        choices=BROKERAGE_TYPES,
+        max_length=10,
     )
     deal_year = models.SmallIntegerField(help_text="계약년도(년)", null=False, blank=False)
     land_area = models.CharField(
@@ -73,12 +78,15 @@ class Deal(DateTimeFields):
     area_for_exclusive_use_price_per_pyung = models.CharField(
         help_text="전용면적 평당가", null=False, blank=False, max_length=8
     )
-    type = models.CharField(
+    deal_type = models.CharField(
         help_text="유형(DEAL(매매), JEONSE(전세), MONTHLY_RENT(월세))",
         null=False,
         blank=False,
+        choices=DEAL_TYPES,
         max_length=13,
     )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     real_estate = models.ForeignKey(
         "RealEstate",
@@ -87,7 +95,7 @@ class Deal(DateTimeFields):
     )
 
 
-class MonthlyRent(DateTimeFields):
+class MonthlyRent(models.Model):
     class Meta:
         db_table = "monthly_rent"
 
@@ -99,7 +107,7 @@ class MonthlyRent(DateTimeFields):
     )
 
 
-class Region(DateTimeFields):
+class Region(models.Model):
     class Meta:
         db_table = "region"
 
@@ -110,3 +118,7 @@ class Region(DateTimeFields):
     sigungu = models.CharField(help_text="시군구명", max_length=15, null=True, blank=True)
     ubmyundong = models.CharField(help_text="읍면동", max_length=15, null=True, blank=True)
     dongri = models.CharField(help_text="동리", max_length=15, null=True, blank=True)
+    latitude = models.CharField(help_text="위도", null=True, blank=True, max_length=20)
+    longitude = models.CharField(help_text="경도", null=True, blank=True, max_length=20)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

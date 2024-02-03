@@ -31,12 +31,12 @@ urlpatterns = [
         name="get-real-estate",
     ),
     path(
-        "real-estates/<str:type>/keyword",
+        "real-estates/<str:deal_type>/keyword",
         app_views.GetRealEstatesOnSearchView.as_view(),
         name="get-real-estates-on-search",
     ),
     path(
-        "real-estates/<str:type>",
+        "real-estates/<str:deal_type>",
         app_views.GetRealEstatesOnMapView.as_view(),
         name="get-real-estates-on-map",
     ),

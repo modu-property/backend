@@ -4,10 +4,15 @@ from pandas import DataFrame
 from modu_property.utils.loggers import logger, file_logger
 from modu_property.utils.validator import validate_data
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
+from real_estate.enum.deal_enum import BrokerageTypesEnum, DealTypesForDBEnum
+from real_estate.enum.real_estate_enum import (
+    RealEstateTypesForDBEnum,
+    RealEstateTypesForQueryEnum,
+)
 
 from real_estate.models import Deal, RealEstate
 from real_estate.serializers import DealSerializer, RealEstateSerializer
-from real_estate.utils.address_converter import AddressConverter
+from real_estate.utils.address_converter import KakaoAddressConverter
 from real_estate.utils.real_estate_collector import RealEstateCollector
 
 """
@@ -18,7 +23,7 @@ from real_estate.utils.real_estate_collector import RealEstateCollector
 class CollectDealPriceOfRealEstateService:
     def __init__(self) -> None:
         self.real_estate_collector = RealEstateCollector()
-        self.address_converter = AddressConverter()
+        self.address_converter = KakaoAddressConverter()
 
     def execute(self, dto: CollectDealPriceOfRealEstateDto):
         deal_prices_of_real_estate: DataFrame = (
@@ -36,7 +41,7 @@ class CollectDealPriceOfRealEstateService:
             return
 
         result = self.create_real_estates(
-            deal_prices_of_real_estate=deal_prices_of_real_estate
+            deal_prices_of_real_estate=deal_prices_of_real_estate, dto=dto
         )
 
         if not result:
@@ -87,29 +92,6 @@ class CollectDealPriceOfRealEstateService:
 
         return deal_prices_of_real_estate
 
-    def get_deal_models(
-        self, dto, deal_price_of_real_estate_list, inserted_real_estate_models_dict
-    ):
-        deal_models = []
-        for deal_price_of_real_estate in deal_price_of_real_estate_list:
-            regional_code = deal_price_of_real_estate["지역코드"]
-            lot_number = deal_price_of_real_estate["지번"]
-            unique_key = f"{regional_code}{lot_number}"
-
-            validated_deal = self.create_validated_deal_model(
-                deal_price_of_real_estate,
-                inserted_real_estate_models_dict[unique_key],
-                dto.trade_type,
-            )
-            if not validated_deal:
-                logger.error(
-                    f"유효성 검사 실패 deal_price_of_real_estate : {deal_price_of_real_estate}"
-                )
-                return False
-
-            deal_models.append(Deal(**validated_deal))
-        return deal_models
-
     def get_inserted_real_estate_models_dict(self, inserted_real_estate_models):
         inserted_real_estate_models_dict = {}
         for inserted_real_estate_model in inserted_real_estate_models:
@@ -119,10 +101,24 @@ class CollectDealPriceOfRealEstateService:
             inserted_real_estate_models_dict[unique_key] = inserted_real_estate_model
         return inserted_real_estate_models_dict
 
-    def create_real_estates(self, deal_prices_of_real_estate: DataFrame):
+    def convert_real_estate_type(self, dto: CollectDealPriceOfRealEstateDto) -> str:
+        if dto.real_estate_type == RealEstateTypesForQueryEnum.MULTI_UNIT_HOUSE.value:
+            return RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value
+        return ""
+
+    def create_real_estates(
+        self,
+        deal_prices_of_real_estate: DataFrame,
+        dto: CollectDealPriceOfRealEstateDto,
+    ):
         deal_price_of_real_estate_list = []
         unique_keys = {}
         real_estate_models = []
+
+        real_estate_type = self.convert_real_estate_type(dto)
+        if not real_estate_type:
+            logger.error(f"right real_estate_type not exist : {real_estate_type}")
+            return False
 
         for _, deal_price_of_real_estate in deal_prices_of_real_estate.iterrows():
             regional_code = deal_price_of_real_estate["지역코드"]
@@ -130,7 +126,8 @@ class CollectDealPriceOfRealEstateService:
             unique_key = f"{regional_code}{lot_number}"
 
             validated_real_estate = self.create_validated_real_estate(
-                deal_price_of_real_estate
+                deal_price_of_real_estate=deal_price_of_real_estate,
+                real_estate_type=real_estate_type,
             )
             if not validated_real_estate:
                 logger.error(
@@ -167,28 +164,31 @@ class CollectDealPriceOfRealEstateService:
             )
             return False
 
-    def create_validated_deal_model(
-        self, deal_price_of_real_estate, inserted_real_estate_model, type
-    ):
-        deal_model = self.create_deal_model(
-            deal_price_of_real_estate, inserted_real_estate_model, type
-        )
-
-        deal_dict = model_to_dict(deal_model)
-
-        validated_deal_model = validate_data(
-            model=deal_model,
-            data=deal_dict,
-            serializer=DealSerializer,
-        )
-
-        return validated_deal_model
-
-    def create_validated_real_estate(self, deal_price_of_real_estate):
-        address_info = self.address_converter.convert_address(
-            dong=deal_price_of_real_estate["법정동"],
+    def create_real_estate_model(
+        self, deal_price_of_real_estate, address_info, real_estate_type: str
+    ) -> RealEstate:
+        return RealEstate(
+            name=deal_price_of_real_estate["연립다세대"],
+            build_year=deal_price_of_real_estate["건축년도"],
+            regional_code=deal_price_of_real_estate["지역코드"],
             lot_number=deal_price_of_real_estate["지번"],
+            road_name_address=address_info["road_name_address"],
+            address=address_info["address"],
+            real_estate_type=real_estate_type,
+            latitude=address_info["latitude"],
+            longitude=address_info["longitude"],
+            point=Point(
+                float(address_info["latitude"]), float(address_info["longitude"])
+            ),
         )
+
+    def create_validated_real_estate(
+        self, deal_price_of_real_estate, real_estate_type: str
+    ):
+        dong = deal_price_of_real_estate["법정동"]
+        lot_number = deal_price_of_real_estate["지번"]
+        query: str = f"{dong} {lot_number}"
+        address_info = self.address_converter.convert_address(query=query)
 
         if not address_info:
             return False
@@ -196,6 +196,7 @@ class CollectDealPriceOfRealEstateService:
         real_estate_model: RealEstate = self.create_real_estate_model(
             deal_price_of_real_estate=deal_price_of_real_estate,
             address_info=address_info,
+            real_estate_type=real_estate_type,
         )
 
         real_estate_dict = model_to_dict(real_estate_model)
@@ -208,12 +209,61 @@ class CollectDealPriceOfRealEstateService:
 
         return validated_real_estate_model
 
+    def get_deal_models(
+        self, dto, deal_price_of_real_estate_list, inserted_real_estate_models_dict
+    ):
+        deal_models = []
+        for deal_price_of_real_estate in deal_price_of_real_estate_list:
+            regional_code = deal_price_of_real_estate["지역코드"]
+            lot_number = deal_price_of_real_estate["지번"]
+            unique_key = f"{regional_code}{lot_number}"
+
+            validated_deal = self.create_validated_deal_model(
+                deal_price_of_real_estate,
+                inserted_real_estate_models_dict[unique_key],
+                dto.deal_type,
+            )
+            if not validated_deal:
+                logger.error(
+                    f"유효성 검사 실패 deal_price_of_real_estate : {deal_price_of_real_estate}"
+                )
+                return False
+
+            deal_models.append(Deal(**validated_deal))
+        return deal_models
+
+    def create_validated_deal_model(
+        self, deal_price_of_real_estate, inserted_real_estate_model, deal_type
+    ):
+        deal_model = self.create_deal_model(
+            deal_price_of_real_estate, inserted_real_estate_model, deal_type
+        )
+
+        deal_dict = model_to_dict(deal_model)
+
+        validated_deal_model = validate_data(
+            model=deal_model,
+            data=deal_dict,
+            serializer=DealSerializer,
+        )
+
+        return validated_deal_model
+
     def create_deal_model(
-        self, deal_price_of_real_estate, inserted_real_estate_model, type
+        self, deal_price_of_real_estate, inserted_real_estate_model, deal_type
     ) -> Deal:
+        brokerage_type = deal_price_of_real_estate["거래유형"]
+        _deal_type = DealTypesForDBEnum.DEAL.value
+        if deal_type == "전세":
+            _deal_type = DealTypesForDBEnum.JEONSE.value
+        elif deal_type == "월세":
+            _deal_type = DealTypesForDBEnum.MONTHLY_RENT.value
+
         return Deal(
             deal_price=deal_price_of_real_estate["거래금액"],
-            deal_type=deal_price_of_real_estate["거래유형"],
+            brokerage_type=BrokerageTypesEnum.BROKERAGE.value
+            if brokerage_type == "중개거래"
+            else BrokerageTypesEnum.DIRECT.value,
             deal_year=deal_price_of_real_estate["년"],
             land_area=deal_price_of_real_estate["대지권면적"],
             deal_month=deal_price_of_real_estate["월"],
@@ -222,25 +272,8 @@ class CollectDealPriceOfRealEstateService:
             floor=deal_price_of_real_estate["층"],
             is_deal_canceled=deal_price_of_real_estate["해제여부"],
             deal_canceled_date=deal_price_of_real_estate["해제사유발생일"],
-            type=type,
+            deal_type=_deal_type,
             real_estate_id=inserted_real_estate_model.id,
-        )
-
-    def create_real_estate_model(
-        self, deal_price_of_real_estate, address_info
-    ) -> RealEstate:
-        return RealEstate(
-            name=deal_price_of_real_estate["연립다세대"],
-            build_year=deal_price_of_real_estate["건축년도"],
-            regional_code=deal_price_of_real_estate["지역코드"],
-            lot_number=deal_price_of_real_estate["지번"],
-            road_name_address=address_info["road_name_address"],
-            address=address_info["address"],
-            latitude=address_info["latitude"],
-            longitude=address_info["longitude"],
-            point=Point(
-                float(address_info["latitude"]), float(address_info["longitude"])
-            ),
         )
 
     def get_data_in_db(self, dto):
@@ -250,7 +283,7 @@ class CollectDealPriceOfRealEstateService:
                 regional_code=dto.regional_code,
                 deals__deal_year=int(dto.year_month[:4]),
                 deals__deal_month=int(dto.year_month[4:]),
-                deals__type=dto.trade_type,
+                deals__deal_type=dto.deal_type,
                 # deal__deal_type=None,
             )
             .all()

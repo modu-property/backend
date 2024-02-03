@@ -14,8 +14,10 @@ from real_estate.models import RealEstate
 from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.serializers import (
     GetRealEstateResponseSerializer,
+    GetRealEstatesAndRegionsOnSearchResponseSerializer,
     GetRealEstatesOnMapResponseSerializer,
     GetRealEstatesOnSearchResponseSerializer,
+    GetRegionsOnSearchResponseSerializer,
 )
 from django.contrib.gis.geos import Point
 from django.db.models import QuerySet
@@ -47,7 +49,24 @@ class GetRealEstatesOnSearchService:
         self.manticoresearch_client = ManticoreClient()
 
     def execute(self, dto: GetRealEstatesOnSearchDto) -> ServiceResultDto:
-        real_estates: list = self.get_real_estates(dto=dto)
+        result: dict[str, list] = {}
+
+        regions: list = self.get_real_estates(dto=dto, index="region_index")
+        if regions:
+            data: Any = validate_data(
+                data=list(regions),
+                serializer=GetRegionsOnSearchResponseSerializer,
+                many=True,
+            )
+            if not data:
+                return ServiceResultDto(
+                    message="GetRegionsOnSearchResponseSerializer 에러",
+                    status_code=400,
+                )
+
+            result["regions"] = list(regions)
+
+        real_estates: list = self.get_real_estates(dto=dto, index="real_estate")
         if real_estates:
             data: Any = validate_data(
                 data=list(real_estates),
@@ -59,14 +78,32 @@ class GetRealEstatesOnSearchService:
                     message="GetRealEstatesOnSearchResponseSerializer 에러",
                     status_code=400,
                 )
-            return ServiceResultDto(data=data)
+            result["real_estates"] = list(real_estates)
+
+        if real_estates or regions:
+            data = validate_data(
+                data=result,
+                serializer=GetRealEstatesAndRegionsOnSearchResponseSerializer,
+            )
+            if not data:
+                return ServiceResultDto(
+                    message="GetRealEstatesAndRegionsOnSearchResponseSerializer 에러",
+                    status_code=400,
+                )
+
+            return ServiceResultDto(data=result)
         return ServiceResultDto(status_code=404)
 
-    def get_real_estates(self, dto: GetRealEstatesOnSearchDto) -> list:
+    def get_real_estates(self, dto: GetRealEstatesOnSearchDto, index: str = "") -> list:
         real_estates = []
-        index = "real_estate"
         query = {"query_string": f"@* *{dto.keyword}*"}
-        hits = self.manticoresearch_client.search(index=index, query=query)
+
+        if index == "region_index":
+            dto.limit = 3
+
+        hits = self.manticoresearch_client.search(
+            index=index, query=query, limit=dto.limit
+        )
 
         for hit in hits:
             real_estate_info = hit["_source"]

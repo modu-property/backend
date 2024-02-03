@@ -1,5 +1,6 @@
 from decimal import Decimal
 from rest_framework import serializers
+from real_estate.enum.deal_enum import DEAL_TYPES
 from real_estate.models import Deal, RealEstate
 
 
@@ -13,6 +14,7 @@ class RealEstateSerializer(serializers.ModelSerializer):
             "lot_number",
             "road_name_address",
             "address",
+            "real_estate_type",
             "latitude",
             "longitude",
             "point",
@@ -20,7 +22,6 @@ class RealEstateSerializer(serializers.ModelSerializer):
 
 
 class DealSerializer(serializers.ModelSerializer):
-    deal_type = serializers.SerializerMethodField()
     area_for_exclusive_use_pyung = serializers.SerializerMethodField(
         "convert_square_meter_to_pyung"
     )
@@ -39,7 +40,7 @@ class DealSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "deal_price",
-            "deal_type",
+            "brokerage_type",
             "deal_year",
             "land_area",
             "deal_month",
@@ -50,13 +51,9 @@ class DealSerializer(serializers.ModelSerializer):
             "deal_canceled_date",
             "area_for_exclusive_use_pyung",
             "area_for_exclusive_use_price_per_pyung",
-            "type",
+            "deal_type",
             "real_estate_id",
         )
-
-    def get_deal_type(self, instance) -> None:
-        if not instance.deal_type:
-            return None
 
     def convert_square_meter_to_pyung(self, instance) -> Decimal:
         self.pyung = round(
@@ -90,13 +87,9 @@ class GetRealEstateResponseSerializer(serializers.ModelSerializer):
 
 
 class GetRealEstatesOnSearchRequestSerializer(serializers.Serializer):
-    TYPE_CHOICES = (
-        ("deal", "deal"),
-        ("jeonse", "jeonse"),
-        ("monthly_rent", "monthly_rent"),
-    )
-    type = serializers.ChoiceField(choices=TYPE_CHOICES)
+    deal_type = serializers.ChoiceField(choices=DEAL_TYPES)
     keyword = serializers.CharField()
+    limit = serializers.IntegerField(min_value=1, max_value=300)
 
 
 class GetRealEstatesOnSearchResponseSerializer(serializers.Serializer):
@@ -105,17 +98,13 @@ class GetRealEstatesOnSearchResponseSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=30)
     road_name_address = serializers.CharField(max_length=30, allow_blank=True)
     address = serializers.CharField(max_length=30)
+    real_estate_type = serializers.CharField(max_length=20)
     latitude = serializers.FloatField()
     longitude = serializers.FloatField()
 
 
 class GetRealEstatesOnMapRequestSerializer(serializers.Serializer):
-    TYPE_CHOICES = (
-        ("deal", "deal"),
-        ("jeonse", "jeonse"),
-        ("monthly_rent", "monthly_rent"),
-    )
-    type = serializers.ChoiceField(choices=TYPE_CHOICES)
+    deal_type = serializers.ChoiceField(choices=DEAL_TYPES)
     latitude = serializers.FloatField()
     longitude = serializers.FloatField()
     zoom_level = serializers.IntegerField(max_value=6, min_value=0)
@@ -129,3 +118,19 @@ class GetRealEstatesOnMapResponseSerializer(serializers.Serializer):
     longitude = serializers.CharField(max_length=20)
     area_for_exclusive_use_pyung = serializers.CharField(max_length=6)
     area_for_exclusive_use_price_per_pyung = serializers.CharField(max_length=8)
+    real_estate_type = serializers.CharField(max_length=20)
+
+
+class GetRegionsOnSearchResponseSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    sido = serializers.CharField(max_length=10, allow_blank=True)
+    sigungu = serializers.CharField(max_length=15, allow_blank=True)
+    ubmyundong = serializers.CharField(max_length=20, allow_blank=True)
+    dongri = serializers.CharField(max_length=20, allow_blank=True)
+    latitude = serializers.FloatField()
+    longitude = serializers.FloatField()
+
+
+class GetRealEstatesAndRegionsOnSearchResponseSerializer(serializers.Serializer):
+    regions = GetRegionsOnSearchResponseSerializer(many=True, required=False)
+    real_estates = GetRealEstatesOnSearchResponseSerializer(many=True, required=False)

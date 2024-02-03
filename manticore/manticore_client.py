@@ -24,9 +24,9 @@ class ManticoreClient:
         except Exception as e:
             logger.error(f"ManticoreClient run_indexer e : {e}")
 
-    def search(self, index: str, query: dict):
+    def search(self, index: str, query: dict, limit: int):
         try:
-            search_request = SearchRequest(index=index, query=query)
+            search_request = SearchRequest(index=index, query=query, limit=limit)
 
             search_response = self.search_instance.search(search_request)
             hits = search_response.hits

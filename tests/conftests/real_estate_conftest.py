@@ -1,5 +1,6 @@
 import datetime
 from pandas import DataFrame
+import pandas
 import pytest
 from real_estate.models import Deal, RealEstate, MonthlyRent
 from django.contrib.gis.geos import Point
@@ -16,6 +17,7 @@ def create_real_estate():
         lot_number: str,
         road_name_address: str,
         address: str,
+        real_estate_type: str,
         latitude: str,
         longitude: str,
         point: Point,
@@ -27,6 +29,7 @@ def create_real_estate():
             lot_number=lot_number,
             road_name_address=road_name_address,
             address=address,
+            real_estate_type=real_estate_type,
             latitude=latitude,
             longitude=longitude,
             point=point,
@@ -42,7 +45,7 @@ def create_deal():
     def _create_deal(
         real_estate_id: int,
         deal_price: int,
-        deal_type: str,
+        brokerage_type: str,
         deal_year: int,
         land_area: str,
         deal_month: int,
@@ -53,12 +56,12 @@ def create_deal():
         deal_canceled_date: datetime,
         area_for_exclusive_use_pyung: str,
         area_for_exclusive_use_price_per_pyung: str,
-        type: str,
+        deal_type: str,
     ):
         deal = Deal(
             real_estate_id=real_estate_id,
             deal_price=deal_price,
-            deal_type=deal_type,
+            brokerage_type=brokerage_type,
             deal_year=deal_year,
             land_area=land_area,
             deal_month=deal_month,
@@ -69,7 +72,7 @@ def create_deal():
             deal_canceled_date=deal_canceled_date,
             area_for_exclusive_use_pyung=area_for_exclusive_use_pyung,
             area_for_exclusive_use_price_per_pyung=area_for_exclusive_use_price_per_pyung,
-            type=type,
+            deal_type=deal_type,
         )
         deal.save()
         return deal
@@ -111,17 +114,20 @@ def mock_collect_deal_price_of_real_estate():
     return DataFrame.from_dict(dct)
 
 
+def get_file_path(file_name: str):
+    dir_path = "tests/conftests"
+    return os.path.join(os.getcwd(), dir_path, file_name)
+
+
 @pytest.fixture
 def insert_regional_codes():
     def _insert_regional_codes(start: int = 0, end: int = 30000):
         connection = connections["default"]
 
-        dir_path = "tests/conftests"
-        sql_file_name = "insert_regional_codes.sql"
-        sql_file = os.path.join(os.getcwd(), dir_path, sql_file_name)
+        path: str = get_file_path(file_name="insert_regional_codes.sql")
 
         # Read SQL commands from the file
-        with open(sql_file, "r") as file:
+        with open(path, "r") as file:
             sql_commands = file.read()
 
         # Split the SQL commands if there are multiple commands
@@ -134,3 +140,17 @@ def insert_regional_codes():
                     cursor.execute(command)
 
     return _insert_regional_codes
+
+
+@pytest.fixture
+def get_dongs():
+    def _get_dongs(count: int = 10) -> DataFrame:
+        path: str = get_file_path(file_name="dong.csv")
+
+        df: pandas.DataFrame = pandas.read_csv(
+            filepath_or_buffer=path, nrows=count, keep_default_na=False
+        )
+
+        return df
+
+    return _get_dongs

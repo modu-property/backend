@@ -8,13 +8,14 @@ class GetRealEstateDto:
 
 @dataclass
 class GetRealEstatesOnSearchDto:
-    type: str
+    deal_type: str
     keyword: str
+    limit: int
 
 
 @dataclass
 class GetRealEstatesOnMapDto:
-    type: str
+    deal_type: str
     latitude: float
     longitude: float
     zoom_level: int

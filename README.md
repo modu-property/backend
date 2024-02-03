@@ -53,7 +53,7 @@ brew install postgis gdal libgeoip
 * docker-compose -f docker-compose.testing.yml up -d --build --force-recreate
 
 # migrate
-SERVER_ENV 설정하기
+SERVER_ENV 설정하기, django container에서 실행하기
 ## local용
 * migration
     * SERVER_ENV=local python manage.py makemigrations --settings=modu_property.settings.local_settings
@@ -209,17 +209,20 @@ pytest 관련 로그는 pytest.ini에서 설정함
 
 # 데이터 수집
 ## Region 테이블에 지역 코드 수집. 법정동이 바뀌지 않는 이상 DB에 한번 적용하면 됨.
-SERVER_ENV=local python manage.py collect_regional_code_command
+SERVER_ENV=local python manage.py collect_regional_code_command  
 
 ## 전체/특정지역 부동산 매매 정보 수집 명령어
 전국의 빌라, 아파트에 대해 2016년부터 현재까지 수집하도록 함  
-SERVER_ENV=local python manage.py collect_deal_price_of_real_estate_command 서울특별시
+SERVER_ENV=local python manage.py collect_deal_price_of_real_estate_command 서울특별시  
 
 # 현재 연월의 부동산 매매 정보 수집 스케쥴러
-collect_deal_price_of_real_estate_command 으로 전체 수집을 했다면, collect_deal_price_of_real_estate_task 스케쥴러로 최신 데이터 수집함
+collect_deal_price_of_real_estate_command 으로 전체 수집을 했다면, collect_deal_price_of_real_estate_task 스케쥴러로 최신 데이터 수집함  
 
 # ngrok
-`ngrok http --host-header=localhost 80`
+`ngrok http --host-header=localhost 80`  
+
+# localxpose
+loclx tunnel http --to localhost:80  
 
 # TODO
 23.12.05  

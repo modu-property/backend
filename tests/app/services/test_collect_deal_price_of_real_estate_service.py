@@ -1,7 +1,11 @@
 import pytest
 
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
-from real_estate.enum.deal_enum import DealType
+from real_estate.enum.deal_enum import DealTypesForDBEnum
+from real_estate.enum.real_estate_enum import (
+    RealEstateTypesForDBEnum,
+    RealEstateTypesForQueryEnum,
+)
 from real_estate.models import RealEstate
 from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.services.collect_deal_price_of_real_estate_service import (
@@ -41,6 +45,7 @@ class TestCollectDealPriceOfRealEstateService:
             lot_number="134-2",
             road_name_address="서울 종로구 자하문로 99-3",
             address="서울특별시 종로구 청운동 134-2",
+            real_estate_type=RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value,
             latitude="37.5848604533872",
             longitude="126.969812605749",
             point=Point(37.5848604533872, 126.969812605749),
@@ -49,7 +54,7 @@ class TestCollectDealPriceOfRealEstateService:
         create_deal(
             real_estate_id=real_estate1.id,
             deal_price=28000,
-            deal_type=None,
+            brokerage_type=None,
             deal_year=2020,
             land_area="37.902",
             deal_month=1,
@@ -60,12 +65,12 @@ class TestCollectDealPriceOfRealEstateService:
             deal_canceled_date=None,
             area_for_exclusive_use_pyung="16.28",
             area_for_exclusive_use_price_per_pyung="1719.90",
-            type=DealType.DEAL.value,
+            deal_type=DealTypesForDBEnum.DEAL.value,
         )
 
         dto = CollectDealPriceOfRealEstateDto(
-            property_type="연립다세대",
-            trade_type=DealType.DEAL.value,
+            real_estate_type=RealEstateTypesForQueryEnum.MULTI_UNIT_HOUSE.value,
+            deal_type=DealTypesForDBEnum.DEAL.value,
             regional_code="11110",
             year_month="202001",
         )

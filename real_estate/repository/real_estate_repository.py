@@ -1,6 +1,6 @@
-from typing import Any, Optional, Union
+from typing import Any, List, Optional, Union
 from real_estate.dto.real_estate_dto import GetRealEstatesOnMapDto
-from real_estate.models import Deal, RealEstate
+from real_estate.models import Deal, RealEstate, Region
 from modu_property.utils.loggers import logger
 from django.contrib.gis.db.models.functions import Distance
 from django.db.models import F
@@ -25,6 +25,11 @@ class RealEstateRepository:
     def get_real_estates_by_latitude_and_longitude(
         self, distance_tolerance: int, center_point: Point
     ) -> Union[QuerySet, bool]:
+        """TODO  zoom_level에 따라 clustering 해야 함
+        https://stackoverflow.com/questions/4349160/how-to-group-latitude-longitude-points-that-are-close-to-each-other
+        https://dev.to/jmnmv12/unveiling-the-power-of-spatial-clustering-with-postgresql-5bbo
+        """
+
         try:
             subquery = Subquery(
                 Deal.objects.filter(real_estate_id=OuterRef("real_estate_id"))
@@ -49,4 +54,29 @@ class RealEstateRepository:
             return real_estates
         except Exception as e:
             logger.error(f"get_real_estates_by_latitude_and_longitude e : {e}")
+            return False
+
+    def bulk_create_regions(
+        self, region_models: List[Region]
+    ) -> Union[List[Region], bool]:
+        try:
+            result: list[Region] = Region.objects.bulk_create(region_models)
+            return result
+        except Exception as e:
+            logger.error(f"bulk_create_regions 실패 e : {e}")
+            return False
+
+    def update_region(self, region: Region) -> bool:
+        try:
+            region.save()
+            return True
+        except Exception as e:
+            logger.error(f"update_region 실패 e : {e}")
+            return False
+
+    def get_regions(self) -> Union[QuerySet, bool]:
+        try:
+            return Region.objects.all()
+        except Exception as e:
+            logger.error(f"get_regions 실패 e : {e}")
             return False

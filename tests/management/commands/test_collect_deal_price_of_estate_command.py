@@ -38,7 +38,7 @@ def test_collect_deal_price_of_estate_command(insert_regional_codes):
         assert isinstance(real_estate.point, Point)
 
         assert isinstance(deal.deal_price, int)
-        assert isinstance(deal.deal_type, str) or deal.deal_type is None
+        assert isinstance(deal.brokerage_type, str) or deal.brokerage_type is None
         assert isinstance(deal.deal_year, int)
         assert isinstance(deal.land_area, str)
         assert isinstance(deal.deal_month, int)
@@ -51,4 +51,4 @@ def test_collect_deal_price_of_estate_command(insert_regional_codes):
         )
         assert isinstance(deal.area_for_exclusive_use_pyung, str)
         assert isinstance(deal.area_for_exclusive_use_price_per_pyung, str)
-        assert isinstance(deal.type, str)
+        assert isinstance(deal.deal_type, str)

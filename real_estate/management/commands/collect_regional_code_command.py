@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from modu_property.utils.loggers import logger
 
 from real_estate.services.collect_address_service import CollectAddressService
 
@@ -10,4 +11,6 @@ class Command(BaseCommand):
         self.service = CollectAddressService()
 
     def handle(self, *args, **options):
-        self.service.execute()
+        result = self.service.execute()
+
+        logger.info(f"result : {result}")

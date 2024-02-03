@@ -13,10 +13,10 @@ from real_estate.dto.service_result_dto import ServiceResultDto
 from real_estate.serializers import (
     GetRealEstateResponseSerializer,
     GetRealEstateRequestSerializer,
+    GetRealEstatesAndRegionsOnSearchResponseSerializer,
     GetRealEstatesOnMapRequestSerializer,
     GetRealEstatesOnMapResponseSerializer,
     GetRealEstatesOnSearchRequestSerializer,
-    GetRealEstatesOnSearchResponseSerializer,
 )
 from real_estate.services.get_deal_price_of_real_estate_service import (
     GetRealEstatesOnMapService,
@@ -28,6 +28,7 @@ from drf_spectacular.utils import (
     OpenApiResponse,
     OpenApiParameter,
     PolymorphicProxySerializer,
+    OpenApiExample,
 )
 from modu_property.utils.loggers import logger
 from rest_framework.views import APIView
@@ -93,27 +94,79 @@ class GetRealEstatesOnSearchView(ListAPIView):
         description="keyword로 부동산 조회",
         parameters=[
             OpenApiParameter(
-                name="type",
+                name="deal_type",
                 type=str,
                 location=OpenApiParameter.PATH,
                 description="deal, jeonse, monthly_rent",
-                required=False,
+                required=True,
+                examples=[
+                    OpenApiExample(
+                        name="매매",
+                        description="매매 타입",
+                        value="deal",
+                    ),
+                    OpenApiExample(
+                        name="전세",
+                        description="전세 타입",
+                        value="jeonse",
+                    ),
+                    OpenApiExample(
+                        name="월세",
+                        description="월세 타입",
+                        value="monthly_rent",
+                    ),
+                ],
             ),
             OpenApiParameter(
                 name="keyword",
                 type=str,
                 location=OpenApiParameter.QUERY,
                 description="검색어",
+                required=True,
+                examples=[
+                    OpenApiExample(
+                        name="강남",
+                        description="강남",
+                        value="강남",
+                    ),
+                    OpenApiExample(
+                        name="하안미리",
+                        description="하안미리",
+                        value="하안미리",
+                    ),
+                    OpenApiExample(
+                        name="부산",
+                        description="부산",
+                        value="부산",
+                    ),
+                ],
+            ),
+            OpenApiParameter(
+                name="limit",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description="몇 개 보여줄 지 결정, regions는 3개로 고정",
                 required=False,
+                default=10,
+                examples=[
+                    OpenApiExample(
+                        name="최소 limit",
+                        description="최소 limit",
+                        value="10",
+                    ),
+                    OpenApiExample(
+                        name="최대 limit",
+                        description="최대 limit",
+                        value="30",
+                    ),
+                ],
             ),
         ],
         request=GetRealEstatesOnSearchRequestSerializer,
         responses={
             200: PolymorphicProxySerializer(
-                component_name="RealEstates",
-                serializers=[
-                    GetRealEstatesOnSearchResponseSerializer,
-                ],
+                component_name="RealEstatesAndRegions",
+                serializers=[GetRealEstatesAndRegionsOnSearchResponseSerializer],
                 resource_type_field_name=None,
             ),
             400: OpenApiResponse(description="bad request"),
@@ -128,8 +181,9 @@ class GetRealEstatesOnSearchView(ListAPIView):
         **kwargs,
     ) -> JsonResponse:
         request_data = {
-            "type": kwargs["type"],
+            "deal_type": str(kwargs["deal_type"]).upper(),
             "keyword": request.query_params.get("keyword", ""),
+            "limit": request.query_params.get("limit", 10),
         }
 
         data: Any = validate_data(
@@ -155,11 +209,29 @@ class GetRealEstatesOnMapView(ListAPIView):
         description="latitude, longitude, zoom_level로 부동산 조회",
         parameters=[
             OpenApiParameter(
-                name="type",
+                name="deal_type",
                 type=str,
                 location=OpenApiParameter.PATH,
                 description="deal, jeonse, monthly_rent",
-                required=False,
+                required=True,
+                default="deal",
+                examples=[
+                    OpenApiExample(
+                        name="매매",
+                        description="매매 타입",
+                        value="deal",
+                    ),
+                    OpenApiExample(
+                        name="전세",
+                        description="전세 타입",
+                        value="jeonse",
+                    ),
+                    OpenApiExample(
+                        name="월세",
+                        description="월세 타입",
+                        value="monthly_rent",
+                    ),
+                ],
             ),
             OpenApiParameter(
                 name="latitude",
@@ -167,6 +239,13 @@ class GetRealEstatesOnMapView(ListAPIView):
                 location=OpenApiParameter.QUERY,
                 description="위도",
                 required=False,
+                examples=[
+                    OpenApiExample(
+                        name="위도",
+                        description="서울 위도",
+                        value="37.566826004661",
+                    ),
+                ],
             ),
             OpenApiParameter(
                 name="longitude",
@@ -174,13 +253,27 @@ class GetRealEstatesOnMapView(ListAPIView):
                 location=OpenApiParameter.QUERY,
                 description="경도",
                 required=False,
+                examples=[
+                    OpenApiExample(
+                        name="경도",
+                        description="경도",
+                        value="126.978652258309",
+                    ),
+                ],
             ),
             OpenApiParameter(
                 name="zoom_level",
                 type=int,
                 location=OpenApiParameter.QUERY,
                 description="줌 레벨",
-                required=False,
+                required=True,
+                examples=[
+                    OpenApiExample(
+                        name="줌 레벨 6",
+                        description="6",
+                        value="6",
+                    ),
+                ],
             ),
         ],
         request=GetRealEstatesOnMapRequestSerializer,
@@ -203,10 +296,12 @@ class GetRealEstatesOnMapView(ListAPIView):
         **kwargs,
     ) -> JsonResponse:
         request_data: dict = {
-            "type": kwargs["type"],
-            "latitude": request.query_params.get("latitude", 0.0),
-            "longitude": request.query_params.get("longitude", 0.0),
-            "zoom_level": request.query_params.get("zoom_level", 0),
+            "deal_type": str(kwargs["deal_type"]).upper(),
+            "latitude": request.query_params.get("latitude", default=37.566826004661),
+            "longitude": request.query_params.get(
+                "longitude", default=126.978652258309
+            ),
+            "zoom_level": request.query_params.get("zoom_level", default=6),
         }
 
         data: Any = validate_data(

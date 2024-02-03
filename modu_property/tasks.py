@@ -4,8 +4,8 @@ from celery import shared_task
 from modu_property.utils.loggers import logger
 from modu_property.utils.time import TimeUtil
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
-from real_estate.enum.property_type_enum import PropertyType
-from real_estate.enum.trade_type_enum import TradeType
+from real_estate.enum.real_estate_enum import RealEstateTypesForQueryEnum
+from real_estate.enum.deal_enum import DealTypesForQueryEnum
 from real_estate.models import Region
 from django.db.models import Count
 
@@ -33,21 +33,21 @@ def collect_deal_price_of_real_estate_task(
 
     service = CollectDealPriceOfRealEstateService()
 
-    property_types = PropertyType.get_property_types()
-    trade_types = TradeType.get_trade_types()
+    real_estate_types = RealEstateTypesForQueryEnum.get_real_estate_types()
+    deal_types = DealTypesForQueryEnum.get_deal_types()
 
     year_and_month = TimeUtil.get_current_year_and_month()
 
-    for property_type in property_types:
-        for trade_type in trade_types:
+    for real_estate_type in real_estate_types:
+        for deal_type in deal_types:
             start = time.time()
             threads = []
             dto = None
             for regional_code in regional_codes:
                 dto: CollectDealPriceOfRealEstateDto = CollectDealPriceOfRealEstateDto(
-                    property_type=property_type,
+                    real_estate_type=real_estate_type,
                     year_month=year_and_month,
-                    trade_type=trade_type,
+                    deal_type=deal_type,
                     regional_code=regional_code,
                 )
                 t = threading.Thread(target=service.execute, args=(dto,))
@@ -60,7 +60,7 @@ def collect_deal_price_of_real_estate_task(
 
             end = time.time()
             logger.info(
-                f"부동산 타입 {dto.property_type}, 연월 {dto.year_month}, 매매타입 {dto.trade_type}, 지역코드 {dto.regional_code} 수행시간: %f 초"
+                f"부동산 타입 {dto.real_estate_type}, 연월 {dto.year_month}, 매매타입 {dto.deal_type}, 지역코드 {dto.regional_code} 수행시간: %f 초"
                 % (end - start)
             )
 

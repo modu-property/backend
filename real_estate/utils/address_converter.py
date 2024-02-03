@@ -7,18 +7,18 @@ from requests.adapters import HTTPAdapter
 from modu_property.utils.loggers import logger
 
 
-class AddressConverter:
-    def convert_address(self, dong: str, lot_number: str) -> Union[dict, bool]:
-        sleep(0.0001)
+class KakaoAddressConverter:
+    def convert_address(self, query: str) -> Union[dict[str, str], dict, bool]:
+        sleep(0.00001)
         response = None
-        _query = f"{dong} {lot_number}"
         with requests.Session() as session:
             adapter = HTTPAdapter(max_retries=1)
             session.mount("http://", adapter)
             session.mount("https://", adapter)
 
             headers = {"Authorization": f"KakaoAK {os.getenv('KAKAO_API_KEY')}"}
-            params = {"query": _query}
+            params = {"query": query}
+            logger.info(f"query : {query}")
             response = session.get(
                 "https://dapi.kakao.com/v2/local/search/address.json",
                 headers=headers,
@@ -32,21 +32,20 @@ class AddressConverter:
         documents = response.json()["documents"]
 
         if not documents:
-            # logger.error(f"documents 없음 response : {response} _query : {_query}")
             return False
 
         try:
             document = documents[0]
-            road_name_address = (
+            road_name_address: str = (
                 document["road_address"]["address_name"]
                 if document.get("road_address")
-                else None
+                else ""
             )
-            address = (
-                document["address"]["address_name"] if document.get("address") else None
+            address: str = (
+                document["address"]["address_name"] if document.get("address") else ""
             )
-            latitude = document["y"]
-            longitude = document["x"]
+            latitude: str = document["y"]
+            longitude: str = document["x"]
 
             return {
                 "road_name_address": road_name_address,

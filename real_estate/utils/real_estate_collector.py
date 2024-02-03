@@ -26,8 +26,8 @@ class RealEstateCollector:
 
     def get_data(self, dto):
         return self.api.get_data(
-            property_type=dto.property_type,
-            trade_type=dto.trade_type,
+            property_type=dto.real_estate_type,
+            trade_type=dto.deal_type,
             sigungu_code=dto.regional_code,
             year_month=dto.year_month,
         )
