@@ -107,18 +107,22 @@ class GetRealEstatesOnMapRequestSerializer(serializers.Serializer):
     deal_type = serializers.ChoiceField(choices=DEAL_TYPES)
     latitude = serializers.FloatField()
     longitude = serializers.FloatField()
+    sw_lat = serializers.FloatField()
+    sw_lng = serializers.FloatField()
+    ne_lat = serializers.FloatField()
+    ne_lng = serializers.FloatField()
     zoom_level = serializers.IntegerField(max_value=6, min_value=0)
 
 
 class GetRealEstatesOnMapResponseSerializer(serializers.Serializer):
-    deals = DealSerializer(many=True)
-
     id = serializers.IntegerField()
     latitude = serializers.CharField(max_length=20)
     longitude = serializers.CharField(max_length=20)
+    deal_price = serializers.IntegerField()
     area_for_exclusive_use_pyung = serializers.CharField(max_length=6)
     area_for_exclusive_use_price_per_pyung = serializers.CharField(max_length=8)
     real_estate_type = serializers.CharField(max_length=20)
+    deal_date = serializers.DateField()
 
 
 class GetRegionsOnSearchResponseSerializer(serializers.Serializer):

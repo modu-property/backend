@@ -2,11 +2,16 @@ from typing import Any, List, Optional, Union
 from real_estate.dto.real_estate_dto import GetRealEstatesOnMapDto
 from real_estate.models import Deal, RealEstate, Region
 from modu_property.utils.loggers import logger
-from django.contrib.gis.db.models.functions import Distance
-from django.db.models import F
-from django.contrib.gis.geos import Point
-from django.db.models import QuerySet
-from django.db.models import Prefetch, OuterRef, Subquery
+from django.db.models import (
+    F,
+    QuerySet,
+    Prefetch,
+    OuterRef,
+    Subquery,
+    Value,
+    DateField,
+)
+from django.db.models.functions import Concat
 
 
 class RealEstateRepository:
@@ -22,14 +27,10 @@ class RealEstateRepository:
     def get_real_estates(self):
         return RealEstate.objects.prefetch_related("deals").all()
 
-    def get_real_estates_by_latitude_and_longitude(
-        self, distance_tolerance: int, center_point: Point
-    ) -> Union[QuerySet, bool]:
-        """TODO  zoom_level에 따라 clustering 해야 함
-        https://stackoverflow.com/questions/4349160/how-to-group-latitude-longitude-points-that-are-close-to-each-other
-        https://dev.to/jmnmv12/unveiling-the-power-of-spatial-clustering-with-postgresql-5bbo
+    def get_real_estates_in_rectangle(self, dto: GetRealEstatesOnMapDto):
         """
-
+        시, 군, 구, 동이 아닌 개별 부동산 정보를 응답함
+        """
         try:
             subquery = Subquery(
                 Deal.objects.filter(real_estate_id=OuterRef("real_estate_id"))
@@ -37,23 +38,35 @@ class RealEstateRepository:
                 .values_list("id", flat=True)[:1]
             )
             real_estates: QuerySet = (
-                RealEstate.objects.prefetch_related(
-                    Prefetch("deals", Deal.objects.filter(id=subquery))
-                )
-                .annotate(
-                    distance=Distance("point", center_point),
+                RealEstate.objects.annotate(
+                    deal_date=Concat(
+                        "deals__deal_year",
+                        Value("-"),
+                        "deals__deal_month",
+                        Value("-"),
+                        "deals__deal_day",
+                        output_field=DateField(),
+                    ),
                     area_for_exclusive_use_pyung=F(
                         "deals__area_for_exclusive_use_pyung"
                     ),
                     area_for_exclusive_use_price_per_pyung=F(
                         "deals__area_for_exclusive_use_price_per_pyung"
                     ),
+                    deal_price=F("deals__deal_price"),
                 )
-                .filter(distance__lte=distance_tolerance, deals__is_deal_canceled=False)
+                .prefetch_related(Prefetch("deals", Deal.objects.filter(id=subquery)))
+                .filter(
+                    deals__is_deal_canceled=False,
+                    latitude__gte=dto.sw_lat,
+                    latitude__lte=dto.ne_lat,
+                    longitude__gte=dto.sw_lng,
+                    longitude__lte=dto.ne_lng,
+                )
             )
             return real_estates
         except Exception as e:
-            logger.error(f"get_real_estates_by_latitude_and_longitude e : {e}")
+            logger.error(f"get_real_estates_in_rectangle e : {e}")
             return False
 
     def bulk_create_regions(

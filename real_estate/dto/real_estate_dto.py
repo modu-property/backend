@@ -18,4 +18,8 @@ class GetRealEstatesOnMapDto:
     deal_type: str
     latitude: float
     longitude: float
+    sw_lat: float
+    sw_lng: float
+    ne_lat: float
+    ne_lng: float
     zoom_level: int

@@ -77,7 +77,7 @@ services:
       - tail -f /dev/null
     depends_on:
       - django
-      - redis_broker
+      - redis
     env_file: .env.testing
     network_mode: "host"
     
@@ -93,7 +93,7 @@ services:
       - tail -f /dev/null
     depends_on:
       - django
-      - redis_broker
+      - redis
       - celery_worker
     env_file: .env.testing
     network_mode: "host"
@@ -108,8 +108,8 @@ services:
     depends_on:
       - celery_beat
 
-  redis_broker:
-    container_name: redis_broker
+  redis:
+    container_name: redis
     restart: unless-stopped
     image: redis:7.0.5-alpine
     expose:

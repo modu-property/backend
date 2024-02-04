@@ -237,7 +237,7 @@ class GetRealEstatesOnMapView(ListAPIView):
                 name="latitude",
                 type=float,
                 location=OpenApiParameter.QUERY,
-                description="위도",
+                description="중심 위도",
                 required=False,
                 examples=[
                     OpenApiExample(
@@ -251,13 +251,69 @@ class GetRealEstatesOnMapView(ListAPIView):
                 name="longitude",
                 type=float,
                 location=OpenApiParameter.QUERY,
-                description="경도",
+                description="중심 경도",
                 required=False,
                 examples=[
                     OpenApiExample(
                         name="경도",
                         description="경도",
                         value="126.978652258309",
+                    ),
+                ],
+            ),
+            OpenApiParameter(
+                name="sw_lat",
+                type=float,
+                location=OpenApiParameter.QUERY,
+                description="지도상의 남서측 위도",
+                required=True,
+                examples=[
+                    OpenApiExample(
+                        name="남서측 위도",
+                        description="남서측 위도",
+                        value="37.54296876065889",
+                    ),
+                ],
+            ),
+            OpenApiParameter(
+                name="sw_lng",
+                type=float,
+                location=OpenApiParameter.QUERY,
+                description="지도상의 남서측 경도",
+                required=True,
+                examples=[
+                    OpenApiExample(
+                        name="남서측 경도",
+                        description="남서측 경도",
+                        value="126.9714256618418",
+                    ),
+                ],
+            ),
+            OpenApiParameter(
+                name="ne_lat",
+                type=float,
+                location=OpenApiParameter.QUERY,
+                description="지도상의 북동측 위도",
+                required=True,
+                examples=[
+                    OpenApiExample(
+                        name="북동측 위도",
+                        description="북동측 위도",
+                        value="37.55780157762771",
+                    ),
+                ],
+            ),
+            OpenApiParameter(
+                name="ne_lng",
+                type=float,
+                location=OpenApiParameter.QUERY,
+                description="지도상의 북동측 경도",
+                required=True,
+                examples=[
+                    OpenApiExample(
+                        name="북동측 경도",
+                        description="북동측 경도",
+                        value="126.98407317806495",
                     ),
                 ],
             ),
@@ -301,6 +357,10 @@ class GetRealEstatesOnMapView(ListAPIView):
             "longitude": request.query_params.get(
                 "longitude", default=126.978652258309
             ),
+            "sw_lat": request.query_params.get("sw_lat"),
+            "sw_lng": request.query_params.get("sw_lng"),
+            "ne_lat": request.query_params.get("ne_lat"),
+            "ne_lng": request.query_params.get("ne_lng"),
             "zoom_level": request.query_params.get("zoom_level", default=6),
         }
 

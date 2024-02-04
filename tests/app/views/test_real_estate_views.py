@@ -8,9 +8,7 @@ from django.contrib.gis.geos import Point
 
 
 @pytest.mark.django_db(transaction=True)
-def test_get_real_estates_with_latitude_longitude_zoom_level_view(
-    client, get_jwt, create_real_estate, create_deal
-):
+def test_get_real_estates_on_map_view(client, get_jwt, create_real_estate, create_deal):
     real_estate1 = create_real_estate(
         name="테스트빌라 1",
         build_year=1990,
@@ -122,7 +120,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         name="지산로얄빌라",
         build_year=1990,
         regional_code="21070",
-        lot_number="부산광역시 남구 대연동 1724-1",
+        lot_number="부산광역시 남구 IntegerField()gerField()1724-1",
         road_name_address="부산광역시 남구 유엔로157번나길 48 (대연동, 지산로얄빌라)",
         address="부산광역시 남구 대연동 1724-1",
         real_estate_type=RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value,
@@ -156,6 +154,10 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
     query_params = {
         "latitude": 37.5054,
         "longitude": 127.0216,
+        "sw_lat": 37.5053,
+        "sw_lng": 127.0215,
+        "ne_lat": 37.5055,
+        "ne_lng": 127.0217,
         "zoom_level": 6,
         "keyword": "",
     }
@@ -168,9 +170,11 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
     for real_estate in real_estates:
         assert "latitude" in real_estate
         assert "longitude" in real_estate
+        assert "real_estate_type" in real_estate
+        assert "deal_price" in real_estate
+        assert "deal_date" in real_estate
         assert "area_for_exclusive_use_pyung" in real_estate
         assert "area_for_exclusive_use_price_per_pyung" in real_estate
-        assert "real_estate_type" in real_estate
 
 
 @pytest.mark.django_db(transaction=True)

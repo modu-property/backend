@@ -75,7 +75,7 @@ services:
       - tail -f /dev/null
     depends_on:
       - django
-      - redis_broker
+      - redis
     env_file: .env.local
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -83,7 +83,7 @@ services:
   celery_beat:
     container_name: celery_beat
     image: django
-    restart: always
+    # restart: always
     volumes:
       - .:/var/www/modu_property/beat
     command:
@@ -93,7 +93,7 @@ services:
       - tail -f /dev/null
     depends_on:
       - django
-      - redis_broker
+      - redis
       - celery_worker
     env_file: .env.local
     extra_hosts:
@@ -110,11 +110,11 @@ services:
     depends_on:
       - celery_beat
 
-  redis_broker:
-    container_name: redis_broker
+  redis:
+    container_name: redis
     restart: unless-stopped
     image: redis:7.0.5-alpine
-    expose:
-      - 6379
+    ports:
+      - 6379:6379
     extra_hosts:
       - "host.docker.internal:host-gateway"

@@ -2,7 +2,6 @@ from typing import Any, Optional, Union
 
 from manticore.manticore_client import ManticoreClient
 
-from modu_property.utils.loggers import logger
 from modu_property.utils.validator import validate_data
 from real_estate.dto.real_estate_dto import (
     GetRealEstateDto,
@@ -19,7 +18,6 @@ from real_estate.serializers import (
     GetRealEstatesOnSearchResponseSerializer,
     GetRegionsOnSearchResponseSerializer,
 )
-from django.contrib.gis.geos import Point
 from django.db.models import QuerySet
 
 
@@ -119,16 +117,10 @@ class GetRealEstatesOnMapService:
         self.repository = RealEstateRepository()
 
     def execute(self, dto: GetRealEstatesOnMapDto) -> ServiceResultDto:
-        distance_tolerance: int = self.get_distance_tolerance(dto=dto)
-        center_point = Point(
-            float(dto.latitude), float(dto.longitude), srid=4326
-        )  # 위경도 받아서 지도의 중심으로 잡음
-
         real_estates: Union[
             QuerySet, bool
-        ] = self.repository.get_real_estates_by_latitude_and_longitude(
-            distance_tolerance=distance_tolerance, center_point=center_point
-        )
+        ] = self.repository.get_real_estates_in_rectangle(dto=dto)
+
         if real_estates:
             data: Union[dict, bool, Any] = validate_data(
                 model=real_estates,
@@ -144,15 +136,3 @@ class GetRealEstatesOnMapService:
                     status_code=400,
                 )
         return ServiceResultDto(status_code=404)
-
-    def get_distance_tolerance(self, dto: GetRealEstatesOnMapDto):
-        # TODO level은 임시로 정함, 바꿔야함, 1,2 정도의 레벨은 하나하나 보여주지 말고 뭉쳐서 개수만 표현해야할듯..
-        zoom_levels: dict[int, int] = {
-            1: 50 * 1000,
-            2: 25 * 1000,
-            3: 15 * 1000,
-            4: 10 * 1000,
-            5: 5 * 1000,
-            6: 1 * 1000,
-        }
-        return zoom_levels.get(dto.zoom_level, 1)
