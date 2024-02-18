@@ -7,8 +7,6 @@ from real_estate.enum.deal_enum import DealTypesForDBEnum
 from real_estate.models import Deal, RealEstate
 from real_estate.repository.real_estate_repository import RealEstateRepository
 
-from modu_property.utils.loggers import logger
-
 
 class CollectRegionPriceService:
     def __init__(

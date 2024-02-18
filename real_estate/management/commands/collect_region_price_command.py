@@ -3,7 +3,6 @@ import os
 import threading
 import time
 from django.core.management.base import BaseCommand
-from manticore.manticore_client import ManticoreClient
 from modu_property.utils.loggers import logger
 from real_estate.dto.collect_region_price_dto import CollectRegionPriceDto
 from real_estate.enum.deal_enum import DealTypesForDBEnum
