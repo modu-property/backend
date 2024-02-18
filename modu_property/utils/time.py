@@ -6,7 +6,12 @@ from dateutil.relativedelta import relativedelta
 class TimeUtil:
     @classmethod
     def get_years_and_months(
-        self, start_year: int, start_month: int, end_year: int, end_month: int
+        self,
+        start_year: int,
+        start_month: int,
+        end_year: int,
+        end_month: int,
+        format: str = "%Y%m",
     ) -> List[str]:
         years = end_year - start_year
         months = end_month - start_month
@@ -15,9 +20,9 @@ class TimeUtil:
 
         years_and_months = [
             datetime.strftime(
-                datetime.strptime(f"{start_year}{start_month}", "%Y%m")
+                datetime.strptime(f"{start_year}{start_month}", format)
                 + relativedelta(months=month),
-                "%Y%m",
+                format,
             )
             for month in range(total_months + 1)
         ]

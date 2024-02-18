@@ -2,13 +2,20 @@ import datetime
 from pandas import DataFrame
 import pandas
 import pytest
-from real_estate.models import Deal, RealEstate, MonthlyRent
+from real_estate.models import Deal, RealEstate, MonthlyRent, Region
 from django.contrib.gis.geos import Point
 import os
 from django.db import connections
 
+import jwt
+import pytest
 
-@pytest.fixture
+from modu_property.settings.test_settings import SECRET_KEY
+from django.contrib.auth.hashers import make_password
+from accounts.models import User
+
+
+@pytest.fixture()
 def create_real_estate():
     def _create_real_estate(
         name: str,
@@ -40,7 +47,7 @@ def create_real_estate():
     return _create_real_estate
 
 
-@pytest.fixture
+@pytest.fixture()
 def create_deal():
     def _create_deal(
         real_estate_id: int,
@@ -115,7 +122,7 @@ def mock_collect_deal_price_of_real_estate():
 
 
 def get_file_path(file_name: str):
-    dir_path = "tests/conftests"
+    dir_path = "tests"
     return os.path.join(os.getcwd(), dir_path, file_name)
 
 
@@ -145,7 +152,7 @@ def insert_regional_codes():
 @pytest.fixture
 def get_dongs():
     def _get_dongs(count: int = 10) -> DataFrame:
-        path: str = get_file_path(file_name="dong.csv")
+        path: str = get_file_path(file_name="files/dong.csv")
 
         df: pandas.DataFrame = pandas.read_csv(
             filepath_or_buffer=path, nrows=count, keep_default_na=False
@@ -154,3 +161,54 @@ def get_dongs():
         return df
 
     return _get_dongs
+
+
+@pytest.fixture
+def get_jwt():
+    return jwt.encode(
+        {
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(days=30),
+            # "user_id": 1,
+        },
+        SECRET_KEY,
+        algorithm="HS256",
+    )
+
+
+@pytest.fixture
+def create_user():
+    def _create_user(username: str, password: str):
+        encrypted_password = make_password(str(password))
+        user = User(username=username, password=encrypted_password)
+
+        user.save()
+        return user
+
+    return _create_user
+
+
+@pytest.fixture
+def create_region():
+    def _create_region(
+        sido: str = "서울특별시",
+        regional_code: str = "11000",
+        sigungu: str = "",
+        ubmyundong: str = "",
+        dongri: str = "",
+        latitude: str = "37.566826004661",
+        longitude: str = "126.978652258309",
+    ):
+        region = Region(
+            sido=sido,
+            regional_code=regional_code,
+            sigungu=sigungu,
+            ubmyundong=ubmyundong,
+            dongri=dongri,
+            latitude=latitude,
+            longitude=longitude,
+        )
+
+        region.save()
+        return region
+
+    return _create_region

@@ -1,6 +1,9 @@
-from typing import Any, List, Optional, Union
-from real_estate.dto.real_estate_dto import GetRealEstatesOnMapDto
-from real_estate.models import Deal, RealEstate, Region
+from typing import List, Optional, Union
+
+from django.forms import model_to_dict
+from real_estate.dto.collect_region_price_dto import CollectRegionPriceDto
+from real_estate.dto.get_real_estate_dto import GetRealEstatesOnMapDto
+from real_estate.models import Deal, RealEstate, Region, RegionPrice
 from modu_property.utils.loggers import logger
 from django.db.models import (
     F,
@@ -13,6 +16,8 @@ from django.db.models import (
 )
 from django.db.models.functions import Concat
 
+from real_estate.serializers import RegionPriceSerializer
+
 
 class RealEstateRepository:
     def get_real_estate(self, id: int) -> Optional[RealEstate]:
@@ -24,10 +29,28 @@ class RealEstateRepository:
             logger.error(f"get_real_estate e : {e}")
             return None
 
-    def get_real_estates(self):
-        return RealEstate.objects.prefetch_related("deals").all()
+    def get_real_estates(self, dto: CollectRegionPriceDto = None):
+        _qs = RealEstate.objects
 
-    def get_real_estates_in_rectangle(self, dto: GetRealEstatesOnMapDto):
+        if isinstance(dto, CollectRegionPriceDto) and dto.target_region:
+            return (
+                _qs.filter(address__contains=dto.target_region)
+                .prefetch_related(
+                    Prefetch(
+                        "deals",
+                        Deal.objects.filter(
+                            deal_year=dto.deal_year,
+                            deal_month=dto.deal_month,
+                            deal_type=dto.deal_type,
+                        ),
+                    )
+                )
+                .all()
+            )
+
+        return _qs.prefetch_related("deals").all()
+
+    def get_individual_real_estates(self, dto: GetRealEstatesOnMapDto):
         """
         시, 군, 구, 동이 아닌 개별 부동산 정보를 응답함
         """
@@ -66,7 +89,7 @@ class RealEstateRepository:
             )
             return real_estates
         except Exception as e:
-            logger.error(f"get_real_estates_in_rectangle e : {e}")
+            logger.error(f"get_individual_real_estates e : {e}")
             return False
 
     def bulk_create_regions(
@@ -87,9 +110,65 @@ class RealEstateRepository:
             logger.error(f"update_region 실패 e : {e}")
             return False
 
-    def get_regions(self) -> Union[QuerySet, bool]:
-        try:
+    def get_regions(self, sido: str = "") -> QuerySet:
+        if sido:
+            return Region.objects.filter(sido=sido)
+        else:
             return Region.objects.all()
+
+    def get_region(
+        self, sido: str = "", sigungu: str = "", ubmyundong: str = "", dongri: str = ""
+    ):
+        _q = Region.objects
+
+        if dongri:
+            _q = _q.filter(
+                sido=sido, sigungu=sigungu, ubmyundong=ubmyundong, dongri=dongri
+            )
+        elif ubmyundong:
+            _q = _q.filter(sido=sido, sigungu=sigungu, ubmyundong=ubmyundong, dongri="")
+        elif sigungu:
+            _q = _q.filter(sido=sido, sigungu=sigungu, ubmyundong="", dongri="")
+        elif sido:
+            _q = _q.filter(sido=sido, sigungu="", ubmyundong="", dongri="")
+
+        try:
+            return _q.get()
         except Exception as e:
-            logger.error(f"get_regions 실패 e : {e}")
+            logger.error(f"get_region 실패 e : {e}")
+            return False
+
+    def create_region_price(
+        self, dto: CollectRegionPriceDto
+    ) -> Union[RegionPrice, bool]:
+        try:
+            model = RegionPrice(
+                region_id=dto.region.id,
+                total_deal_price=dto.total_deal_price,
+                total_jeonse_price=dto.total_jeonse_price,
+                total_deal_price_per_pyung=dto.total_deal_price_per_pyung,
+                total_jeonse_price_per_pyung=dto.total_jeonse_price_per_pyung,
+                average_deal_price=dto.average_deal_price,
+                average_jeonse_price=dto.average_jeonse_price,
+                average_deal_price_per_pyung=dto.average_deal_price_per_pyung,
+                average_jeonse_price_per_pyung=dto.average_jeonse_price_per_pyung,
+                deal_date=dto.deal_date,
+                deal_count=dto.deal_count,
+                jeonse_count=dto.jeonse_count,
+            )
+            region_price_serializer = RegionPriceSerializer(data=model_to_dict(model))
+            region_price_serializer.is_valid(raise_exception=True)
+            region_price = region_price_serializer.save()
+            return region_price
+        except Exception as e:
+            logger.error(
+                f"create_region_price 실패 e : {e} dto : {dto.__dict__}",
+            )
+            return False
+
+    def get_region_prices(self):
+        try:
+            return RegionPrice.objects.all()
+        except Exception as e:
+            logger.error(f"get_region_prices 실패 e : {e}")
             return False

@@ -4,7 +4,7 @@ from rest_framework.request import Request
 from rest_framework.generics import ListAPIView
 from accounts.util.authenticator import jwt_authenticator
 from modu_property.utils.validator import validate_data
-from real_estate.dto.real_estate_dto import (
+from real_estate.dto.get_real_estate_dto import (
     GetRealEstateDto,
     GetRealEstatesOnMapDto,
     GetRealEstatesOnSearchDto,

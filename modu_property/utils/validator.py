@@ -30,9 +30,7 @@ def validate_data(
             _data = _serializer.data
         elif model or data:
             _serializer = serializer(instance=model, data=data, many=many)
-            if not _serializer.is_valid(raise_exception=True):
-                return False
-
+            _serializer.is_valid(raise_exception=True)
             _serializer.initial_data
             _serializer.validated_data
             _data = _serializer.data

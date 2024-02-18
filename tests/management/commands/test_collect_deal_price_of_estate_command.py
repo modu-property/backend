@@ -1,11 +1,11 @@
 from datetime import date
+from typing import List
 import pytest
 from real_estate.management.commands.collect_deal_price_of_real_estate_command import (
     Command,
 )
 from real_estate.models import Deal, RealEstate
 from django.contrib.gis.geos.point import Point
-from tests.conftests.real_estate_conftest import insert_regional_codes
 
 
 @pytest.mark.skip
@@ -20,9 +20,7 @@ def test_collect_deal_price_of_estate_command(insert_regional_codes):
 
     for real_estate in real_estates:
         real_estate: RealEstate = real_estate
-        deal: Deal = real_estate.deal.get()
-
-        assert real_estate.id == deal.real_estate.id
+        deals: List[Deal] = list(real_estate.deals.all())
 
         assert isinstance(real_estate.name, str)
         assert isinstance(real_estate.build_year, int)
@@ -37,18 +35,22 @@ def test_collect_deal_price_of_estate_command(insert_regional_codes):
         assert isinstance(real_estate.longitude, str)
         assert isinstance(real_estate.point, Point)
 
-        assert isinstance(deal.deal_price, int)
-        assert isinstance(deal.brokerage_type, str) or deal.brokerage_type is None
-        assert isinstance(deal.deal_year, int)
-        assert isinstance(deal.land_area, str)
-        assert isinstance(deal.deal_month, int)
-        assert isinstance(deal.deal_day, int)
-        assert isinstance(deal.area_for_exclusive_use, str)
-        assert isinstance(deal.floor, str)
-        assert isinstance(deal.is_deal_canceled, bool)
-        assert (
-            isinstance(deal.deal_canceled_date, date) or deal.deal_canceled_date is None
-        )
-        assert isinstance(deal.area_for_exclusive_use_pyung, str)
-        assert isinstance(deal.area_for_exclusive_use_price_per_pyung, str)
-        assert isinstance(deal.deal_type, str)
+        for deal in deals:
+            assert real_estate.id == deal.real_estate.id
+
+            assert isinstance(deal.deal_price, int)
+            assert isinstance(deal.brokerage_type, str) or deal.brokerage_type is None
+            assert isinstance(deal.deal_year, int)
+            assert isinstance(deal.land_area, str)
+            assert isinstance(deal.deal_month, int)
+            assert isinstance(deal.deal_day, int)
+            assert isinstance(deal.area_for_exclusive_use, str)
+            assert isinstance(deal.floor, str)
+            assert isinstance(deal.is_deal_canceled, bool)
+            assert (
+                isinstance(deal.deal_canceled_date, date)
+                or deal.deal_canceled_date is None
+            )
+            assert isinstance(deal.area_for_exclusive_use_pyung, str)
+            assert isinstance(deal.area_for_exclusive_use_price_per_pyung, str)
+            assert isinstance(deal.deal_type, str)

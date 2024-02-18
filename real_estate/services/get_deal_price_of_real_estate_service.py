@@ -3,7 +3,7 @@ from typing import Any, Optional, Union
 from manticore.manticore_client import ManticoreClient
 
 from modu_property.utils.validator import validate_data
-from real_estate.dto.real_estate_dto import (
+from real_estate.dto.get_real_estate_dto import (
     GetRealEstateDto,
     GetRealEstatesOnMapDto,
     GetRealEstatesOnSearchDto,
@@ -117,22 +117,44 @@ class GetRealEstatesOnMapService:
         self.repository = RealEstateRepository()
 
     def execute(self, dto: GetRealEstatesOnMapDto) -> ServiceResultDto:
-        real_estates: Union[
-            QuerySet, bool
-        ] = self.repository.get_real_estates_in_rectangle(dto=dto)
+        # TODO : zoom_level이 5 -> dongri, 4 -> ubmyundong, 3 -> sigungu, 2 -> sido, 1 -> 전국. 나중에 프론트엔드랑 맞춰서 변경해야함.
 
-        if real_estates:
-            data: Union[dict, bool, Any] = validate_data(
-                model=real_estates,
-                serializer=GetRealEstatesOnMapResponseSerializer,
-                many=True,
-            )
+        if dto.zoom_level >= 6:
+            real_estates: Union[
+                QuerySet, bool
+            ] = self.repository.get_individual_real_estates(dto=dto)
 
-            if data:
-                return ServiceResultDto(data=data)
-            else:
-                return ServiceResultDto(
-                    message="GetRealEstatesOnMapResponseSerializer 에러",
-                    status_code=400,
+            if real_estates:
+                data: Union[dict, bool, Any] = validate_data(
+                    model=real_estates,
+                    serializer=GetRealEstatesOnMapResponseSerializer,
+                    many=True,
                 )
+
+                if data:
+                    return ServiceResultDto(data=data)
+                else:
+                    return ServiceResultDto(
+                        message="GetRealEstatesOnMapResponseSerializer 에러",
+                        status_code=400,
+                    )
+        else:
+            real_estates: Union[
+                QuerySet, bool
+            ] = self.repository.get_clustered_real_estates(dto=dto)
+
+            if real_estates:
+                data: Union[dict, bool, Any] = validate_data(
+                    model=real_estates,
+                    serializer=GetRealEstatesOnMapResponseSerializer,
+                    many=True,
+                )
+
+                if data:
+                    return ServiceResultDto(data=data)
+                else:
+                    return ServiceResultDto(
+                        message="GetRealEstatesOnMapResponseSerializer 에러",
+                        status_code=400,
+                    )
         return ServiceResultDto(status_code=404)

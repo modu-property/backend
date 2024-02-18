@@ -12,11 +12,6 @@ from real_estate.services.collect_deal_price_of_real_estate_service import (
     CollectDealPriceOfRealEstateService,
 )
 from django.contrib.gis.geos import Point
-from tests.conftests.real_estate_conftest import (
-    mock_collect_deal_price_of_real_estate,
-    create_real_estate,
-    create_deal,
-)
 
 
 @pytest.mark.django_db

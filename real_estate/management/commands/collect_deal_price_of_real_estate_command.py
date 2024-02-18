@@ -52,10 +52,10 @@ class Command(BaseCommand):
         deal_types = DealTypesForQueryEnum.get_deal_types()
 
         # 2006년부터 수집
-        start_year = 2016
+        start_year = 2006
         start_month = 1
-        end_year = 2016
-        end_month = 1
+        end_year = 2006
+        end_month = 2
 
         years_and_months = TimeUtil.get_years_and_months(
             start_year=start_year,

@@ -1,7 +1,6 @@
 import pytest
 from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.services.collect_address_service import CollectAddressService
-from tests.conftests.real_estate_conftest import get_dongs
 
 
 @pytest.mark.django_db

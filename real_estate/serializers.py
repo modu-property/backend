@@ -1,7 +1,7 @@
 from decimal import Decimal
 from rest_framework import serializers
 from real_estate.enum.deal_enum import DEAL_TYPES
-from real_estate.models import Deal, RealEstate
+from real_estate.models import Deal, RealEstate, RegionPrice
 
 
 class RealEstateSerializer(serializers.ModelSerializer):
@@ -138,3 +138,22 @@ class GetRegionsOnSearchResponseSerializer(serializers.Serializer):
 class GetRealEstatesAndRegionsOnSearchResponseSerializer(serializers.Serializer):
     regions = GetRegionsOnSearchResponseSerializer(many=True, required=False)
     real_estates = GetRealEstatesOnSearchResponseSerializer(many=True, required=False)
+
+
+class RegionPriceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RegionPrice
+        fields = (
+            "total_deal_price",
+            "total_jeonse_price",
+            "average_deal_price",
+            "average_jeonse_price",
+            "average_deal_price_per_pyung",
+            "average_jeonse_price_per_pyung",
+            "deal_date",
+            "region",
+            "deal_count",
+            "jeonse_count",
+            "total_deal_price_per_pyung",
+            "total_jeonse_price_per_pyung",
+        )

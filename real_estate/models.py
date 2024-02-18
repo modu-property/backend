@@ -122,3 +122,45 @@ class Region(models.Model):
     longitude = models.CharField(help_text="경도", null=True, blank=True, max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class RegionPrice(models.Model):
+    class Meta:
+        db_table = "region_price"
+
+    id = models.BigAutoField(primary_key=True, auto_created=True)
+    total_deal_price = models.PositiveIntegerField(
+        help_text="지역 총 매매가", null=True, blank=True
+    )
+    total_jeonse_price = models.PositiveIntegerField(
+        help_text="지역 총 전세가", null=True, blank=True
+    )
+    total_deal_price_per_pyung = models.CharField(
+        help_text="지역 총 평당 매매가", max_length=15, null=True, blank=True
+    )
+    total_jeonse_price_per_pyung = models.CharField(
+        help_text="지역 총 평당 전세가", max_length=15, null=True, blank=True
+    )
+    average_deal_price = models.CharField(
+        help_text="지역 평균 매매가", max_length=15, null=True, blank=True
+    )
+    average_jeonse_price = models.CharField(
+        help_text="지역 평균 전세가", max_length=15, null=True, blank=True
+    )
+    average_deal_price_per_pyung = models.CharField(
+        help_text="지역 전용면적 평균 매매 평당가", max_length=15, null=True, blank=True
+    )
+    average_jeonse_price_per_pyung = models.CharField(
+        help_text="지역 전용면적 평균 전세 평당가", max_length=15, null=True, blank=True
+    )
+    deal_count = models.PositiveIntegerField(help_text="매매 개수", null=True, blank=True)
+    jeonse_count = models.PositiveIntegerField(help_text="전세 개수", null=True, blank=True)
+    deal_date = models.DateField(help_text="거래 날짜(2020-01)", null=False, blank=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    region = models.ForeignKey(
+        "Region",
+        related_name="region_prices",
+        on_delete=models.DO_NOTHING,
+    )
