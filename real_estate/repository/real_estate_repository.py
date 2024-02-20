@@ -15,6 +15,7 @@ from django.db.models import (
     DateField,
 )
 from django.db.models.functions import Concat
+from django.db.models import Q
 
 from real_estate.serializers import RegionPriceSerializer
 
@@ -42,6 +43,7 @@ class RealEstateRepository:
                             deal_year=dto.deal_year,
                             deal_month=dto.deal_month,
                             deal_type=dto.deal_type,
+                            is_deal_canceled=dto.is_deal_canceled,
                         ),
                     )
                 )
@@ -110,11 +112,12 @@ class RealEstateRepository:
             logger.error(f"update_region 실패 e : {e}")
             return False
 
-    def get_regions(self, sido: str = "") -> QuerySet:
+    def get_regions(self, sido: str = "") -> Union[QuerySet, bool]:
+        _q = Region.objects
         if sido:
-            return Region.objects.filter(sido=sido)
+            return _q.filter(sido=sido)
         else:
-            return Region.objects.all()
+            return _q.all()
 
     def get_region(
         self, sido: str = "", sigungu: str = "", ubmyundong: str = "", dongri: str = ""
@@ -166,9 +169,60 @@ class RealEstateRepository:
             )
             return False
 
-    def get_region_prices(self):
-        try:
-            return RegionPrice.objects.all()
-        except Exception as e:
-            logger.error(f"get_region_prices 실패 e : {e}")
-            return False
+    def get_region_prices(self, dto: GetRealEstatesOnMapDto = None):
+        _q = RegionPrice.objects.select_related("region")
+
+        """
+        TODO
+        * 통계용으로 deal_date filter 추가, 기본은 최근 n달치 정보 응답
+        * si에서 세종시 중복 제거. orm 짜야 함
+        select distinct sido
+        from region
+        where  sido !='' and sigungu='' and ubmyundong='';
+        """
+
+        if isinstance(dto, GetRealEstatesOnMapDto):
+            logger.debug(dto.__dict__)
+            if dto.zoom_level == 5:
+                # dongri
+                _q = _q.exclude(region__dongri="")
+            elif dto.zoom_level == 4:
+                # ubmyundong
+                _q = _q.exclude(region__ubmyundong="").exclude(~Q(region__dongri=""))
+            elif dto.zoom_level == 3:
+                # sigungu
+                _q = (
+                    _q.exclude(region__sigungu="")
+                    .exclude(~Q(region__ubmyundong=""))
+                    .exclude(~Q(region__dongri=""))
+                )
+            elif dto.zoom_level == 2:
+                # sido
+                _q = (
+                    _q.exclude(region__sido="")
+                    .exclude(~Q(region__sigungu=""))
+                    .exclude(~Q(region__ubmyundong=""))
+                    .exclude(~Q(region__dongri=""))
+                )
+
+            logger.debug(f"_q : {str(_q.query)}")
+
+            try:
+                _q = _q.filter(
+                    region__latitude__gte=dto.sw_lat,
+                    region__latitude__lte=dto.ne_lat,
+                    region__longitude__gte=dto.sw_lng,
+                    region__longitude__lte=dto.ne_lng,
+                )
+
+                logger.debug(f"_q : {str(_q.query)}")
+                return _q.all()
+            except Exception as e:
+                logger.error(f"get_region_price 실패 e : {e}")
+                return False
+        else:
+            try:
+                return RegionPrice.objects.all()
+            except Exception as e:
+                logger.error(f"get_region_price 실패 e : {e}")
+                return False

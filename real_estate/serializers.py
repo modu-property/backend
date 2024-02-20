@@ -1,7 +1,7 @@
 from decimal import Decimal
 from rest_framework import serializers
 from real_estate.enum.deal_enum import DEAL_TYPES
-from real_estate.models import Deal, RealEstate, RegionPrice
+from real_estate.models import Deal, RealEstate, Region, RegionPrice
 
 
 class RealEstateSerializer(serializers.ModelSerializer):
@@ -125,21 +125,6 @@ class GetRealEstatesOnMapResponseSerializer(serializers.Serializer):
     deal_date = serializers.DateField()
 
 
-class GetRegionsOnSearchResponseSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    sido = serializers.CharField(max_length=10, allow_blank=True)
-    sigungu = serializers.CharField(max_length=15, allow_blank=True)
-    ubmyundong = serializers.CharField(max_length=20, allow_blank=True)
-    dongri = serializers.CharField(max_length=20, allow_blank=True)
-    latitude = serializers.FloatField()
-    longitude = serializers.FloatField()
-
-
-class GetRealEstatesAndRegionsOnSearchResponseSerializer(serializers.Serializer):
-    regions = GetRegionsOnSearchResponseSerializer(many=True, required=False)
-    real_estates = GetRealEstatesOnSearchResponseSerializer(many=True, required=False)
-
-
 class RegionPriceSerializer(serializers.ModelSerializer):
     class Meta:
         model = RegionPrice
@@ -157,3 +142,39 @@ class RegionPriceSerializer(serializers.ModelSerializer):
             "total_deal_price_per_pyung",
             "total_jeonse_price_per_pyung",
         )
+
+
+class RegionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Region
+        fields = (
+            "sido",
+            "sigungu",
+            "ubmyundong",
+            "dongri",
+            "latitude",
+            "longitude",
+        )
+
+
+class GetRegionsOnMapResponseSerializer(serializers.ModelSerializer):
+    region = RegionSerializer()
+
+    class Meta:
+        model = RegionPrice
+        fields = "__all__"
+
+
+class GetRegionsOnSearchResponseSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    sido = serializers.CharField(max_length=10, allow_blank=True)
+    sigungu = serializers.CharField(max_length=15, allow_blank=True)
+    ubmyundong = serializers.CharField(max_length=20, allow_blank=True)
+    dongri = serializers.CharField(max_length=20, allow_blank=True)
+    latitude = serializers.FloatField()
+    longitude = serializers.FloatField()
+
+
+class GetRealEstatesAndRegionsOnSearchResponseSerializer(serializers.Serializer):
+    regions = GetRegionsOnSearchResponseSerializer(many=True, required=False)
+    real_estates = GetRealEstatesOnSearchResponseSerializer(many=True, required=False)

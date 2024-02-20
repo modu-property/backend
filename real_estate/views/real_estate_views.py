@@ -17,6 +17,7 @@ from real_estate.serializers import (
     GetRealEstatesOnMapRequestSerializer,
     GetRealEstatesOnMapResponseSerializer,
     GetRealEstatesOnSearchRequestSerializer,
+    GetRegionsOnMapResponseSerializer,
 )
 from real_estate.services.get_deal_price_of_real_estate_service import (
     GetRealEstatesOnMapService,
@@ -269,9 +270,14 @@ class GetRealEstatesOnMapView(ListAPIView):
                 required=True,
                 examples=[
                     OpenApiExample(
-                        name="남서측 위도",
+                        name="서울 남서측 위도",
                         description="남서측 위도",
                         value="37.54296876065889",
+                    ),
+                    OpenApiExample(
+                        name="강원도 횡성군 남서측 위도",
+                        description="강원도 횡성군 남서측 위도",
+                        value="37.4825868",
                     ),
                 ],
             ),
@@ -283,9 +289,14 @@ class GetRealEstatesOnMapView(ListAPIView):
                 required=True,
                 examples=[
                     OpenApiExample(
-                        name="남서측 경도",
+                        name="서울 남서측 경도",
                         description="남서측 경도",
                         value="126.9714256618418",
+                    ),
+                    OpenApiExample(
+                        name="강원도 횡성군 남서측 경도",
+                        description="강원도 횡성군 남서측 경도",
+                        value="127.9014549",
                     ),
                 ],
             ),
@@ -301,6 +312,11 @@ class GetRealEstatesOnMapView(ListAPIView):
                         description="북동측 위도",
                         value="37.55780157762771",
                     ),
+                    OpenApiExample(
+                        name="강원도 속초 북동측 위도",
+                        description="강원도 북동측 위도",
+                        value="38.2622783",
+                    ),
                 ],
             ),
             OpenApiParameter(
@@ -315,6 +331,11 @@ class GetRealEstatesOnMapView(ListAPIView):
                         description="북동측 경도",
                         value="126.98407317806495",
                     ),
+                    OpenApiExample(
+                        name="강원도 속초 북동측 경도",
+                        description=" 강원도 속초 북동측 경도",
+                        value="128.5011757",
+                    ),
                 ],
             ),
             OpenApiParameter(
@@ -325,8 +346,13 @@ class GetRealEstatesOnMapView(ListAPIView):
                 required=True,
                 examples=[
                     OpenApiExample(
+                        name="줌 레벨 5",
+                        description="5 이하면 지역 부동산 정보를 응답함",
+                        value="5",
+                    ),
+                    OpenApiExample(
                         name="줌 레벨 6",
-                        description="6",
+                        description="6이상이면 개별 부동산 정보를 응답함",
                         value="6",
                     ),
                 ],
@@ -338,6 +364,7 @@ class GetRealEstatesOnMapView(ListAPIView):
                 component_name="RealEstates",
                 serializers=[
                     GetRealEstatesOnMapResponseSerializer,
+                    GetRegionsOnMapResponseSerializer,
                 ],
                 resource_type_field_name=None,
             ),

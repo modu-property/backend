@@ -86,6 +86,7 @@ class Command(BaseCommand):
                         deal_type=deal_type,
                         deal_year=deal_year,
                         deal_month=deal_month,
+                        is_deal_canceled=False,
                     )
                     if os.getenv("SERVER_ENV") != "test":
                         t = threading.Thread(target=self.service.execute, args=(dto,))

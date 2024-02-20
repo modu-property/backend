@@ -4,6 +4,7 @@ import pytest
 from real_estate.enum.deal_enum import BrokerageTypesEnum, DealTypesForDBEnum
 from real_estate.enum.real_estate_enum import RealEstateTypesForDBEnum
 from django.contrib.gis.geos import Point
+from datetime import datetime
 
 
 @pytest.mark.django_db(transaction=True)
@@ -347,45 +348,80 @@ def test_get_real_estates_on_map_view(client, get_jwt, create_real_estate, creat
 
 @pytest.mark.django_db(transaction=True)
 def test_get_region_prices_on_map_view(
-    client, get_jwt, create_real_estate, create_deal
+    client,
+    get_jwt,
+    create_region,
+    create_region_price,
 ):
     """
     zool_level에 따라 시군구동읍면리 단위로 평균 매매가, 평균 평당가 등 응답
     """
-    real_estate1 = create_real_estate(
-        name="테스트빌라 1",
-        build_year=1990,
-        regional_code="11650",
-        lot_number="서울특별시 서초구 반포동 739",
-        road_name_address="서울특별시 서초구 사평대로53길 22 (반포동)",
-        address="서울특별시 서초구 반포동 739",
-        real_estate_type=RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value,
-        latitude="37.5054",
-        longitude="127.0216",
-        point=Point(37.5054, 127.0216),
+    region = create_region(
+        sido="서울특별시",
+        sigungu="서초구",
+        ubmyundong="논현동",
+        dongri="논현동",
+        latitude=37.5054,
+        longitude=127.0216,
     )
 
-    create_deal(
-        real_estate_id=real_estate1.id,
-        deal_price=10000,
-        brokerage_type=BrokerageTypesEnum.BROKERAGE.value,
-        deal_year=2023,
-        land_area=100,
-        deal_month=3,
-        deal_day=21,
-        area_for_exclusive_use=80,
-        floor=3,
-        is_deal_canceled=False,
-        deal_canceled_date=None,
-        area_for_exclusive_use_pyung="30.30",
-        area_for_exclusive_use_price_per_pyung="330",
-        deal_type=DealTypesForDBEnum.DEAL.value,
+    create_region_price(
+        region_id=region.id,
+        total_deal_price=636300,
+        total_jeonse_price=0,
+        total_deal_price_per_pyung="32356.95",
+        total_jeonse_price_per_pyung="0",
+        average_deal_price="17675.00",
+        average_jeonse_price="0",
+        average_deal_price_per_pyung="898.81",
+        average_jeonse_price_per_pyung="0",
+        deal_count=36,
+        jeonse_count=0,
+        deal_date=datetime.strptime("2006-01-01", "%Y-%m-%d"),
     )
 
     """TODO
       region_price 테이블 채우기
       zoom_level 변경 시 응답 asssert
     """
+    url = reverse("get-real-estates-on-map", kwargs={"deal_type": "deal"})
+
+    _jwt = get_jwt
+
+    headers = {"HTTP_AUTHORIZATION": f"Bearer {_jwt}"}
+    query_params = {
+        "latitude": 37.5054,
+        "longitude": 127.0216,
+        "sw_lat": 37.5053,
+        "sw_lng": 127.0215,
+        "ne_lat": 37.5055,
+        "ne_lng": 127.0217,
+        "zoom_level": 5,
+        "keyword": "",
+    }
+
+    response: JsonResponse = client.get(url, data=query_params, **headers)
+    assert response.status_code == 200
+
+    data = response.json()
+    region_prices = data.get("data")
+    for region_price in region_prices:
+        assert "total_deal_price" in region_price
+        assert "total_jeonse_price" in region_price
+        assert "total_deal_price_per_pyung" in region_price
+        assert "total_jeonse_price_per_pyung" in region_price
+        assert "average_deal_price" in region_price
+        assert "average_jeonse_price" in region_price
+        assert "average_deal_price_per_pyung" in region_price
+        assert "average_jeonse_price_per_pyung" in region_price
+        assert "deal_count" in region_price
+        assert "jeonse_count" in region_price
+        assert "deal_date" in region_price
+
+        region = region_price["region"]
+
+        assert "latitude" in region
+        assert "longitude" in region
 
 
 @pytest.mark.django_db(transaction=True)

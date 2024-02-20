@@ -11,6 +11,7 @@ class CollectRegionPriceDto:
     deal_type: str
     deal_year: int
     deal_month: int
+    is_deal_canceled: bool
 
     total_deal_price: int = 0
     total_deal_price_per_pyung: Decimal = Decimal()

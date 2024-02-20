@@ -16,6 +16,7 @@ from real_estate.serializers import (
     GetRealEstatesAndRegionsOnSearchResponseSerializer,
     GetRealEstatesOnMapResponseSerializer,
     GetRealEstatesOnSearchResponseSerializer,
+    GetRegionsOnMapResponseSerializer,
     GetRegionsOnSearchResponseSerializer,
 )
 from django.db.models import QuerySet
@@ -139,14 +140,17 @@ class GetRealEstatesOnMapService:
                         status_code=400,
                     )
         else:
-            real_estates: Union[
-                QuerySet, bool
-            ] = self.repository.get_clustered_real_estates(dto=dto)
+            """
+            region 테이블의 위경도 내에 있고, 시군구동 단위 일치하는것들을 region_price랑 join해서 응답
+            """
+            region_prices: Union[QuerySet, bool] = self.repository.get_region_prices(
+                dto=dto
+            )
 
-            if real_estates:
+            if region_prices:
                 data: Union[dict, bool, Any] = validate_data(
-                    model=real_estates,
-                    serializer=GetRealEstatesOnMapResponseSerializer,
+                    model=region_prices,
+                    serializer=GetRegionsOnMapResponseSerializer,
                     many=True,
                 )
 
@@ -154,7 +158,7 @@ class GetRealEstatesOnMapService:
                     return ServiceResultDto(data=data)
                 else:
                     return ServiceResultDto(
-                        message="GetRealEstatesOnMapResponseSerializer 에러",
+                        message="GetRegionsOnMapResponseSerializer 에러",
                         status_code=400,
                     )
         return ServiceResultDto(status_code=404)

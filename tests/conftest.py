@@ -1,8 +1,8 @@
-import datetime
+from datetime import datetime, date, timedelta
 from pandas import DataFrame
 import pandas
 import pytest
-from real_estate.models import Deal, RealEstate, MonthlyRent, Region
+from real_estate.models import Deal, RealEstate, MonthlyRent, Region, RegionPrice
 from django.contrib.gis.geos import Point
 import os
 from django.db import connections
@@ -167,7 +167,7 @@ def get_dongs():
 def get_jwt():
     return jwt.encode(
         {
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(days=30),
+            "exp": datetime.utcnow() + timedelta(days=30),
             # "user_id": 1,
         },
         SECRET_KEY,
@@ -212,3 +212,40 @@ def create_region():
         return region
 
     return _create_region
+
+
+@pytest.fixture
+def create_region_price():
+    def _create_region_price(
+        region_id: int,
+        total_deal_price: int,
+        total_jeonse_price: int,
+        total_deal_price_per_pyung: str,
+        total_jeonse_price_per_pyung: str,
+        average_deal_price: str,
+        average_jeonse_price: str,
+        average_deal_price_per_pyung: str,
+        average_jeonse_price_per_pyung: str,
+        deal_count: int,
+        jeonse_count: int,
+        deal_date: date,
+    ):
+        region_price = RegionPrice(
+            region_id=region_id,
+            total_deal_price=total_deal_price,
+            total_jeonse_price=total_jeonse_price,
+            total_deal_price_per_pyung=total_deal_price_per_pyung,
+            total_jeonse_price_per_pyung=total_jeonse_price_per_pyung,
+            average_deal_price=average_deal_price,
+            average_jeonse_price=average_jeonse_price,
+            average_deal_price_per_pyung=average_deal_price_per_pyung,
+            average_jeonse_price_per_pyung=average_jeonse_price_per_pyung,
+            deal_count=deal_count,
+            jeonse_count=jeonse_count,
+            deal_date=deal_date,
+        )
+
+        region_price.save()
+        return region_price
+
+    return _create_region_price
