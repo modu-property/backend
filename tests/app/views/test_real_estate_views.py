@@ -346,8 +346,20 @@ def test_get_real_estates_on_map_view(client, get_jwt, create_real_estate, creat
         assert "area_for_exclusive_use_price_per_pyung" in real_estate
 
 
+@pytest.mark.parametrize(
+    "title, zoom_level, expected_region",
+    [
+        ("zoom_level 2 then sido", 2, "sido"),
+        ("zoom_level 3 then sigungu", 3, "sigungu"),
+        ("zoom_level 4 then ubmyundong", 4, "ubmyundong"),
+        ("zoom_level 5 then dongri", 5, "dongri"),
+    ],
+)
 @pytest.mark.django_db(transaction=True)
 def test_get_region_prices_on_map_view(
+    title,
+    zoom_level,
+    expected_region,
     client,
     get_jwt,
     create_region,
@@ -356,17 +368,18 @@ def test_get_region_prices_on_map_view(
     """
     zool_level에 따라 시군구동읍면리 단위로 평균 매매가, 평균 평당가 등 응답
     """
-    region = create_region(
+    # sido
+    region_sido = create_region(
         sido="서울특별시",
-        sigungu="서초구",
-        ubmyundong="논현동",
-        dongri="논현동",
+        sigungu="",
+        ubmyundong="",
+        dongri="",
         latitude=37.5054,
         longitude=127.0216,
     )
 
     create_region_price(
-        region_id=region.id,
+        region_id=region_sido.id,
         total_deal_price=636300,
         total_jeonse_price=0,
         total_deal_price_per_pyung="32356.95",
@@ -380,23 +393,92 @@ def test_get_region_prices_on_map_view(
         deal_date=datetime.strptime("2006-01-01", "%Y-%m-%d"),
     )
 
-    """TODO
-      region_price 테이블 채우기
-      zoom_level 변경 시 응답 asssert
-    """
+    # sigungu
+    region_sigungu = create_region(
+        sido="서울특별시",
+        sigungu="서초구",
+        ubmyundong="",
+        dongri="",
+        latitude=37.5054,
+        longitude=127.0216,
+    )
+
+    create_region_price(
+        region_id=region_sigungu.id,
+        total_deal_price=636300,
+        total_jeonse_price=0,
+        total_deal_price_per_pyung="32356.95",
+        total_jeonse_price_per_pyung="0",
+        average_deal_price="17675.00",
+        average_jeonse_price="0",
+        average_deal_price_per_pyung="898.81",
+        average_jeonse_price_per_pyung="0",
+        deal_count=36,
+        jeonse_count=0,
+        deal_date=datetime.strptime("2006-01-01", "%Y-%m-%d"),
+    )
+
+    # ubmyundong
+    region_ubmyundong = create_region(
+        sido="서울특별시",
+        sigungu="서초구",
+        ubmyundong="논현동",
+        dongri="",
+        latitude=37.5054,
+        longitude=127.0216,
+    )
+
+    create_region_price(
+        region_id=region_ubmyundong.id,
+        total_deal_price=636300,
+        total_jeonse_price=0,
+        total_deal_price_per_pyung="32356.95",
+        total_jeonse_price_per_pyung="0",
+        average_deal_price="17675.00",
+        average_jeonse_price="0",
+        average_deal_price_per_pyung="898.81",
+        average_jeonse_price_per_pyung="0",
+        deal_count=36,
+        jeonse_count=0,
+        deal_date=datetime.strptime("2006-01-01", "%Y-%m-%d"),
+    )
+
+    # dong
+    region_dong = create_region(
+        sido="서울특별시",
+        sigungu="서초구",
+        ubmyundong="논현동",
+        dongri="논현동",
+        latitude=37.5054,
+        longitude=127.0216,
+    )
+
+    create_region_price(
+        region_id=region_dong.id,
+        total_deal_price=636300,
+        total_jeonse_price=0,
+        total_deal_price_per_pyung="32356.95",
+        total_jeonse_price_per_pyung="0",
+        average_deal_price="17675.00",
+        average_jeonse_price="0",
+        average_deal_price_per_pyung="898.81",
+        average_jeonse_price_per_pyung="0",
+        deal_count=36,
+        jeonse_count=0,
+        deal_date=datetime.strptime("2006-01-01", "%Y-%m-%d"),
+    )
+
     url = reverse("get-real-estates-on-map", kwargs={"deal_type": "deal"})
 
     _jwt = get_jwt
 
     headers = {"HTTP_AUTHORIZATION": f"Bearer {_jwt}"}
     query_params = {
-        "latitude": 37.5054,
-        "longitude": 127.0216,
         "sw_lat": 37.5053,
         "sw_lng": 127.0215,
         "ne_lat": 37.5055,
         "ne_lng": 127.0217,
-        "zoom_level": 5,
+        "zoom_level": zoom_level,
         "keyword": "",
     }
 
@@ -419,6 +501,27 @@ def test_get_region_prices_on_map_view(
         assert "deal_date" in region_price
 
         region = region_price["region"]
+
+        if expected_region == "sido":
+            assert region["sido"]
+            assert region["sigungu"] == ""
+            assert region["ubmyundong"] == ""
+            assert region["dongri"] == ""
+        elif expected_region == "sigungu":
+            assert region["sido"]
+            assert region["sigungu"]
+            assert region["ubmyundong"] == ""
+            assert region["dongri"] == ""
+        elif expected_region == "ubmyundong":
+            assert region["sido"]
+            assert region["sigungu"]
+            assert region["ubmyundong"]
+            assert region["dongri"] == ""
+        elif expected_region == "dongri":
+            assert region["sido"]
+            assert region["sigungu"]
+            assert region["ubmyundong"]
+            assert region["dongri"]
 
         assert "latitude" in region
         assert "longitude" in region

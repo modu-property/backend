@@ -188,21 +188,21 @@ class RealEstateRepository:
                 _q = _q.exclude(region__dongri="")
             elif dto.zoom_level == 4:
                 # ubmyundong
-                _q = _q.exclude(region__ubmyundong="").exclude(~Q(region__dongri=""))
+                _q = _q.exclude(region__ubmyundong="").filter(region__dongri="")
             elif dto.zoom_level == 3:
                 # sigungu
                 _q = (
                     _q.exclude(region__sigungu="")
-                    .exclude(~Q(region__ubmyundong=""))
-                    .exclude(~Q(region__dongri=""))
+                    .filter(region__ubmyundong="")
+                    .filter(region__dongri="")
                 )
             elif dto.zoom_level == 2:
                 # sido
                 _q = (
                     _q.exclude(region__sido="")
-                    .exclude(~Q(region__sigungu=""))
-                    .exclude(~Q(region__ubmyundong=""))
-                    .exclude(~Q(region__dongri=""))
+                    .filter(region__sigungu="")
+                    .filter(region__ubmyundong="")
+                    .filter(region__dongri="")
                 )
 
             logger.debug(f"_q : {str(_q.query)}")
@@ -216,7 +216,7 @@ class RealEstateRepository:
                 )
 
                 logger.debug(f"_q : {str(_q.query)}")
-                return _q.all()
+                return _q.all()[:20]
             except Exception as e:
                 logger.error(f"get_region_price 실패 e : {e}")
                 return False
