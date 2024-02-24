@@ -105,8 +105,6 @@ class GetRealEstatesOnSearchResponseSerializer(serializers.Serializer):
 
 class GetRealEstatesOnMapRequestSerializer(serializers.Serializer):
     deal_type = serializers.ChoiceField(choices=DEAL_TYPES)
-    latitude = serializers.FloatField()
-    longitude = serializers.FloatField()
     sw_lat = serializers.FloatField()
     sw_lng = serializers.FloatField()
     ne_lat = serializers.FloatField()

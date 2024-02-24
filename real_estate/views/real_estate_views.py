@@ -235,34 +235,6 @@ class GetRealEstatesOnMapView(ListAPIView):
                 ],
             ),
             OpenApiParameter(
-                name="latitude",
-                type=float,
-                location=OpenApiParameter.QUERY,
-                description="중심 위도",
-                required=False,
-                examples=[
-                    OpenApiExample(
-                        name="위도",
-                        description="서울 위도",
-                        value="37.566826004661",
-                    ),
-                ],
-            ),
-            OpenApiParameter(
-                name="longitude",
-                type=float,
-                location=OpenApiParameter.QUERY,
-                description="중심 경도",
-                required=False,
-                examples=[
-                    OpenApiExample(
-                        name="경도",
-                        description="경도",
-                        value="126.978652258309",
-                    ),
-                ],
-            ),
-            OpenApiParameter(
                 name="sw_lat",
                 type=float,
                 location=OpenApiParameter.QUERY,
@@ -380,10 +352,6 @@ class GetRealEstatesOnMapView(ListAPIView):
     ) -> JsonResponse:
         request_data: dict = {
             "deal_type": str(kwargs["deal_type"]).upper(),
-            "latitude": request.query_params.get("latitude", default=37.566826004661),
-            "longitude": request.query_params.get(
-                "longitude", default=126.978652258309
-            ),
             "sw_lat": request.query_params.get("sw_lat"),
             "sw_lng": request.query_params.get("sw_lng"),
             "ne_lat": request.query_params.get("ne_lat"),

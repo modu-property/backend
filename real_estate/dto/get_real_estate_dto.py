@@ -16,8 +16,6 @@ class GetRealEstatesOnSearchDto:
 @dataclass
 class GetRealEstatesOnMapDto:
     deal_type: str
-    latitude: float
-    longitude: float
     sw_lat: float
     sw_lng: float
     ne_lat: float
