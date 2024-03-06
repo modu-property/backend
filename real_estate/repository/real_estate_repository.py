@@ -1,8 +1,7 @@
 from typing import List, Optional, Union
-
 from django.forms import model_to_dict
 from real_estate.dto.collect_region_price_dto import CollectRegionPriceDto
-from real_estate.dto.get_real_estate_dto import GetRealEstatesOnMapDto
+from real_estate.dto.get_real_estate_dto import GetDealsDto, GetRealEstatesOnMapDto
 from real_estate.models import Deal, RealEstate, Region, RegionPrice
 from modu_property.utils.loggers import logger
 from django.db.models import (
@@ -15,8 +14,6 @@ from django.db.models import (
     DateField,
 )
 from django.db.models.functions import Concat
-from django.db.models import Q
-
 from real_estate.serializers import RegionPriceSerializer
 
 
@@ -205,8 +202,6 @@ class RealEstateRepository:
                     .filter(region__dongri="")
                 )
 
-            logger.debug(f"_q : {str(_q.query)}")
-
             try:
                 _q = _q.filter(
                     region__latitude__gte=dto.sw_lat,
@@ -215,7 +210,6 @@ class RealEstateRepository:
                     region__longitude__lte=dto.ne_lng,
                 )
 
-                logger.debug(f"_q : {str(_q.query)}")
                 return _q.all()[:20]
             except Exception as e:
                 logger.error(f"get_region_price 실패 e : {e}")
@@ -226,3 +220,16 @@ class RealEstateRepository:
             except Exception as e:
                 logger.error(f"get_region_price 실패 e : {e}")
                 return False
+
+    def get_deals(self, dto: GetDealsDto = None):
+        _q = (
+            Deal.objects.select_related("real_estate")
+            .filter(real_estate__id=dto.real_estate_id)
+            .filter(deal_type=dto.deal_type)
+        )
+        if dto.deal_id:
+            _q = _q.filter(id__lt=dto.deal_id)
+
+        deals = _q.all().order_by("-deal_year", "-deal_month", "-deal_day")[:10]
+
+        return deals

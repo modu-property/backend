@@ -2,7 +2,7 @@ from django.urls import reverse
 import pytest
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db(transaction=True, reset_sequences=True)
 def test_signup_view(client):
     url = reverse("signup")
 
@@ -13,7 +13,7 @@ def test_signup_view(client):
     assert response.status_code == 200
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db(transaction=True, reset_sequences=True)
 def test_login_view(client, create_user):
     create_user(username="test1", password="1234")
     url = reverse("login")

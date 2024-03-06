@@ -1,5 +1,6 @@
 from decimal import Decimal
 from rest_framework import serializers
+import real_estate
 from real_estate.enum.deal_enum import DEAL_TYPES
 from real_estate.models import Deal, RealEstate, Region, RegionPrice
 
@@ -176,3 +177,9 @@ class GetRegionsOnSearchResponseSerializer(serializers.Serializer):
 class GetRealEstatesAndRegionsOnSearchResponseSerializer(serializers.Serializer):
     regions = GetRegionsOnSearchResponseSerializer(many=True, required=False)
     real_estates = GetRealEstatesOnSearchResponseSerializer(many=True, required=False)
+
+
+class GetDealsRequestSerializer(serializers.Serializer):
+    real_estate_id = serializers.IntegerField()
+    deal_id = serializers.IntegerField()
+    deal_type = serializers.ChoiceField(choices=DEAL_TYPES)

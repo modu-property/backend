@@ -6,7 +6,6 @@ from real_estate.enum.real_estate_enum import (
     RealEstateTypesForDBEnum,
     RealEstateTypesForQueryEnum,
 )
-from real_estate.models import RealEstate
 from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.services.collect_deal_price_of_real_estate_service import (
     CollectDealPriceOfRealEstateService,

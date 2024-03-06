@@ -5,12 +5,15 @@ from rest_framework.generics import ListAPIView
 from accounts.util.authenticator import jwt_authenticator
 from modu_property.utils.validator import validate_data
 from real_estate.dto.get_real_estate_dto import (
+    GetDealsDto,
     GetRealEstateDto,
     GetRealEstatesOnMapDto,
     GetRealEstatesOnSearchDto,
 )
 from real_estate.dto.service_result_dto import ServiceResultDto
 from real_estate.serializers import (
+    DealSerializer,
+    GetDealsRequestSerializer,
     GetRealEstateResponseSerializer,
     GetRealEstateRequestSerializer,
     GetRealEstatesAndRegionsOnSearchResponseSerializer,
@@ -33,6 +36,7 @@ from drf_spectacular.utils import (
 )
 from modu_property.utils.loggers import logger
 from rest_framework.views import APIView
+from real_estate.services.get_deals_service import GetDealsService
 
 
 class GetRealEstateView(APIView):
@@ -368,6 +372,83 @@ class GetRealEstatesOnMapView(ListAPIView):
 
         dto = GetRealEstatesOnMapDto(**data)
         result: ServiceResultDto = GetRealEstatesOnMapService().execute(dto=dto)
+
+        return JsonResponse(
+            data=result.data,
+            status=result.status_code,
+            safe=False,
+        )
+
+
+class GetDealsView(ListAPIView):
+    @extend_schema(
+        summary="마지막 deal_id를 넘겨서 다음 거래내역 조회",
+        description="마지막 deal_id를 넘겨서 다음 거래내역 조회",
+        parameters=[
+            OpenApiParameter(
+                name="id",
+                type=int,
+                location=OpenApiParameter.PATH,
+                description="real_estate_id",
+                required=True,
+            ),
+            OpenApiParameter(
+                name="deal_type",
+                type=str,
+                location=OpenApiParameter.PATH,
+                description="deal_type",
+                required=True,
+            ),
+            OpenApiParameter(
+                name="deal_id",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description="가장 마지막 거래 id",
+                required=True,
+                examples=[
+                    OpenApiExample(
+                        name="deal_id",
+                        description="21을 넘기면 20 이하의 deal_id를 응답",
+                        value="21",
+                    ),
+                ],
+            ),
+        ],
+        request=GetDealsRequestSerializer,
+        responses={
+            200: PolymorphicProxySerializer(
+                component_name="Deals",
+                serializers=[
+                    DealSerializer,
+                ],
+                resource_type_field_name=None,
+            ),
+            400: OpenApiResponse(description="bad request"),
+            404: OpenApiResponse(description="not found"),
+        },
+    )
+    # @jwt_authenticator
+    def get(
+        self,
+        request: Request,
+        *args,
+        **kwargs,
+    ) -> JsonResponse:
+        request_data: dict = {
+            "real_estate_id": int(kwargs.get("id", 0)),
+            "deal_id": int(request.query_params.get("deal_id", 0)),
+            "deal_type": str(kwargs["deal_type"]).upper(),
+        }
+
+        data: Any = validate_data(
+            data=request_data,
+            serializer=GetDealsRequestSerializer,
+        )
+        if not data:
+            return JsonResponse(data={}, status=400)
+
+        dto = GetDealsDto(**data)
+        result: ServiceResultDto = GetDealsService().execute(dto=dto)
 
         return JsonResponse(
             data=result.data,

@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+from django.test import Client
 from django.urls import reverse
 import pytest
 from real_estate.enum.deal_enum import BrokerageTypesEnum, DealTypesForDBEnum
@@ -7,7 +8,7 @@ from django.contrib.gis.geos import Point
 from datetime import datetime
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db(transaction=True, reset_sequences=True)
 def test_get_real_estates_with_latitude_longitude_zoom_level_view(
     client, get_jwt, create_real_estate, create_deal
 ):
@@ -176,7 +177,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         assert "area_for_exclusive_use_price_per_pyung" in real_estate
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db(transaction=True, reset_sequences=True)
 def test_get_real_estates_on_map_view(client, get_jwt, create_real_estate, create_deal):
     real_estate1 = create_real_estate(
         name="테스트빌라 1",
@@ -355,7 +356,7 @@ def test_get_real_estates_on_map_view(client, get_jwt, create_real_estate, creat
         ("zoom_level 5 then dongri", 5, "dongri"),
     ],
 )
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db(transaction=True, reset_sequences=True)
 def test_get_region_prices_on_map_view(
     title,
     zoom_level,
@@ -527,8 +528,8 @@ def test_get_region_prices_on_map_view(
         assert "longitude" in region
 
 
-@pytest.mark.django_db(transaction=True)
-# @pytest.mark.skip()
+@pytest.mark.django_db(transaction=True, reset_sequences=True)
+@pytest.mark.skip()
 def test_get_real_estates_with_keyword_view(client, get_jwt):
     """
     !!로컬 데이터 사라지므로 주의!!
@@ -550,7 +551,7 @@ def test_get_real_estates_with_keyword_view(client, get_jwt):
     assert response.status_code == 200
 
 
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db(transaction=True, reset_sequences=True)
 def test_get_real_estate(client, get_jwt, create_real_estate, create_deal):
     real_estate1 = create_real_estate(
         name="테스트빌라 1",
@@ -632,3 +633,106 @@ def test_get_real_estate(client, get_jwt, create_real_estate, create_deal):
         assert "area_for_exclusive_use_pyung" in deal
         assert "area_for_exclusive_use_price_per_pyung" in deal
         assert "deal_type" in deal
+
+
+@pytest.mark.django_db(transaction=True, reset_sequences=True)
+@pytest.mark.parametrize(
+    "title, deal_create_count, last_deal_id, expected_deal_count",
+    [
+        ("when deal count is 0, last_deal_id is None then return 0", 0, None, 0),
+        ("when deal count is 0, last_deal_id is 1 then return 0", 0, 1, 0),
+        ("when deal count is 11, last_deal_id is None then return 10", 11, None, 10),
+        ("when deal count is 12, last_deal_id is 3 then return 2", 12, 3, 2),
+        ("when deal count is 25, last_deal_id is 16 then return 10", 25, 16, 10),
+        ("when deal count is 25, last_deal_id is 7 then return 6", 25, 7, 6),
+    ],
+)
+def test_when_get_deals_then_return_deals(
+    title,
+    deal_create_count,
+    last_deal_id,
+    expected_deal_count,
+    client: Client,
+    get_jwt,
+    create_real_estate,
+    create_deal,
+):
+    real_estate = create_real_estate(
+        name="테스트빌라 1",
+        build_year=1990,
+        regional_code="11650",
+        lot_number="서울특별시 서초구 반포동 739",
+        road_name_address="서울특별시 서초구 사평대로53길 22 (반포동)",
+        address="서울특별시 서초구 반포동 739",
+        real_estate_type=RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value,
+        latitude="37.5054",
+        longitude="127.0216",
+        point=Point(37.5054, 127.0216),
+    )
+
+    year = 2024
+
+    for i in range(deal_create_count):
+        create_deal(
+            real_estate_id=real_estate.id,
+            deal_price=10000,
+            brokerage_type=BrokerageTypesEnum.DIRECT.value,
+            deal_year=year - i,
+            land_area=100,
+            deal_month=3,
+            deal_day=21,
+            area_for_exclusive_use=80,
+            floor=3,
+            is_deal_canceled=False,
+            deal_canceled_date=None,
+            area_for_exclusive_use_pyung="30.30",
+            area_for_exclusive_use_price_per_pyung="330",
+            deal_type=DealTypesForDBEnum.DEAL.value,
+        )
+
+    another_real_estate = create_real_estate(
+        name="테스트빌라 1",
+        build_year=1990,
+        regional_code="11650",
+        lot_number="서울특별시 서초구 반포동 739",
+        road_name_address="서울특별시 서초구 사평대로53길 22 (반포동)",
+        address="서울특별시 서초구 반포동 739",
+        real_estate_type=RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value,
+        latitude="37.5054",
+        longitude="127.0216",
+        point=Point(37.5054, 127.0216),
+    )
+
+    create_deal(
+        real_estate_id=another_real_estate.id,
+        deal_price=10000,
+        brokerage_type=BrokerageTypesEnum.DIRECT.value,
+        deal_year=year,
+        land_area=100,
+        deal_month=3,
+        deal_day=21,
+        area_for_exclusive_use=80,
+        floor=3,
+        is_deal_canceled=False,
+        deal_canceled_date=None,
+        area_for_exclusive_use_pyung="30.30",
+        area_for_exclusive_use_price_per_pyung="330",
+        deal_type=DealTypesForDBEnum.DEAL.value,
+    )
+
+    url = reverse(
+        "get-deals",
+        kwargs={"id": real_estate.id, "deal_type": DealTypesForDBEnum.DEAL.value},
+    )
+
+    _jwt = get_jwt
+
+    headers = {"HTTP_AUTHORIZATION": f"Bearer {_jwt}"}
+
+    query_params = {"deal_id": last_deal_id} if last_deal_id else None
+
+    response = client.get(
+        path=url, data=query_params, **headers, content_type="application/json"
+    )
+    assert response.status_code == 200
+    assert len(response.json().get("data")) == expected_deal_count

@@ -21,3 +21,10 @@ class GetRealEstatesOnMapDto:
     ne_lat: float
     ne_lng: float
     zoom_level: int
+
+
+@dataclass
+class GetDealsDto:
+    real_estate_id: int
+    deal_id: int
+    deal_type: str

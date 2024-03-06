@@ -9,7 +9,7 @@ from django.contrib.gis.geos.point import Point
 
 
 @pytest.mark.skip
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db(transaction=True, reset_sequences=True)
 def test_collect_deal_price_of_estate_command(insert_regional_codes):
     insert_regional_codes()
 

@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
@@ -29,6 +30,11 @@ urlpatterns = [
         "real-estate/<int:id>",
         app_views.GetRealEstateView.as_view(),
         name="get-real-estate",
+    ),
+    path(
+        "real-estate/<int:id>/<str:deal_type>/deals",
+        app_views.GetDealsView.as_view(),
+        name="get-deals",
     ),
     path(
         "real-estates/<str:deal_type>/keyword",
