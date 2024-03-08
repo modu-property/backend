@@ -32,3 +32,7 @@ BROKERAGE_TYPES = (
     (BrokerageTypesEnum.BROKERAGE.value, BrokerageTypesEnum.BROKERAGE.value),
     (BrokerageTypesEnum.DIRECT.value, BrokerageTypesEnum.DIRECT.value),
 )
+
+
+class DealPerPageEnum(Enum):
+    PER_PAGE = 10

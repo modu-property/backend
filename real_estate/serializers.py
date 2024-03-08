@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import Dict, OrderedDict
 from rest_framework import serializers
 import real_estate
 from real_estate.enum.deal_enum import DEAL_TYPES
@@ -23,6 +24,11 @@ class RealEstateSerializer(serializers.ModelSerializer):
 
 
 class DealSerializer(serializers.ModelSerializer):
+    # area_for_exclusive_use_pyung = serializers.CharField()
+    # area_for_exclusive_use_price_per_pyung = serializers.CharField()
+    # is_deal_canceled = serializers.BooleanField()
+    # floor = serializers.CharField()
+
     area_for_exclusive_use_pyung = serializers.SerializerMethodField(
         "convert_square_meter_to_pyung"
     )
@@ -181,10 +187,33 @@ class GetRealEstatesAndRegionsOnSearchResponseSerializer(serializers.Serializer)
 
 class GetDealsRequestSerializer(serializers.Serializer):
     real_estate_id = serializers.IntegerField()
-    deal_id = serializers.IntegerField()
+    page = serializers.IntegerField()
     deal_type = serializers.ChoiceField(choices=DEAL_TYPES)
 
 
+class DealDictSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    deal_price = serializers.CharField()
+    brokerage_type = serializers.CharField()
+    deal_year = serializers.IntegerField()
+    land_area = serializers.CharField()
+    deal_month = serializers.IntegerField()
+    deal_day = serializers.IntegerField()
+    area_for_exclusive_use = serializers.CharField()
+    floor = serializers.CharField()
+    is_deal_canceled = serializers.BooleanField()
+    deal_canceled_date = serializers.DateField(allow_null=True)
+    area_for_exclusive_use_pyung = serializers.DecimalField(
+        max_digits=10, decimal_places=2
+    )
+    area_for_exclusive_use_price_per_pyung = serializers.DecimalField(
+        max_digits=10, decimal_places=2
+    )
+    deal_type = serializers.CharField()
+    real_estate_id = serializers.IntegerField()
+
+
 class GetDealsResponseSerializer(serializers.Serializer):
-    deals = serializers.ListField(required=True)
-    is_remained = serializers.BooleanField(required=True)
+    deals = serializers.ListField(child=DealDictSerializer())
+    current_page = serializers.IntegerField(required=True)
+    total_pages = serializers.IntegerField(required=True)

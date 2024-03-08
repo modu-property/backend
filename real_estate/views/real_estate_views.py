@@ -435,7 +435,7 @@ class GetDealsView(ListAPIView):
     ) -> JsonResponse:
         request_data: dict = {
             "real_estate_id": int(kwargs.get("id", 0)),
-            "deal_id": int(request.query_params.get("deal_id", 0)),
+            "page": int(request.query_params.get("page", 1)),
             "deal_type": str(kwargs["deal_type"]).upper(),
         }
 

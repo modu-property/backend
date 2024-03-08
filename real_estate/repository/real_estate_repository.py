@@ -222,14 +222,10 @@ class RealEstateRepository:
                 return False
 
     def get_deals(self, dto: GetDealsDto = None):
-        _q = (
+        return (
             Deal.objects.select_related("real_estate")
             .filter(real_estate__id=dto.real_estate_id)
             .filter(deal_type=dto.deal_type)
+            .all()
+            .order_by("-deal_year", "-deal_month", "-deal_day")
         )
-        if dto.deal_id:
-            _q = _q.filter(id__lt=dto.deal_id)
-
-        deals = _q.all().order_by("-deal_year", "-deal_month", "-deal_day")[:11]
-
-        return deals

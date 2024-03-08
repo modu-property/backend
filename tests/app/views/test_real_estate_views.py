@@ -637,28 +637,23 @@ def test_get_real_estate(client, get_jwt, create_real_estate, create_deal):
 
 @pytest.mark.django_db(transaction=True, reset_sequences=True)
 @pytest.mark.parametrize(
-    "title, deal_create_count, last_deal_id, expected_deal_count, expected_is_remained",
+    "title, deal_create_count, page, expected_deal_count, expected_current_page, expected_total_pages",
     [
-        ("when deal count is 0, last_deal_id is None then return 0", 0, None, 0, False),
-        ("when deal count is 0, last_deal_id is 1 then return 0", 0, 1, 0, False),
-        (
-            "when deal count is 11, last_deal_id is None then return 10",
-            11,
-            None,
-            10,
-            True,
-        ),
-        ("when deal count is 12, last_deal_id is 3 then return 2", 12, 3, 2, False),
-        ("when deal count is 25, last_deal_id is 16 then return 10", 25, 16, 10, True),
-        ("when deal count is 25, last_deal_id is 7 then return 6", 25, 7, 6, False),
+        ("when deal count is 0, page is None then return 0", 0, None, 0, 1, 1),
+        ("when deal count is 0, page is 1 then return 0", 0, 1, 0, 1, 1),
+        ("when deal count is 11, page is None then return 10", 11, None, 10, 1, 2),
+        ("when deal count is 12, page is 2 then return 2", 12, 2, 2, 2, 2),
+        ("when deal count is 25, page is 2 then return 10", 25, 2, 10, 2, 3),
+        ("when deal count is 25, page is 3 then return 5", 25, 3, 5, 3, 3),
     ],
 )
 def test_when_get_deals_then_return_deals(
     title,
     deal_create_count,
-    last_deal_id,
+    page,
     expected_deal_count,
-    expected_is_remained,
+    expected_current_page,
+    expected_total_pages,
     client: Client,
     get_jwt,
     create_real_estate,
@@ -736,7 +731,7 @@ def test_when_get_deals_then_return_deals(
 
     headers = {"HTTP_AUTHORIZATION": f"Bearer {_jwt}"}
 
-    query_params = {"deal_id": last_deal_id} if last_deal_id else None
+    query_params = {"page": page} if page else None
 
     response = client.get(
         path=url, data=query_params, **headers, content_type="application/json"
@@ -744,6 +739,8 @@ def test_when_get_deals_then_return_deals(
     assert response.status_code == 200
     data = response.json().get("data")
     deals = data.get("deals")
-    is_remained = data.get("is_remained")
+    current_page = data.get("current_page")
+    total_pages = data.get("total_pages")
     assert len(deals) == expected_deal_count
-    assert is_remained == expected_is_remained
+    assert current_page == expected_current_page
+    assert total_pages == expected_total_pages
