@@ -183,3 +183,8 @@ class GetDealsRequestSerializer(serializers.Serializer):
     real_estate_id = serializers.IntegerField()
     deal_id = serializers.IntegerField()
     deal_type = serializers.ChoiceField(choices=DEAL_TYPES)
+
+
+class GetDealsResponseSerializer(serializers.Serializer):
+    deals = serializers.ListField(required=True)
+    is_remained = serializers.BooleanField(required=True)

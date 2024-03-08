@@ -14,6 +14,7 @@ from real_estate.dto.service_result_dto import ServiceResultDto
 from real_estate.serializers import (
     DealSerializer,
     GetDealsRequestSerializer,
+    GetDealsResponseSerializer,
     GetRealEstateResponseSerializer,
     GetRealEstateRequestSerializer,
     GetRealEstatesAndRegionsOnSearchResponseSerializer,
@@ -418,9 +419,7 @@ class GetDealsView(ListAPIView):
         responses={
             200: PolymorphicProxySerializer(
                 component_name="Deals",
-                serializers=[
-                    DealSerializer,
-                ],
+                serializers=[GetDealsResponseSerializer],
                 resource_type_field_name=None,
             ),
             400: OpenApiResponse(description="bad request"),

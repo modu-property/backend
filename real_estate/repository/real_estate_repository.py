@@ -230,6 +230,6 @@ class RealEstateRepository:
         if dto.deal_id:
             _q = _q.filter(id__lt=dto.deal_id)
 
-        deals = _q.all().order_by("-deal_year", "-deal_month", "-deal_day")[:10]
+        deals = _q.all().order_by("-deal_year", "-deal_month", "-deal_day")[:11]
 
         return deals

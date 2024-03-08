@@ -637,14 +637,20 @@ def test_get_real_estate(client, get_jwt, create_real_estate, create_deal):
 
 @pytest.mark.django_db(transaction=True, reset_sequences=True)
 @pytest.mark.parametrize(
-    "title, deal_create_count, last_deal_id, expected_deal_count",
+    "title, deal_create_count, last_deal_id, expected_deal_count, expected_is_remained",
     [
-        ("when deal count is 0, last_deal_id is None then return 0", 0, None, 0),
-        ("when deal count is 0, last_deal_id is 1 then return 0", 0, 1, 0),
-        ("when deal count is 11, last_deal_id is None then return 10", 11, None, 10),
-        ("when deal count is 12, last_deal_id is 3 then return 2", 12, 3, 2),
-        ("when deal count is 25, last_deal_id is 16 then return 10", 25, 16, 10),
-        ("when deal count is 25, last_deal_id is 7 then return 6", 25, 7, 6),
+        ("when deal count is 0, last_deal_id is None then return 0", 0, None, 0, False),
+        ("when deal count is 0, last_deal_id is 1 then return 0", 0, 1, 0, False),
+        (
+            "when deal count is 11, last_deal_id is None then return 10",
+            11,
+            None,
+            10,
+            True,
+        ),
+        ("when deal count is 12, last_deal_id is 3 then return 2", 12, 3, 2, False),
+        ("when deal count is 25, last_deal_id is 16 then return 10", 25, 16, 10, True),
+        ("when deal count is 25, last_deal_id is 7 then return 6", 25, 7, 6, False),
     ],
 )
 def test_when_get_deals_then_return_deals(
@@ -652,6 +658,7 @@ def test_when_get_deals_then_return_deals(
     deal_create_count,
     last_deal_id,
     expected_deal_count,
+    expected_is_remained,
     client: Client,
     get_jwt,
     create_real_estate,
@@ -735,4 +742,8 @@ def test_when_get_deals_then_return_deals(
         path=url, data=query_params, **headers, content_type="application/json"
     )
     assert response.status_code == 200
-    assert len(response.json().get("data")) == expected_deal_count
+    data = response.json().get("data")
+    deals = data.get("deals")
+    is_remained = data.get("is_remained")
+    assert len(deals) == expected_deal_count
+    assert is_remained == expected_is_remained
