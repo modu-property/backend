@@ -383,8 +383,8 @@ class GetRealEstatesOnMapView(ListAPIView):
 
 class GetDealsView(ListAPIView):
     @extend_schema(
-        summary="마지막 deal_id를 넘겨서 다음 거래내역 조회",
-        description="마지막 deal_id를 넘겨서 다음 거래내역 조회",
+        summary="page 번호로 거래내역 조회",
+        description="page 번호로 거래내역 조회",
         parameters=[
             OpenApiParameter(
                 name="id",
@@ -392,6 +392,13 @@ class GetDealsView(ListAPIView):
                 location=OpenApiParameter.PATH,
                 description="real_estate_id",
                 required=True,
+                examples=[
+                    OpenApiExample(
+                        name="id",
+                        description="real_estate_id",
+                        value="30000",
+                    ),
+                ],
             ),
             OpenApiParameter(
                 name="deal_type",
@@ -399,18 +406,25 @@ class GetDealsView(ListAPIView):
                 location=OpenApiParameter.PATH,
                 description="deal_type",
                 required=True,
+                examples=[
+                    OpenApiExample(
+                        name="deal_type",
+                        description="deal_type",
+                        value="deal",
+                    ),
+                ],
             ),
             OpenApiParameter(
-                name="deal_id",
+                name="page",
                 type=int,
                 location=OpenApiParameter.QUERY,
-                description="가장 마지막 거래 id",
+                description="조회할 페이지 번호",
                 required=True,
                 examples=[
                     OpenApiExample(
-                        name="deal_id",
-                        description="21을 넘기면 20 이하의 deal_id를 응답",
-                        value="21",
+                        name="page",
+                        description="한 페이지 당 최대 10개 거래내역 조회",
+                        value="1",
                     ),
                 ],
             ),
