@@ -93,6 +93,7 @@ jobs:
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
             cd ~/backend
+            cat docker-compose.testing.yml
             git reset --hard
             git checkout feature/simon/get-property-from-api
             git pull origin feature/simon/get-property-from-api
@@ -102,11 +103,6 @@ jobs:
             docker pull gidlemyeon/modu_property_platform_development:django
             docker-compose -f docker-compose.testing.yml up -d
             docker image prune -f
-      
-      - name: Check yml
-        run: |
-          cd ~/backend
-          cat docker-compose.testing.yml
 
       - name: Remove Github Actions IP From Security Group
         run: |
