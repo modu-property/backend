@@ -86,8 +86,6 @@ class GetRealEstateRequestSerializer(serializers.Serializer):
 
 
 class GetRealEstateResponseSerializer(serializers.ModelSerializer):
-    deals = DealSerializer(many=True)
-
     class Meta:
         model = RealEstate
         exclude = ("point",)

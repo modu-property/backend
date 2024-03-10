@@ -620,19 +620,6 @@ def test_get_real_estate(client, get_jwt, create_real_estate, create_deal):
     assert real_estate["real_estate_type"] == real_estate1.real_estate_type
     assert real_estate["latitude"] == real_estate1.latitude
     assert real_estate["longitude"] == real_estate1.longitude
-    assert "deals" in real_estate
-
-    deals = real_estate["deals"]
-    for deal in deals:
-        assert "deal_price" in deal
-        assert "brokerage_type" in deal
-        assert "deal_year" in deal
-        assert "land_area" in deal
-        assert "deal_month" in deal
-        assert "deal_day" in deal
-        assert "area_for_exclusive_use_pyung" in deal
-        assert "area_for_exclusive_use_price_per_pyung" in deal
-        assert "deal_type" in deal
 
 
 @pytest.mark.django_db(transaction=True, reset_sequences=True)

@@ -1,0 +1,83 @@
+name: Django CICD development
+
+on:
+  push:
+    branches:
+      - feature/simon/get-property-from-api
+
+permissions:
+  contents: read
+
+env:
+  SERVER_ENV: "testing"
+  DEBUG: ${{secrets.DEBUG}}
+  SECRET_KEY: ${{secrets.SECRET_KEY}}
+  DB_ENGINE: ${{secrets.DB_ENGINE}}
+  DB_NAME: ${{secrets.DB_NAME}}
+  DB_USER: ${{secrets.USER}}
+  DB_PASSWORD: ${{secrets.DB_PASSWORD}}
+  DB_HOST: ${{secrets.DB_HOST}}
+  DB_PORT: ${{secrets.DB_PORT}}
+  CELERY_BROKER_URL: ${{secrets.CELERY_BROKER_URL}}
+  CELERY_BACKEND: ${{secrets.CELERY_BACKEND}}
+  LOG_LEVEL: ${{secrets.LOG_LEVEL}}
+  DJANGO_ALLOWED_HOSTS: ${{secrets.DJANGO_ALLOWED_HOSTS}}
+  SERVICE_KEY: ${{secrets.SERVICE_KEY}}
+  KAKAO_API_KEY: ${{secrets.KAKAO_API_KEY}}
+  FLOWER_PORT: ${{secrets.FLOWER_PORT}}
+  DB_HOST_FOR_MANTICORE: ${{secrets.DB_HOST_FOR_MANTICORE}}
+
+jobs:
+  build:
+    dev_project:
+      runs-on: ubuntu-20.04
+      strategy:
+        max-parallel: 4
+        matrix:
+          python-version: [3.9]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # - name: psycopg2 prerequisites
+      #   run: sudo apt-get install python3-capstone libpq-dev
+      # TODO : poetry 사용
+      - name: Install Dependencies & pytest
+        run: |
+          pip install --upgrade pip
+          python3.9 -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          pytest .
+
+      - name: Docker build & push to docker repo
+        run: |
+            docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
+            
+            docker-compose -f docker-compose.testing.yml build
+
+            docker tag django:latest gidlemyeon/modu_property_platform_development:django
+
+            docker push gidlemyeon/modu_property_platform_development:django
+
+  deploy:
+    name: Deploying
+    needs: [ dev_project ]
+    runs-on: ubuntu-20.04
+    uses: appleboy/ssh-action@master
+     id: deploy
+     with:
+       host: ${{ secrets.SSH_AWS_SERVER_IP_DEV }}
+       username: ubuntu
+       key: ${{ secrets.SSH_PRIVATE_KEY_DEV }}
+       envs: GITHUB_SHA
+     script: |
+       sudo docker rm -f $(docker ps -qa)
+       sudo docker pull gidlemyeon/modu_property_platform_development:django
+       docker-compose -f docker-compose.testing.yml up -d
+       docker image prune -f

@@ -42,7 +42,7 @@ from real_estate.services.get_deals_service import GetDealsService
 
 class GetRealEstateView(APIView):
     @extend_schema(
-        summary="부동산 id로 단일 부동산, 거래내역 조회",
+        summary="부동산 id로 단일 부동산 조회",
         description="id로 real_estate_id 입력",
         parameters=[
             OpenApiParameter(

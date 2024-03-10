@@ -20,9 +20,7 @@ from real_estate.serializers import RegionPriceSerializer
 class RealEstateRepository:
     def get_real_estate(self, id: int) -> Optional[RealEstate]:
         try:
-            return (
-                RealEstate.objects.filter(id=id).all().prefetch_related("deals").get()
-            )
+            return RealEstate.objects.filter(id=id).get()
         except Exception as e:
             logger.error(f"get_real_estate e : {e}")
             return None
