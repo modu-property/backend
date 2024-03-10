@@ -40,11 +40,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-
       - name: Set env
         run: |
           echo "SERVER_ENV=$SERVER_ENV" >> .env.testing
@@ -96,7 +91,9 @@ jobs:
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
             cd ~/backend
-            git pull https://$GITHUB_ID:$GITHUB_TOKEN@github.com/modu-property/backend.git
+            git pull origin feature/simon/get-property-from-api
+            #  https://$GITHUB_ID:$GITHUB_TOKEN@github.com/modu-property/backend.git
+            ls -al
             cat docker-compose.testing.yml
 
             # sudo docker rm -f $(docker ps -qa)
