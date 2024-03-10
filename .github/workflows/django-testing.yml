@@ -74,7 +74,6 @@ jobs:
       host: ${{ secrets.SSH_AWS_SERVER_IP_DEV }}
       username: ec2-user
       key: ${{ secrets.SSH_PRIVATE_KEY_DEV }}
-      envs: GITHUB_SHA
       script: |
         sudo docker rm -f $(docker ps -qa)
         sudo docker pull gidlemyeon/modu_property_platform_development:django
