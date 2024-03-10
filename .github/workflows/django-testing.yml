@@ -70,10 +70,9 @@ jobs:
     needs: [ dev_project ]
     runs-on: ubuntu-20.04
     uses: appleboy/ssh-action@master
-     id: deploy
      with:
        host: ${{ secrets.SSH_AWS_SERVER_IP_DEV }}
-       username: ubuntu
+       username: ec2-user
        key: ${{ secrets.SSH_PRIVATE_KEY_DEV }}
        envs: GITHUB_SHA
      script: |
