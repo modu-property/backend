@@ -92,11 +92,13 @@ jobs:
           username: ec2-user
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
+            cd backend
+            git checkout feature/simon/get-property-from-api
+            git pull origin feature/simon/get-property-from-api
+
             sudo docker rm -f $(docker ps -qa)
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
             docker pull gidlemyeon/modu_property_platform_development:django
-            cd backend
-            git pull origin feature/simon/get-property-from-api
             docker-compose -f docker-compose.testing.yml up -d
             docker image prune -f
 
