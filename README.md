@@ -237,6 +237,11 @@ SERVER_ENV=local python manage.py collect_region_price_command 서울특별시
 # localxpose
 loclx tunnel http --to localhost:80  
 
+# docker hub에 push된 이미지로 로컬에서 테스트하기
+docker login -u gidlemyeon -p {password}  
+docker pull gidlemyeon/modu_property_platform_development:django  
+docker-compose -f docker-compose.testing.yml up -d
+
 # TODO
 23.12.05  
 * https://www.notion.so/2-5ddb861b8a5d468eac0b71b1238a41aa  

@@ -93,7 +93,9 @@ jobs:
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
             sudo docker rm -f $(docker ps -qa)
-            sudo docker pull gidlemyeon/modu_property_platform_development:django
+            docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
+            docker pull gidlemyeon/modu_property_platform_development:django
+            cd backend
             docker-compose -f docker-compose.testing.yml up -d
             docker image prune -f
 
