@@ -67,8 +67,6 @@ jobs:
             
             docker-compose -f docker-compose.testing.yml build
 
-            docker tag django:latest gidlemyeon/modu_property_platform_development:django
-
             docker push gidlemyeon/modu_property_platform_development:django
 
   # deploy:
