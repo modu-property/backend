@@ -95,11 +95,10 @@ jobs:
             ls -al
             cat docker-compose.testing.yml
 
-            # sudo docker rm -f $(docker ps -qa)
-            # docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
-            # docker pull gidlemyeon/modu_property_platform_development:django
-            # docker-compose -f docker-compose.testing.yml up -d
-            # docker image prune -f
+            docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
+            docker pull gidlemyeon/modu_property_platform_development:django
+            docker-compose -f docker-compose.testing.yml up -d
+            docker system prune --volumes -af
 
       - name: Remove Github Actions IP From Security Group
         run: |
