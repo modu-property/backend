@@ -2,7 +2,8 @@ version: '3.7'
 services:
   django:
     container_name: django
-    image: django
+    # image: django
+    image: gidlemyeon/modu_property_platform_development:django
     build:
       context: .
       dockerfile: ./dockerfile-testing
@@ -66,7 +67,8 @@ services:
 
   celery_worker:
     container_name: celery_worker
-    image: django
+    # image: django
+    image: gidlemyeon/modu_property_platform_development:django
     restart: always
     volumes:
       - .:/var/www/modu_property/worker
@@ -83,7 +85,8 @@ services:
     
   celery_beat:
     container_name: celery_beat
-    image: django
+    # image: django
+    image: gidlemyeon/modu_property_platform_development:django
     volumes:
       - .:/var/www/modu_property/beat
     command:

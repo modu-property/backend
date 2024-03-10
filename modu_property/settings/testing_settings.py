@@ -8,6 +8,8 @@ file_path = os.path.abspath(__file__)
 dir_name = os.path.dirname(file_path)
 parent_dir = os.path.dirname(dir_name)
 
+print(f"file_path : {file_path} dir_name : {dir_name} parent_dir : {parent_dir}")
+
 
 LOGGING["handlers"] = {
     "console": {
