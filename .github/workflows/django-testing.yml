@@ -31,6 +31,9 @@ env:
   AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
   AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
 
+  GITHUB_ID: ${{secrets._GITHUB_ID}}
+  GITHUB_TOKEN: ${{secrets._GITHUB_TOKEN}}
+
 jobs:
   build:
     runs-on: ubuntu-20.04
@@ -94,9 +97,7 @@ jobs:
           script: |
             cd ~/backend
             cat docker-compose.testing.yml
-            git reset --hard
-            git checkout feature/simon/get-property-from-api
-            git pull origin feature/simon/get-property-from-api
+            git pull https://${{secrets.GITHUB_ID}}:${{secrets.GITHUB_TOKEN}}@github.com/modu-property/backend.git
 
             sudo docker rm -f $(docker ps -qa)
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
