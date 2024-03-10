@@ -97,7 +97,7 @@ jobs:
           script: |
             cd ~/backend
             cat docker-compose.testing.yml
-            git pull https://${{secrets.GITHUB_ID}}:${{secrets.GITHUB_TOKEN}}@github.com/modu-property/backend.git
+            git pull https://$GITHUB_ID:$GITHUB_TOKEN@github.com/modu-property/backend.git
 
             sudo docker rm -f $(docker ps -qa)
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
