@@ -39,6 +39,26 @@ jobs:
         with:
           python-version: 3.9
 
+      - name: Set env
+        run: |
+          echo "SERVER_ENV=$SERVER_ENV" >> .env.testing
+          echo "DEBUG=$DEBUG" >> .env.testing
+          echo "SECRET_KEY=$SECRET_KEY" >> .env.testing
+          echo "DB_ENGINE=$DB_ENGINE" >> .env.testing
+          echo "DB_NAME=$DB_NAME" >> .env.testing
+          echo "DB_USER=$DB_USER" >> .env.testing
+          echo "DB_PASSWORD=$DB_PASSWORD" >> .env.testing
+          echo "DB_HOST=$DB_HOST" >> .env.testing
+          echo "DB_PORT=$DB_PORT" >> .env.testing
+          echo "CELERY_BROKER_URL=$CELERY_BROKER_URL" >> .env.testing
+          echo "CELERY_BACKEND=$CELERY_BACKEND" >> .env.testing
+          echo "LOG_LEVEL=$LOG_LEVEL" >> .env.testing
+          echo "DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS" >> .env.testing
+          echo "SERVICE_KEY=$SERVICE_KEY" >> .env.testing
+          echo "KAKAO_API_KEY=$KAKAO_API_KEY" >> .env.testing
+          echo "FLOWER_PORT=$FLOWER_PORT" >> .env.testing
+          echo "DB_HOST_FOR_MANTICORE=$DB_HOST_FOR_MANTICORE" >> .env.testing
+
       - name: Docker build & push to docker repo
         run: |
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
