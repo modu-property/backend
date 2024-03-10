@@ -65,17 +65,17 @@ jobs:
 
             docker push gidlemyeon/modu_property_platform_development:django
 
-  deploy:
-    name: Deploying
-    needs: [ dev_project ]
-    runs-on: ubuntu-20.04
-    uses: appleboy/ssh-action@master
-    with:
-      host: ${{ secrets.SSH_AWS_SERVER_IP_DEV }}
-      username: ec2-user
-      key: ${{ secrets.SSH_PRIVATE_KEY_DEV }}
-      script: |
-        sudo docker rm -f $(docker ps -qa)
-        sudo docker pull gidlemyeon/modu_property_platform_development:django
-        docker-compose -f docker-compose.testing.yml up -d
-        docker image prune -f
+  # deploy:
+  #   name: Deploying
+  #   needs: [ dev_project ]
+  #   runs-on: ubuntu-20.04
+  #   uses: appleboy/ssh-action@master
+  #   with:
+  #     host: ${{ secrets.SSH_AWS_SERVER_IP_DEV }}
+  #     username: ec2-user
+  #     key: ${{ secrets.SSH_PRIVATE_KEY_DEV }}
+  #     script: |
+  #       sudo docker rm -f $(docker ps -qa)
+  #       sudo docker pull gidlemyeon/modu_property_platform_development:django
+  #       docker-compose -f docker-compose.testing.yml up -d
+  #       docker image prune -f
