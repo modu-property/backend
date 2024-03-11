@@ -21,9 +21,10 @@ services:
     volumes:
       - .:/modu_property
       - static_volume:/modu_property/static
-    network_mode: "host"
+    # network_mode: "host"
     extra_hosts:
-      - "nginx:127.0.0.1"
+      # - "nginx:127.0.0.1"
+      - "host.docker.internal:host-gateway"
 
   manticore:
     container_name: manticore
@@ -48,9 +49,11 @@ services:
       - ./manticore/manticore.conf:/etc/manticoresearch/manticore.conf
       - ./manticore/log:/var/log/manticore
       - ./manticore/index:/var/index/manticore
-    network_mode: "host"
+    # network_mode: "host"
     depends_on:
       - django
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   nginx:
     container_name: nginx
@@ -81,7 +84,9 @@ services:
       - django
       - redis
     env_file: .env.testing
-    network_mode: "host"
+    # network_mode: "host"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     
   celery_beat:
     container_name: celery_beat
@@ -99,7 +104,9 @@ services:
       - redis
       - celery_worker
     env_file: .env.testing
-    network_mode: "host"
+    # network_mode: "host"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   flower:
     container_name: celery_flower
@@ -117,7 +124,9 @@ services:
     image: redis:7.0.5-alpine
     expose:
       - 6379
-    network_mode: "host"
+    # network_mode: "host"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
   static_volume:
