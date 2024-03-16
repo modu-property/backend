@@ -45,6 +45,36 @@ class TestCollectRegionPriceService:
             deal_type=DealTypesForDBEnum.DEAL.value,
         )
 
+        real_estate1 = create_real_estate(
+            name="풍림팍사이드빌라",
+            build_year=1996,
+            regional_code="11110",
+            lot_number="134-2",
+            road_name_address="서울 종로구 자하문로 99-3",
+            address="부산 해운대구 청운동 134-2",
+            real_estate_type=RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value,
+            latitude="37.5848604533872",
+            longitude="126.969812605749",
+            point=Point(37.5848604533872, 126.969812605749),
+        )
+
+        deal = create_deal(
+            real_estate_id=real_estate1.id,
+            deal_price=28000,
+            brokerage_type=None,
+            deal_year=2006,
+            land_area="37.902",
+            deal_month=1,
+            deal_day=20,
+            area_for_exclusive_use="53.83",
+            floor=2,
+            is_deal_canceled=False,
+            deal_canceled_date=None,
+            area_for_exclusive_use_pyung="16.28",
+            area_for_exclusive_use_price_per_pyung="1719.90",
+            deal_type=DealTypesForDBEnum.DEAL.value,
+        )
+
         create_region()
 
         region = repository.get_region(sido="서울특별시")
@@ -133,6 +163,37 @@ class TestCollectRegionPriceService:
             deal_type=DealTypesForDBEnum.DEAL.value,
         )
 
+        # 동 이름만 같은 부동산
+        real_estate2 = create_real_estate(
+            name="풍림팍사이드빌라",
+            build_year=1996,
+            regional_code="11110",
+            lot_number="134-2",
+            road_name_address="서울 종로구 자하문로 99-3",
+            address="부산 해운대구 청운동 134-2",
+            real_estate_type=RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value,
+            latitude="37.5848604533872",
+            longitude="126.969812605749",
+            point=Point(37.5848604533872, 126.969812605749),
+        )
+
+        deal = create_deal(
+            real_estate_id=real_estate2.id,
+            deal_price=28000,
+            brokerage_type=None,
+            deal_year=2006,
+            land_area="37.902",
+            deal_month=1,
+            deal_day=20,
+            area_for_exclusive_use="53.83",
+            floor=2,
+            is_deal_canceled=False,
+            deal_canceled_date=None,
+            area_for_exclusive_use_pyung="16.28",
+            area_for_exclusive_use_price_per_pyung="1719.90",
+            deal_type=DealTypesForDBEnum.DEAL.value,
+        )
+
         # 취소된 거래는 제외
         deal = create_deal(
             real_estate_id=real_estate1.id,
@@ -151,9 +212,11 @@ class TestCollectRegionPriceService:
             deal_type=DealTypesForDBEnum.DEAL.value,
         )
 
-        create_region()
+        region = create_region(sigungu="종로구", ubmyundong="청운동")
 
-        region = repository.get_region(sido="서울특별시")
+        region = repository.get_region(
+            sido=region.sido, sigungu=region.sigungu, ubmyundong=region.ubmyundong
+        )
 
         dto: CollectRegionPriceDto = CollectRegionPriceDto(
             region=region,

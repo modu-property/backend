@@ -217,18 +217,18 @@ def create_region():
 @pytest.fixture
 def create_region_price():
     def _create_region_price(
-        region_id: int,
-        total_deal_price: int,
-        total_jeonse_price: int,
-        total_deal_price_per_pyung: str,
-        total_jeonse_price_per_pyung: str,
-        average_deal_price: str,
-        average_jeonse_price: str,
-        average_deal_price_per_pyung: str,
-        average_jeonse_price_per_pyung: str,
-        deal_count: int,
-        jeonse_count: int,
-        deal_date: date,
+        region_id: int = 0,
+        total_deal_price: int = 0,
+        total_jeonse_price: int = 0,
+        total_deal_price_per_pyung: str = "",
+        total_jeonse_price_per_pyung: str = "",
+        average_deal_price: str = "",
+        average_jeonse_price: str = "",
+        average_deal_price_per_pyung: str = "",
+        average_jeonse_price_per_pyung: str = "",
+        deal_count: int = 0,
+        jeonse_count: int = 0,
+        deal_date: date = datetime(year=2006, month=1, day=1),
     ):
         region_price = RegionPrice(
             region_id=region_id,

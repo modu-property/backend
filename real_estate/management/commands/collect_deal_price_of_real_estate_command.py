@@ -46,16 +46,16 @@ class Command(BaseCommand):
         else:
             regional_codes.append(sejong_regional_code)
 
-        real_estate_types: list[
-            str
-        ] = RealEstateTypesForQueryEnum.get_real_estate_types()
+        real_estate_types: list[str] = (
+            RealEstateTypesForQueryEnum.get_real_estate_types()
+        )
         deal_types = DealTypesForQueryEnum.get_deal_types()
 
         # 2006년부터 수집
-        start_year = 2006
+        start_year = 2013
         start_month = 1
-        end_year = 2006
-        end_month = 2
+        end_year = 2015
+        end_month = 12
 
         years_and_months = TimeUtil.get_years_and_months(
             start_year=start_year,

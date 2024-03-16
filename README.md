@@ -174,10 +174,14 @@ min_prefix_len = 1
 table 확인 curl
 curl -s 'http://127.0.0.1:9308/cli_json?show%20tables'
 
-# 로컬 터미널에서 manticore 컨테이너 mysql 호출
+# 검색엔진 쿼리
+
+# DB_HOST_FOR_MANTICORE가 rds인 경우
+# ec2 django container에서 실행  
 curl --location 'http://127.0.0.1:9308/search' --header 'Content-Type: application/json' --data '{"index": "real_estate", "query": { "match": {"*":"*반포*"}}}'
 
-# django container 안에서 실행. DB_HOST_FOR_MANTICORE가 host.docker.internal인 경우.
+# DB_HOST_FOR_MANTICORE가 host.docker.internal인 경우
+# 로컬 django container에서 실행  
 curl --location 'http://host.docker.internal:9308/search' --header 'Content-Type: application/json' --data '{"index": "real_estate", "query": { "match": {"*":"*반포*"}}}'
 ```
 
@@ -230,6 +234,8 @@ collect_deal_price_of_real_estate_command 으로 전체 수집을 했다면, col
 
 # 전체/특정지역 통계 정보 수집 명령어
 SERVER_ENV=local python manage.py collect_region_price_command 서울특별시  
+
+SERVER_ENV=testing python manage.py collect_region_price_command 서울특별시  
 
 # ngrok
 `ngrok http --host-header=localhost 80`  

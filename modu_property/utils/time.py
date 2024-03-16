@@ -1,12 +1,14 @@
 from datetime import datetime
+from functools import wraps
+import time
 from typing import List
 from dateutil.relativedelta import relativedelta
+from modu_property.utils.loggers import logger
 
 
 class TimeUtil:
-    @classmethod
+    @staticmethod
     def get_years_and_months(
-        self,
         start_year: int,
         start_month: int,
         end_year: int,
@@ -28,10 +30,32 @@ class TimeUtil:
         ]
         return years_and_months
 
-    @classmethod
-    def get_current_year_and_month(self):
+    @staticmethod
+    def get_current_year_and_month():
         _now = datetime.now()
         year = _now.year
         month = _now.month
 
         return datetime.strftime(datetime.strptime(f"{year}{month}", "%Y%m"), "%Y%m")
+
+    @staticmethod
+    def split_year_and_month(year_and_month: str) -> tuple[int, int]:
+        if "-" in year_and_month:
+            year_and_month = year_and_month.split("-")
+        return int(year_and_month[:4]), int(year_and_month[4:6])
+
+    @staticmethod
+    def timer(func):
+        @wraps(func)
+        def timer_wrapper(*args, **kwargs):
+            start_time = time.perf_counter()
+            result = func(*args, **kwargs)
+            end_time = time.perf_counter()
+            total_time = end_time - start_time
+
+            logger.debug(
+                f"timer [{func.__name__}] {args} {kwargs} Took {total_time:.4f} seconds"
+            )
+            return result
+
+        return timer_wrapper

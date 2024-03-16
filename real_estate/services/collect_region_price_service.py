@@ -22,8 +22,6 @@ class CollectRegionPriceService:
         매매 총 거래액, 총 평당가
         전세 총 거래액, 총 평당가
         """
-
-        # TODO : 광역시, 특별시, 특별자치.. 등 있으면 앞에만 따야함. 서울처럼
         self.set_target_region(dto=dto)
         real_estates: List[RealEstate] = list(
             self.real_estate_repository.get_real_estates(dto=dto)
@@ -91,16 +89,29 @@ class CollectRegionPriceService:
         region_price = self.real_estate_repository.create_region_price(dto=dto)
         return region_price
 
-    def set_target_region(self, dto):
+    def set_target_region(self, dto: CollectRegionPriceDto):
+        if dto.region.sido:
+            self.filter_sido(dto=dto)
         if dto.region.dongri:
-            dto.target_region = dto.region.dongri
+            dto.target_region = f"{dto.region.sido} {dto.region.sigungu} {dto.region.ubmyundong} {dto.region.dongri}"
         elif dto.region.ubmyundong:
-            dto.target_region = dto.region.ubmyundong
+            dto.target_region = (
+                f"{dto.region.sido} {dto.region.sigungu} {dto.region.ubmyundong}"
+            )
         elif dto.region.sigungu:
-            dto.target_region = dto.region.sigungu
+            dto.target_region = f"{dto.region.sido} {dto.region.sigungu}"
         elif dto.region.sido:
             dto.target_region = dto.region.sido
-            if "특별시" in dto.target_region:
-                dto.target_region = "서울"
-            elif "광역시" in dto.target_region:
-                dto.target_region = dto.target_region[2:]
+
+    def filter_sido(self, dto: CollectRegionPriceDto):
+        sido: str = dto.region.sido
+        if "특별시" in sido:
+            dto.region.sido = "서울"
+        elif "광역시" in sido:
+            dto.region.sido = sido[2:]
+        elif "남도" in sido or "북도" in sido:
+            dto.region.sido = sido[0] + sido[2]
+        elif "경기도" in sido:
+            dto.region.sido = "경기"
+        elif "특별" in sido:
+            pass

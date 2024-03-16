@@ -227,3 +227,6 @@ class RealEstateRepository:
             .all()
             .order_by("-deal_year", "-deal_month", "-deal_day")
         )
+
+    def get_last_region_price(self):
+        return RegionPrice.objects.order_by("-id").first()
