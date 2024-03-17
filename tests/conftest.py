@@ -2,6 +2,7 @@ from datetime import datetime, date, timedelta
 from pandas import DataFrame
 import pandas
 import pytest
+from modu_property.utils.file import FileUtil
 from real_estate.models import Deal, RealEstate, MonthlyRent, Region, RegionPrice
 from django.contrib.gis.geos import Point
 import os
@@ -121,17 +122,14 @@ def mock_collect_deal_price_of_real_estate():
     return DataFrame.from_dict(dct)
 
 
-def get_file_path(file_name: str):
-    dir_path = "tests"
-    return os.path.join(os.getcwd(), dir_path, file_name)
-
-
 @pytest.fixture
 def insert_regional_codes():
     def _insert_regional_codes(start: int = 0, end: int = 30000):
         connection = connections["default"]
 
-        path: str = get_file_path(file_name="insert_regional_codes.sql")
+        path: str = FileUtil.get_file_path(
+            dir_name="tests/files/", file_name="insert_regional_codes.sql"
+        )
 
         # Read SQL commands from the file
         with open(path, "r") as file:
@@ -152,7 +150,9 @@ def insert_regional_codes():
 @pytest.fixture
 def get_dongs():
     def _get_dongs(count: int = 10) -> DataFrame:
-        path: str = get_file_path(file_name="files/dong.csv")
+        path: str = FileUtil.get_file_path(
+            dir_name="tests/", file_name="files/dong.csv"
+        )
 
         df: pandas.DataFrame = pandas.read_csv(
             filepath_or_buffer=path, nrows=count, keep_default_na=False

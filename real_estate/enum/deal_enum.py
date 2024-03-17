@@ -5,21 +5,25 @@ class DealTypesForQueryEnum(Enum):
     DEAL = "매매"
     # JEONSE_MONTHLY_RENT = "전월세"
 
-    @classmethod
-    def get_deal_types(cls):
+    @staticmethod
+    def get_deal_types() -> list[str]:
         return [e.value for e in DealTypesForQueryEnum]
 
 
 class DealTypesForDBEnum(Enum):
     DEAL = "DEAL"
-    JEONSE = "JEONSE"
-    MONTHLY_RENT = "MONTHLY_RENT"
+    # JEONSE = "JEONSE"
+    # MONTHLY_RENT = "MONTHLY_RENT"
+
+    @staticmethod
+    def get_deal_types() -> list[str]:
+        return [e.value for e in DealTypesForDBEnum]
 
 
 DEAL_TYPES = (
     (DealTypesForDBEnum.DEAL.value, DealTypesForDBEnum.DEAL.value),
-    (DealTypesForDBEnum.JEONSE.value, DealTypesForDBEnum.JEONSE.value),
-    (DealTypesForDBEnum.MONTHLY_RENT.value, DealTypesForDBEnum.MONTHLY_RENT.value),
+    # (DealTypesForDBEnum.JEONSE.value, DealTypesForDBEnum.JEONSE.value),
+    # (DealTypesForDBEnum.MONTHLY_RENT.value, DealTypesForDBEnum.MONTHLY_RENT.value),
 )
 
 

@@ -1,44 +1,40 @@
-import os
 import threading
-import time
 from django.core.management.base import BaseCommand
 from manticore.manticore_client import ManticoreClient
-from modu_property.utils.loggers import logger
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
 from real_estate.enum.real_estate_enum import RealEstateTypesForQueryEnum
 from real_estate.enum.deal_enum import DealTypesForQueryEnum
-from real_estate.models import Region
-from django.db.models import Count
+from real_estate.management.commands.collect_command_mixin import CollectCommandMixin
 from modu_property.utils.time import TimeUtil
+from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.services.collect_deal_price_of_real_estate_service import (
     CollectDealPriceOfRealEstateService,
 )
 
 
-class Command(BaseCommand):
+class Command(BaseCommand, CollectCommandMixin):
     help = "매매, 전월세 내역 수집하는 명령어"
 
     def __init__(self):
+        super(BaseCommand, self).__init__()
+        super(CollectCommandMixin, self).__init__()
+
         self.service = CollectDealPriceOfRealEstateService()
-
-    def add_arguments(self, parser):
-        parser.add_argument(
-            "sido",
-            type=str,
-            help="서울특별시, 세종특별자치시, ...",
+        self.deal_types: list[str] = DealTypesForQueryEnum.get_deal_types()
+        self.real_estate_types: list[str] = (
+            RealEstateTypesForQueryEnum.get_real_estate_types()
         )
+        self.repository = RealEstateRepository()
 
+    @TimeUtil.timer
     def handle(self, *args, **options):
-        total_period = 0
-        sido = options.get("sido")
-        regions = []
-        qs = Region.objects.values("sido", "regional_code").annotate(c=Count("id"))
+        sido, start_date, end_date = self.get_command_params(options)
 
         sejong_regional_code = "36110"
 
+        regional_codes = []
         if sido:
-            qs = qs.filter(sido=sido)
-            regions = qs.exclude(sido__contains="출장소").exclude(sigungu="")
+            regions = self.repository.get_regions_exclude_branch(sido=sido)
 
             regional_codes = list(
                 set([region.get("regional_code") for region in regions])
@@ -46,28 +42,28 @@ class Command(BaseCommand):
         else:
             regional_codes.append(sejong_regional_code)
 
-        real_estate_types: list[str] = (
-            RealEstateTypesForQueryEnum.get_real_estate_types()
+        years_and_months = None
+        if not all([start_date, end_date]):
+            last_deal = self.repository.get_last_deal()
+            if not last_deal:
+                raise Exception(
+                    "시작/종료 연월과 deal 둘 다 없음. 둘 중에 하나는 있어야 함"
+                )
+
+            years_and_months = self.get_collecting_period(instance=last_deal)
+        else:
+            years_and_months = self.get_collecting_period(
+                start_date=start_date, end_date=end_date
+            )
+
+        self.run_service(
+            regional_codes=regional_codes, years_and_months=years_and_months
         )
-        deal_types = DealTypesForQueryEnum.get_deal_types()
 
-        # 2006년부터 수집
-        start_year = 2013
-        start_month = 1
-        end_year = 2015
-        end_month = 12
-
-        years_and_months = TimeUtil.get_years_and_months(
-            start_year=start_year,
-            start_month=start_month,
-            end_year=end_year,
-            end_month=end_month,
-        )
-
+    def run_service(self, regional_codes, years_and_months):
         for year_and_month in years_and_months:
-            for real_estate_type in real_estate_types:
-                for deal_type in deal_types:
-                    start = time.time()
+            for real_estate_type in self.real_estate_types:
+                for deal_type in self.deal_types:
                     threads = []
                     dto = None
                     for regional_code in regional_codes:
@@ -79,7 +75,7 @@ class Command(BaseCommand):
                                 regional_code=regional_code,
                             )
                         )
-                        if os.getenv("SERVER_ENV") != "test":
+                        if self.not_test_env():
                             t = threading.Thread(
                                 target=self.service.execute, args=(dto,)
                             )
@@ -88,24 +84,9 @@ class Command(BaseCommand):
                         else:
                             self.service.execute(dto=dto)
 
-                    if os.getenv("SERVER_ENV") != "test":
+                    if self.not_test_env():
                         for _thread in threads:
                             _thread.join()
 
-                    end = time.time()
-                    period = end - start
-                    total_period += period
-                    logger.info(
-                        f"부동산 타입 {dto.real_estate_type}, 연월 {dto.year_month}, 매매타입 {dto.deal_type}, 지역코드 {dto.regional_code} 수행시간: %f 초"
-                        % (period)
-                    )
-
-                    start = time.time()
                     manticore_client = ManticoreClient()
                     manticore_client.run_indexer()
-                    end = time.time()
-                    period = end - start
-                    total_period += period
-                    logger.info(f"run manticore indexer 수행시간: %f 초" % (period))
-
-        logger.info(f"total_period : %f초" % (total_period))

@@ -1,37 +1,44 @@
-from datetime import datetime, timedelta
-import os
+from datetime import datetime
 import threading
-from django.core.management.base import BaseCommand
 from modu_property.utils.loggers import logger
 from real_estate.dto.collect_region_price_dto import CollectRegionPriceDto
 from real_estate.enum.deal_enum import DealTypesForDBEnum
 from modu_property.utils.time import TimeUtil
+from real_estate.management.commands.collect_command_mixin import CollectCommandMixin
 from real_estate.models import Region
 from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.services.collect_region_price_service import CollectRegionPriceService
+from django.core.management.base import BaseCommand
 
 
-class Command(BaseCommand):
-    help = "지역 매매, 전세 가격 정보 수집하는 명령어"
+class Command(BaseCommand, CollectCommandMixin):
+    help = "지역 단위 매매, 전세 가격 정보 수집하는 명령어"
 
     def __init__(self):
+        super(BaseCommand, self).__init__()
+        super(CollectCommandMixin, self).__init__()
+
         self.service = CollectRegionPriceService()
         self.deal_types = [DealTypesForDBEnum.DEAL.value]
         self.repository = RealEstateRepository()
-        self.total_period = 0
 
     @TimeUtil.timer
     def handle(self, *args, **options):
-        sido, start_year, start_month, end_year, end_month = self.get_command_params(
-            options
-        )
+        sido, start_date, end_date = self.get_command_params(options)
 
-        years_and_months = self.get_collect_period(
-            start_year=start_year,
-            start_month=start_month,
-            end_year=end_year,
-            end_month=end_month,
-        )
+        years_and_months = None
+        if not all([start_date, end_date]):
+            last_region_price = self.real_estate_repository.get_last_region_price()
+            if not last_region_price:
+                raise Exception(
+                    "시작/종료 연월과 region_price 둘 다 없음. 둘 중에 하나는 있어야 함"
+                )
+
+            years_and_months = self.get_collecting_period(instance=last_region_price)
+        else:
+            years_and_months = self.get_collecting_period(
+                start_date=start_date, end_date=end_date
+            )
 
         regions = self.repository.get_regions(sido=sido)
         if not regions:
@@ -42,13 +49,20 @@ class Command(BaseCommand):
             self.create_existing_region_price_dict()
         )
 
+        self.collect(
+            years_and_months=years_and_months,
+            regions=regions,
+            existing_region_price_dict=existing_region_price_dict,
+        )
+
+    def collect(self, years_and_months, regions, existing_region_price_dict):
         for year_and_month in years_and_months:
             for region in regions:
                 deal_year, deal_month = TimeUtil.split_year_and_month(
                     year_and_month=year_and_month
                 )
 
-                if self._continue(
+                if self.skip_existing_region_price(
                     region=region,
                     deal_year=deal_year,
                     deal_month=deal_month,
@@ -68,80 +82,6 @@ class Command(BaseCommand):
                 self.run_service(
                     deal_year=deal_year, deal_month=deal_month, _region=_region
                 )
-
-    def get_collect_period(
-        self, start_year: int, start_month: int, end_year: int, end_month: int
-    ):
-        start_year, start_month, end_year, end_month = self.get_start_date_and_end_date(
-            start_year=start_year,
-            start_month=start_month,
-            end_year=end_year,
-            end_month=end_month,
-        )
-
-        years_and_months = TimeUtil.get_years_and_months(
-            start_year=start_year,
-            start_month=start_month,
-            end_year=end_year,
-            end_month=end_month,
-        )
-
-        return years_and_months
-
-    def add_arguments(self, parser):
-        parser.add_argument(
-            "sido",
-            type=str,
-            help="서울특별시, 세종특별자치시, ...",
-        )
-        parser.add_argument(
-            "start_year",
-            type=int,
-            help="2006",
-        )
-        parser.add_argument(
-            "start_month",
-            type=int,
-            help="1",
-        )
-        parser.add_argument(
-            "end_year",
-            type=int,
-            help="2006",
-        )
-        parser.add_argument(
-            "end_month",
-            type=int,
-            help="12",
-        )
-
-    def get_command_params(self, options):
-        sido = options.get("sido")
-        start_year = options.get("start_year", 0)
-        start_month = options.get("start_month", 0)
-        end_year = options.get("end_year", 0)
-        end_month = options.get("end_month", 0)
-        return sido, start_year, start_month, end_year, end_month
-
-    def get_start_date_and_end_date(
-        self, start_year: int, start_month: int, end_year: int, end_month: int
-    ):
-        if not all([start_year, start_month, end_year, end_month]):
-            region_price = self.repository.get_last_region_price()
-            if not region_price:
-                raise Exception(
-                    "시작/종료 연월과 region_price 둘 다 없음. 둘 중에 하나는 있어야 함"
-                )
-
-            end_date = datetime.strftime(
-                region_price.deal_date + timedelta(weeks=52 * 2), "%Y%m%d"
-            )
-
-            start_year, start_month = TimeUtil.split_year_and_month(
-                year_and_month=datetime.strftime(region_price.deal_date, "%Y%m%d")
-            )
-            end_year, end_month = TimeUtil.split_year_and_month(year_and_month=end_date)
-        return start_year, start_month, end_year, end_month
 
     def create_existing_region_price_dict(self) -> dict[str, None]:
         """
@@ -192,15 +132,14 @@ class Command(BaseCommand):
             for _thread in threads:
                 _thread.join()
 
-    def not_test_env(self) -> bool:
-        return os.getenv("SERVER_ENV") != "test"
-
     def create_region_price_key(
         self, region_id: int, deal_year: str, deal_month: str
     ) -> str:
         return f"{region_id}-{deal_year}-{deal_month}"
 
-    def _continue(self, region, deal_year, deal_month, existing_region_price_dict):
+    def skip_existing_region_price(
+        self, region, deal_year, deal_month, existing_region_price_dict
+    ):
         region_price_key = self.create_region_price_key(
             region_id=region.id, deal_year=deal_year, deal_month=deal_month
         )

@@ -12,6 +12,7 @@ from django.db.models import (
     Subquery,
     Value,
     DateField,
+    Count,
 )
 from django.db.models.functions import Concat
 from real_estate.serializers import RegionPriceSerializer
@@ -113,6 +114,12 @@ class RealEstateRepository:
             return _q.filter(sido=sido)
         else:
             return _q.all()
+
+    def get_regions_exclude_branch(self, sido: str):
+        qs = Region.objects.values("sido", "regional_code").annotate(c=Count("id"))
+        qs = qs.filter(sido=sido)
+        regions = qs.exclude(sido__contains="출장소").exclude(sigungu="")
+        return regions
 
     def get_region(
         self, sido: str = "", sigungu: str = "", ubmyundong: str = "", dongri: str = ""
@@ -230,3 +237,6 @@ class RealEstateRepository:
 
     def get_last_region_price(self):
         return RegionPrice.objects.order_by("-id").first()
+
+    def get_last_deal(self):
+        return Deal.objects.order_by("-id").first()

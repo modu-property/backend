@@ -73,9 +73,7 @@ def test_collect_region_price_command(create_real_estate, create_deal, create_re
     )
 
     create_region()
-    Command().handle(
-        sido="서울특별시", start_year=2006, start_month=1, end_year=2006, end_month=1
-    )
+    Command().handle(sido="서울특별시", start_date="200601", end_date="200601")
 
     repository = RealEstateRepository()
     region_prices = repository.get_region_prices()

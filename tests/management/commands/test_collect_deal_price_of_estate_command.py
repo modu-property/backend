@@ -8,13 +8,12 @@ from real_estate.models import Deal, RealEstate
 from django.contrib.gis.geos.point import Point
 
 
-@pytest.mark.skip
+@pytest.mark.skip(reason="수집 오래걸려서 스킵함")
 @pytest.mark.django_db(transaction=True, reset_sequences=True)
 def test_collect_deal_price_of_estate_command(insert_regional_codes):
     insert_regional_codes()
 
-    # Command().handle()
-    # Command().handle(sido="서울특별시")
+    Command().handle(sido="서울특별시", start_date="200601", end_date="200601")
 
     real_estates = RealEstate.objects.prefetch_related("deals").all()
 

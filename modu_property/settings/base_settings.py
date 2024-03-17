@@ -228,7 +228,7 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_BEAT_SCHEDULE = {
     "collect_deal_price_of_real_estate_every_30_minutes": {
         "task": "modu_property.tasks.collect_deal_price_of_real_estate_task",
-        "schedule": crontab(minute="*/30"),
+        "schedule": crontab(hour="9-23", minute="0-59"),
         "kwargs": {"sido": "서울특별시"},
     },
 }

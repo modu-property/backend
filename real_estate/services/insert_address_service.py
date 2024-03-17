@@ -1,6 +1,8 @@
 import os
 from django.db import connections
 
+from modu_property.utils.file import FileUtil
+
 
 class InsertAddressService:
     def __init__(
@@ -16,7 +18,9 @@ class InsertAddressService:
 
         connection = connections["default"]
 
-        path: str = self.get_file_path(file_name="insert_regional_codes.sql")
+        path: str = FileUtil.get_file_path(
+            dir_name="tests/files", file_name="insert_regional_codes.sql"
+        )
 
         # Read SQL commands from the file
         with open(path, "r") as file:
