@@ -18,6 +18,7 @@ services:
         gunicorn modu_property.wsgi:application --bind 0.0.0.0:8000 --workers 1 --threads 1
     volumes:
       - .:/modu_property/
+      - /var/run/docker.sock:/var/run/docker.sock  # django container에서 manticore container에 indexer 실행하기 위해 설정함
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -79,11 +80,11 @@ services:
     env_file: .env.local
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    
+
   celery_beat:
     container_name: celery_beat
     image: django
-    # restart: always
+    restart: always
     volumes:
       - .:/var/www/modu_property/beat
     command:
@@ -118,3 +119,4 @@ services:
       - 6379:6379
     extra_hosts:
       - "host.docker.internal:host-gateway"
+  

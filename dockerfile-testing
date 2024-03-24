@@ -1,12 +1,9 @@
 # syntax=docker/dockerfile:experimental
 
-FROM python:3.9-slim as python-base
+FROM python:3.10-slim as python-base
 
 RUN apt-get update \
 && apt-get install default-mysql-client gdal-bin libgdal-dev docker.io gettext -yqq 
-
-# 같은 호스트 내 프로세스 간 소켓 통신을 하기 위함. celery worker -> manticore
-VOLUME ["/var/run/docker.sock"]
 
 FROM python-base as poetry-base
 WORKDIR /modu_property

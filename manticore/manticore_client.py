@@ -20,7 +20,14 @@ class ManticoreClient:
         logger.info("run_indexer")
         try:
             dir_path = os.path.dirname(os.path.realpath(__file__))
-            subprocess.run(["bash", f"{dir_path}/run_indexer.sh"])
+            sh_filename = (
+                "run_indexer.sh"
+                if os.getenv("SERVER_ENV") != "local"
+                else "run_indexer_local.sh"
+            )
+            sh_path = f"{dir_path}/{sh_filename}"
+            logger.info(f"sh_path : {sh_path}")
+            subprocess.run(["bash", sh_path])
         except Exception as e:
             logger.error(f"ManticoreClient run_indexer e : {e}")
 

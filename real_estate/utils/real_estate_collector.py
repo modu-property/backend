@@ -18,10 +18,12 @@ class RealEstateCollector:
         self, dto: CollectDealPriceOfRealEstateDto
     ) -> Union[DataFrame, bool]:
         try:
-            sleep(0.0001)
+            sleep(0.0005)
             return self.get_data(dto)
         except Exception as e:
-            logger.error(e, f"get_deal_price_of_real_estate 수집 실패 dto : {dto.__dict__}")
+            logger.error(
+                e, f"get_deal_price_of_real_estate 수집 실패 dto : {dto.__dict__}"
+            )
             return False
 
     def get_data(self, dto):

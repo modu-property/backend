@@ -2,14 +2,23 @@ import os
 import datetime
 from celery.schedules import crontab
 
+from modu_property.utils.file import FileUtil
+from modu_property.utils.loggers import logger
+
 LOG_LEVEL = os.getenv("LOG_LEVEL")
 
-file_path = os.path.abspath(__file__)
-dir_name = os.path.dirname(file_path)
-parent_dir = os.path.dirname(dir_name)
+
+log_file = FileUtil.get_file_path(
+    dir_name="modu_property/logs/", file_name="modu_property.log"
+)
+
+logger.info(f"log file : {log_file}")
 
 
 def set_logging():
+    log_file = FileUtil.get_file_path(
+        dir_name="modu_property/logs/", file_name="modu_property.log"
+    )
     return {
         "version": 1,
         "disable_existing_loggers": False,
@@ -43,7 +52,7 @@ def set_logging():
                 "level": LOG_LEVEL,
                 "filters": ["require_debug_false"],
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": f"{parent_dir}/logs/modu_property.log",
+                "filename": log_file,
                 "maxBytes": 1024 * 1024 * 50,  # 50 MB
                 "backupCount": 5,
                 "formatter": "django.server",
@@ -226,9 +235,9 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_BEAT_SCHEDULE = {
-    "collect_deal_price_of_real_estate_every_30_minutes": {
+    "collect_deal_price_of_real_estate_every_hour_from_9_to_18": {
         "task": "modu_property.tasks.collect_deal_price_of_real_estate_task",
-        "schedule": crontab(hour="9-23", minute="0-59"),
+        "schedule": crontab(hour="9-18"),
         "kwargs": {"sido": "서울특별시"},
     },
 }

@@ -38,6 +38,7 @@ from drf_spectacular.utils import (
 from modu_property.utils.loggers import logger
 from rest_framework.views import APIView
 from real_estate.services.get_deals_service import GetDealsService
+from manticore.manticore_client import ManticoreClient
 
 
 class GetRealEstateView(APIView):
@@ -468,3 +469,37 @@ class GetDealsView(ListAPIView):
             status=result.status_code,
             safe=False,
         )
+
+
+class ManticoreView(APIView):
+    @extend_schema(
+        summary="manticoresearch indexer 실행",
+        description="manticoresearch indexer를 API 호출해서 수동 실행",
+        responses={
+            200: OpenApiResponse(description="ok"),
+            400: OpenApiResponse(description="bad request"),
+        },
+    )
+    def get(
+        self,
+        request: Request,
+        *args,
+        **kwargs,
+    ) -> JsonResponse:
+        logger.info("ManticoreView")
+
+        try:
+            manticore = ManticoreClient()
+            manticore.run_indexer()
+            return JsonResponse(
+                data={},
+                status=200,
+                safe=False,
+            )
+        except Exception as e:
+            logger.error(f"celery -> django -> manticore e : {e}")
+            return JsonResponse(
+                data={},
+                status=400,
+                safe=False,
+            )
