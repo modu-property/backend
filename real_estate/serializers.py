@@ -22,11 +22,6 @@ class RealEstateSerializer(serializers.ModelSerializer):
 
 
 class DealSerializer(serializers.ModelSerializer):
-    # area_for_exclusive_use_pyung = serializers.CharField()
-    # area_for_exclusive_use_price_per_pyung = serializers.CharField()
-    # is_deal_canceled = serializers.BooleanField()
-    # floor = serializers.CharField()
-
     area_for_exclusive_use_pyung = serializers.SerializerMethodField(
         "convert_square_meter_to_pyung"
     )
