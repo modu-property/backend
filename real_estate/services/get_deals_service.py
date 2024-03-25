@@ -1,5 +1,6 @@
 import logging
 
+from modu_property.utils.validator import validate_data
 from real_estate.dto.get_real_estate_dto import GetDealsDto
 from real_estate.dto.service_result_dto import ServiceResultDto
 from real_estate.enum.deal_enum import DealPerPageEnum
@@ -8,42 +9,45 @@ from real_estate.serializers import (
     DealSerializer,
     GetDealsResponseSerializer,
 )
-from django.core.paginator import Paginator, Page
+from real_estate.utils.paginator import PaginatorUtil
 
 
 class GetDealsService:
     def __init__(self) -> None:
         self.repository = RealEstateRepository()
+        self.paginator = PaginatorUtil()
 
     def execute(self, dto: GetDealsDto) -> ServiceResultDto:
         deals = self.repository.get_deals(dto=dto)
 
-        per_page = DealPerPageEnum.PER_PAGE.value
-        paginator = Paginator(deals, per_page)
-        total_page_info: Page = paginator.get_page(dto.page)
-        total_pages = total_page_info.paginator.num_pages
+        deals, total_pages, current_page = self.paginator.get_page_info(
+            current_page=dto.page,
+            object_list=deals,
+            per_page=DealPerPageEnum.PER_PAGE.value,
+        )
 
-        current_page = total_page_info.number
-        deals = total_page_info.object_list
-
-        validated_deals = DealSerializer(
-            deals,
-            many=True,
-        ).data
-        deals_list = [dict(deal) for deal in validated_deals]
+        deals_list = self.create_deal_list(deals)
 
         data = {
             "deals": deals_list,
             "current_page": current_page,
             "total_pages": total_pages,
         }
-        serializer = GetDealsResponseSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
+        data = validate_data(serializer=GetDealsResponseSerializer, data=data)
 
         try:
-            return ServiceResultDto(data=serializer.validated_data)
+            return ServiceResultDto(data=data)
         except Exception as e:
             logging.error(f"e : {e}")
             return ServiceResultDto(
                 status_code=400, message="GetDealsResponseSerializer error"
             )
+
+    def create_deal_list(self, deals):
+        deals_list = []
+        if deals:
+            validated_deals = validate_data(
+                serializer=DealSerializer, queryset=deals, many=True
+            )
+            deals_list = [dict(deal) for deal in validated_deals]
+        return deals_list
