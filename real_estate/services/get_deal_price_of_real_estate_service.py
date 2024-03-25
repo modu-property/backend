@@ -33,8 +33,8 @@ class GetRealEstateService:
             return ServiceResultDto(status_code=404)
 
         data: Any = validate_data(
-            model=real_estate,
             serializer=GetRealEstateResponseSerializer,
+            queryset=real_estate,
         )
         if not data:
             return ServiceResultDto(
@@ -121,13 +121,13 @@ class GetRealEstatesOnMapService:
         # TODO : zoom_level이 5 -> dongri, 4 -> ubmyundong, 3 -> sigungu, 2 -> sido, 1 -> 전국. 나중에 프론트엔드랑 맞춰서 변경해야함.
 
         if dto.zoom_level >= 6:
-            real_estates: Union[
-                QuerySet, bool
-            ] = self.repository.get_individual_real_estates(dto=dto)
+            real_estates: Union[QuerySet, bool] = (
+                self.repository.get_individual_real_estates(dto=dto)
+            )
 
             if real_estates:
                 data: Union[dict, bool, Any] = validate_data(
-                    model=real_estates,
+                    queryset=real_estates,
                     serializer=GetRealEstatesOnMapResponseSerializer,
                     many=True,
                 )
@@ -148,14 +148,14 @@ class GetRealEstatesOnMapService:
             )
 
             if region_prices:
-                data: Union[dict, bool, Any] = validate_data(
-                    model=region_prices,
+                _data = validate_data(
                     serializer=GetRegionsOnMapResponseSerializer,
+                    queryset=region_prices,
                     many=True,
                 )
 
-                if data:
-                    return ServiceResultDto(data=data)
+                if _data:
+                    return ServiceResultDto(data=_data)
                 else:
                     return ServiceResultDto(
                         message="GetRegionsOnMapResponseSerializer 에러",

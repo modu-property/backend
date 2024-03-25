@@ -1,7 +1,5 @@
 from decimal import Decimal
-from typing import Dict, OrderedDict
 from rest_framework import serializers
-import real_estate
 from real_estate.enum.deal_enum import DEAL_TYPES
 from real_estate.models import Deal, RealEstate, Region, RegionPrice
 
@@ -157,6 +155,7 @@ class RegionSerializer(serializers.ModelSerializer):
             "dongri",
             "latitude",
             "longitude",
+            "regional_code",
         )
 
 

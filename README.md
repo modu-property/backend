@@ -248,6 +248,29 @@ docker login -u gidlemyeon -p {password}
 docker pull gidlemyeon/modu_property_platform_development:django  
 docker-compose -f docker-compose.testing.yml up -d
 
+# serializer 사용 방법
+https://velog.io/write?id=d7202849-3ed9-4fc2-931b-f4f6968cb834
+
+serializer에 model을 넘기는 경우 serializer.data 사용
+```python
+_serializer = RegionSerializer(data=region_models, many=True)
+_serializer.data
+```
+
+serializer.validated_data
+```python
+_serializer.is_valid(raise_exception=True)
+_serializer.validated_data # 검증된 데이터 사용, save()하기 전 처리할 때 쓰일 수 있음
+```
+
+serializer.data # validated_data의 serialize된 표현
+```python
+_serializer = serializer(instance=model, data=data, many=many)
+_serializer.is_valid(raise_exception=True)
+data = _serializer.data
+```
+
+
 # TODO
 23.12.05  
 * https://www.notion.so/2-5ddb861b8a5d468eac0b71b1238a41aa  

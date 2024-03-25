@@ -52,11 +52,11 @@ class CollectDealPriceOfRealEstateService:
             deal_price_of_real_estate_list,
         ) = result
 
-        inserted_real_estate_models_dict = self.get_inserted_real_estate_models_dict(
+        inserted_real_estate_models_dict = self.create_inserted_real_estate_models_dict(
             inserted_real_estate_models
         )
 
-        deal_models = self.get_deal_models(
+        deal_models = self.create_deal_models(
             dto, deal_price_of_real_estate_list, inserted_real_estate_models_dict
         )
 
@@ -70,15 +70,17 @@ class CollectDealPriceOfRealEstateService:
 
     def delete_duplication(self, dto, deal_prices_of_real_estate):
         file_logger.info("delete_duplication")
-        unique_keys_in_db = {}
-        data_in_db = self.get_data_in_db(dto)
-        for data in data_in_db:
-            regional_code = data.regional_code
-            lot_number = data.lot_number
-            unique_key = f"{regional_code}{lot_number}"
+        unique_keys_in_db = self.create_unique_keys_in_db(dto)
 
-            unique_keys_in_db[unique_key] = True
+        indexes_to_drop = self.create_indexes_to_drop(
+            deal_prices_of_real_estate, unique_keys_in_db
+        )
 
+        deal_prices_of_real_estate = deal_prices_of_real_estate.drop(indexes_to_drop)
+
+        return deal_prices_of_real_estate
+
+    def create_indexes_to_drop(self, deal_prices_of_real_estate, unique_keys_in_db):
         indexes_to_drop = []
         for index, deal_price_of_real_estate in deal_prices_of_real_estate.iterrows():
             regional_code = deal_price_of_real_estate["지역코드"]
@@ -87,12 +89,20 @@ class CollectDealPriceOfRealEstateService:
 
             if unique_key in unique_keys_in_db:
                 indexes_to_drop.append(deal_prices_of_real_estate.index[index])
+        return indexes_to_drop
 
-        deal_prices_of_real_estate = deal_prices_of_real_estate.drop(indexes_to_drop)
+    def create_unique_keys_in_db(self, dto):
+        unique_keys_in_db = {}
+        data_in_db = self.get_data_in_db(dto)
+        for data in data_in_db:
+            regional_code = data.regional_code
+            lot_number = data.lot_number
+            unique_key = f"{regional_code}{lot_number}"
 
-        return deal_prices_of_real_estate
+            unique_keys_in_db[unique_key] = True
+        return unique_keys_in_db
 
-    def get_inserted_real_estate_models_dict(self, inserted_real_estate_models):
+    def create_inserted_real_estate_models_dict(self, inserted_real_estate_models):
         inserted_real_estate_models_dict = {}
         for inserted_real_estate_model in inserted_real_estate_models:
             regional_code = inserted_real_estate_model.regional_code
@@ -130,26 +140,19 @@ class CollectDealPriceOfRealEstateService:
                 real_estate_type=real_estate_type,
             )
             if not validated_real_estate:
-                logger.error(
-                    f"유효성 검사 실패 deal_price_of_real_estate : {deal_price_of_real_estate}"
-                )
                 return False
 
-            if deal_price_of_real_estate.get("해제사유발생일"):
-                canceled_date = deal_price_of_real_estate.get("해제사유발생일")
-                y, m, d = canceled_date.split(".")
-                y = f"20{y}"
+            self.set_remove_reason_date(
+                deal_price_of_real_estate=deal_price_of_real_estate
+            )
 
-                deal_price_of_real_estate["해제사유발생일"] = f"{y}-{m}-{d}"
-
-            if not deal_price_of_real_estate.get("해제여부"):
-                deal_price_of_real_estate["해제여부"] = False
+            self.set_remove_or_not(deal_price_of_real_estate)
 
             deal_price_of_real_estate_list.append(deal_price_of_real_estate)
 
-            if unique_key not in unique_keys:
-                real_estate_models.append(RealEstate(**validated_real_estate))
-                unique_keys[unique_key] = ""
+            self.append_real_estate(
+                unique_keys, real_estate_models, unique_key, validated_real_estate
+            )
 
         try:
             inserted_real_estate_models = []
@@ -163,6 +166,25 @@ class CollectDealPriceOfRealEstateService:
                 f"real_estate bulk_create e : {e} inserted_real_estate_models : {inserted_real_estate_models}"
             )
             return False
+
+    def append_real_estate(
+        self, unique_keys, real_estate_models, unique_key, validated_real_estate
+    ):
+        if unique_key not in unique_keys:
+            real_estate_models.append(RealEstate(**validated_real_estate))
+            unique_keys[unique_key] = ""
+
+    def set_remove_or_not(self, deal_price_of_real_estate):
+        if not deal_price_of_real_estate.get("해제여부"):
+            deal_price_of_real_estate["해제여부"] = False
+
+    def set_remove_reason_date(self, deal_price_of_real_estate):
+        if deal_price_of_real_estate.get("해제사유발생일"):
+            canceled_date = deal_price_of_real_estate.get("해제사유발생일")
+            y, m, d = canceled_date.split(".")
+            y = f"20{y}"
+
+            deal_price_of_real_estate["해제사유발생일"] = f"{y}-{m}-{d}"
 
     def create_real_estate_model(
         self, deal_price_of_real_estate, address_info, real_estate_type: str
@@ -199,17 +221,9 @@ class CollectDealPriceOfRealEstateService:
             real_estate_type=real_estate_type,
         )
 
-        real_estate_dict = model_to_dict(real_estate_model)
+        return validate_data(serializer=RealEstateSerializer, model=real_estate_model)
 
-        validated_real_estate_model = validate_data(
-            model=real_estate_model,
-            data=real_estate_dict,
-            serializer=RealEstateSerializer,
-        )
-
-        return validated_real_estate_model
-
-    def get_deal_models(
+    def create_deal_models(
         self, dto, deal_price_of_real_estate_list, inserted_real_estate_models_dict
     ):
         deal_models = []
@@ -224,9 +238,6 @@ class CollectDealPriceOfRealEstateService:
                 dto.deal_type,
             )
             if not validated_deal:
-                logger.error(
-                    f"유효성 검사 실패 deal_price_of_real_estate : {deal_price_of_real_estate}"
-                )
                 return False
 
             deal_models.append(Deal(**validated_deal))
@@ -261,9 +272,11 @@ class CollectDealPriceOfRealEstateService:
 
         return Deal(
             deal_price=deal_price_of_real_estate["거래금액"],
-            brokerage_type=BrokerageTypesEnum.BROKERAGE.value
-            if brokerage_type == "중개거래"
-            else BrokerageTypesEnum.DIRECT.value,
+            brokerage_type=(
+                BrokerageTypesEnum.BROKERAGE.value
+                if brokerage_type == "중개거래"
+                else BrokerageTypesEnum.DIRECT.value
+            ),
             deal_year=deal_price_of_real_estate["년"],
             land_area=deal_price_of_real_estate["대지권면적"],
             deal_month=deal_price_of_real_estate["월"],

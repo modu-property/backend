@@ -3,11 +3,14 @@ from typing import List, Union
 import PublicDataReader as pdr
 
 from PublicDataReader import TransactionPrice
+from django.forms import model_to_dict
 from pandas import DataFrame
 from modu_property.utils.loggers import logger
 
+from modu_property.utils.validator import validate_data
 from real_estate.models import Region
 from real_estate.repository.real_estate_repository import RealEstateRepository
+from real_estate.serializers import RegionSerializer
 from real_estate.utils.address_converter import KakaoAddressConverter
 
 
@@ -37,9 +40,9 @@ class AddressCollector:
 
                 query: str = f"{sido} {sigungu} {ubmyundong} {dongri}".strip()
 
-                address_info: Union[
-                    dict[str, str], dict, bool
-                ] = self.kakao_address_converter.convert_address(query=query)
+                address_info: Union[dict[str, str], dict, bool] = (
+                    self.kakao_address_converter.convert_address(query=query)
+                )
                 logger.info(address_info)
 
                 if not address_info:
@@ -59,8 +62,17 @@ class AddressCollector:
                 region_models.append(region)
 
         logger.info(f"region_models count {len(region_models)}")
-        result: Union[
-            List[Region], bool
-        ] = self.real_estate_repository.bulk_create_regions(region_models=region_models)
+
+        is_validated = validate_data(
+            serializer=RegionSerializer,
+            data=[model_to_dict(region) for region in region_models],
+            many=True,
+        )
+        if not is_validated:
+            return False
+
+        result: Union[List[Region], bool] = (
+            self.real_estate_repository.bulk_create_regions(region_models=region_models)
+        )
 
         return result

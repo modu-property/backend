@@ -2,12 +2,12 @@ from typing import Any, Union
 from django.db import models
 from rest_framework.exceptions import ValidationError
 from django.db.models import QuerySet
-
 from modu_property.utils.loggers import logger
 
 
 def validate_data(
     serializer: Any = None,
+    queryset: QuerySet = None,
     data: Union[
         list[dict],
         dict,
@@ -20,22 +20,30 @@ def validate_data(
     many: bool = False,
 ) -> Union[dict, bool, Any]:
     """
-    serializer에 queryset 넣는 경우 model에 queryset 할당
-    serializer에 queryset이 아닌 커스텀 데이터 넣는 경우 data에 dict 할당
+    model and data
+    model과 dict data 있을 때?
+
+    queryset
+    dict data, model 없을 때 사용
+
+    model and not data
+    model serializer로 model 검증할 때
+
+    data and not model
+    model을 dict로 만들어서 model serializer 사용할 때
     """
     try:
-        _data = None
-        if model and not data:
-            _serializer = serializer(instance=model, many=many)
-            _data = _serializer.data
-        elif model or data:
+        if model and data:
             _serializer = serializer(instance=model, data=data, many=many)
             _serializer.is_valid(raise_exception=True)
-            _serializer.initial_data
-            _serializer.validated_data
-            _data = _serializer.data
-
-        return _data
+        elif queryset:
+            _serializer = serializer(instance=queryset, many=many)
+        elif model and not data:
+            _serializer = serializer(instance=model, many=many)
+        elif data and not model:
+            _serializer = serializer(data=data, many=many)
+            _serializer.is_valid(raise_exception=True)
+        return _serializer.data
     except ValueError as e:
         logger.error(
             f"validate_model ValueError e : {e}, serializer : {serializer}, data : {data}, model : {model}, many : {many}"
