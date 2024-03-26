@@ -147,20 +147,7 @@ class RealEstateRepository:
         self, dto: CollectRegionPriceDto
     ) -> Union[RegionPrice, bool]:
         try:
-            model = RegionPrice(
-                region_id=dto.region.id,
-                total_deal_price=dto.total_deal_price,
-                total_jeonse_price=dto.total_jeonse_price,
-                total_deal_price_per_pyung=dto.total_deal_price_per_pyung,
-                total_jeonse_price_per_pyung=dto.total_jeonse_price_per_pyung,
-                average_deal_price=dto.average_deal_price,
-                average_jeonse_price=dto.average_jeonse_price,
-                average_deal_price_per_pyung=dto.average_deal_price_per_pyung,
-                average_jeonse_price_per_pyung=dto.average_jeonse_price_per_pyung,
-                deal_date=dto.deal_date,
-                deal_count=dto.deal_count,
-                jeonse_count=dto.jeonse_count,
-            )
+            model: RegionPrice = self.create_region_price_model(dto=dto)
             region_price_serializer = RegionPriceSerializer(data=model_to_dict(model))
             region_price_serializer.is_valid(raise_exception=True)
             region_price = region_price_serializer.save()
@@ -170,6 +157,22 @@ class RealEstateRepository:
                 f"create_region_price 실패 e : {e} dto : {dto.__dict__}",
             )
             return False
+
+    def create_region_price_model(self, dto) -> RegionPrice:
+        return RegionPrice(
+            region_id=dto.region.id,
+            total_deal_price=dto.total_deal_price,
+            total_jeonse_price=dto.total_jeonse_price,
+            total_deal_price_per_pyung=dto.total_deal_price_per_pyung,
+            total_jeonse_price_per_pyung=dto.total_jeonse_price_per_pyung,
+            average_deal_price=dto.average_deal_price,
+            average_jeonse_price=dto.average_jeonse_price,
+            average_deal_price_per_pyung=dto.average_deal_price_per_pyung,
+            average_jeonse_price_per_pyung=dto.average_jeonse_price_per_pyung,
+            deal_date=dto.deal_date,
+            deal_count=dto.deal_count,
+            jeonse_count=dto.jeonse_count,
+        )
 
     def get_region_prices(self, dto: GetRealEstatesOnMapDto = None):
         _q = RegionPrice.objects.select_related("region")
