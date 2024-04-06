@@ -43,10 +43,6 @@ class GetRealEstateService:
         return ServiceResultDto(data=data)
 
 
-
-
-
-
 class GetRealEstatesOnSearchService:
     def __init__(self) -> None:
         self.manticoresearch_client = ManticoreClient()
@@ -54,13 +50,11 @@ class GetRealEstatesOnSearchService:
     def execute(self, dto: GetRealEstatesOnSearchDto) -> ServiceResultDto:
         result: dict[str, list] = {}
 
-
-
         regions: list = self.get_real_estates(dto=dto, index="region_index")
         if regions:
             data: Any = validate_data(
-                data=list(regions),           
-                          serializer=GetRegionsOnSearchResponseSerializer,
+                data=list(regions),
+                serializer=GetRegionsOnSearchResponseSerializer,
                 many=True,
             )
             if not data:
