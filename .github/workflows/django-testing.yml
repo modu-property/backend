@@ -3,7 +3,7 @@ name: Django CICD development
 on:
   push:
     branches:
-      - feature/simon/get-property-from-api
+      - dev
 
 permissions:
   contents: read
