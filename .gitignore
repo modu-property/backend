@@ -184,3 +184,8 @@ cython_debug/
 /data
 
 .DS_Store
+
+.vscode
+
+/manticore/data
+/manticore/manticore.conf

@@ -1,0 +1,105 @@
+name: Django CICD development
+
+on:
+  push:
+    branches:
+      - development
+
+permissions:
+  contents: read
+
+env:
+  SERVER_ENV: "testing"
+  DEBUG: ${{secrets.DEBUG}}
+  SECRET_KEY: ${{secrets.SECRET_KEY}}
+  DB_ENGINE: ${{secrets.DB_ENGINE}}
+  DB_NAME: ${{secrets.DB_NAME}}
+  DB_USER: ${{secrets.USER}}
+  DB_PASSWORD: ${{secrets.DB_PASSWORD}}
+  DB_HOST: ${{secrets.DB_HOST}}
+  DB_PORT: ${{secrets.DB_PORT}}
+  CELERY_BROKER_URL: ${{secrets.CELERY_BROKER_URL}}
+  CELERY_BACKEND: ${{secrets.CELERY_BACKEND}}
+  LOG_LEVEL: ${{secrets.LOG_LEVEL}}
+  DJANGO_ALLOWED_HOSTS: ${{secrets.DJANGO_ALLOWED_HOSTS}}
+  SERVICE_KEY: ${{secrets.SERVICE_KEY}}
+  KAKAO_API_KEY: ${{secrets.KAKAO_API_KEY}}
+  FLOWER_PORT: ${{secrets.FLOWER_PORT}}
+  DB_HOST_FOR_MANTICORE: ${{secrets.DB_HOST_FOR_MANTICORE}}
+  DOCKER_HUB_USERNAME: ${{secrets.DOCKER_HUB_USERNAME}}
+  DOCKER_HUB_PASSWORD: ${{secrets.DOCKER_HUB_PASSWORD}}
+  AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+  AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+
+  GITHUB_ID: ${{secrets._GITHUB_ID}}
+  GITHUB_TOKEN: ${{secrets._GITHUB_TOKEN}}
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set env
+        run: |
+          echo "SERVER_ENV=$SERVER_ENV" >> .env.testing
+          echo "DEBUG=$DEBUG" >> .env.testing
+          echo "SECRET_KEY=$SECRET_KEY" >> .env.testing
+          echo "DB_ENGINE=$DB_ENGINE" >> .env.testing
+          echo "DB_NAME=$DB_NAME" >> .env.testing
+          echo "DB_USER=$DB_USER" >> .env.testing
+          echo "DB_PASSWORD=$DB_PASSWORD" >> .env.testing
+          echo "DB_HOST=$DB_HOST" >> .env.testing
+          echo "DB_PORT=$DB_PORT" >> .env.testing
+          echo "CELERY_BROKER_URL=$CELERY_BROKER_URL" >> .env.testing
+          echo "CELERY_BACKEND=$CELERY_BACKEND" >> .env.testing
+          echo "LOG_LEVEL=$LOG_LEVEL" >> .env.testing
+          echo "DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS" >> .env.testing
+          echo "SERVICE_KEY=$SERVICE_KEY" >> .env.testing
+          echo "KAKAO_API_KEY=$KAKAO_API_KEY" >> .env.testing
+          echo "FLOWER_PORT=$FLOWER_PORT" >> .env.testing
+          echo "DB_HOST_FOR_MANTICORE=$DB_HOST_FOR_MANTICORE" >> .env.testing
+
+      - name: Docker build & push to docker repo
+        run: |
+            docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
+            
+            docker-compose -f docker-compose.testing.yml build
+
+            docker push gidlemyeon/modu_property_platform_development:django
+
+      - name: Get Github Actions IP
+        id: ip
+        uses: haythem/public-ip@v1.2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+      
+      - name: Add Github Actions IP to Security group
+        run: |
+          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
+
+      - name: Deploying
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_AWS_SERVER_IP_DEV }}
+          username: ec2-user
+          key: ${{ secrets.AWS_SSH_KEY }}
+          script: |
+            cd ~/backend
+            ${{secrets.GIT_PULL_SCRIPT}}
+            ls -al
+            cat docker-compose.testing.yml
+
+            docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
+            docker pull gidlemyeon/modu_property_platform_development:django
+            docker-compose -f docker-compose.testing.yml up -d
+            docker system prune --volumes -af
+
+      - name: Remove Github Actions IP From Security Group
+        run: |
+          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32

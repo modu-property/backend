@@ -5,8 +5,13 @@ import sys
 
 
 def main():
+    server_env = os.getenv("SERVER_ENV")
+    print(f"SERVER_ENV : {server_env}")
+    settings = f"modu_property.settings.{server_env}_settings"
+
     """Run administrative tasks."""
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "modu_property.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", settings)
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

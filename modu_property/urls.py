@@ -13,16 +13,56 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-
-from app.views import news_views as app_views
+from real_estate.views import real_estate_views as app_views
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+    SpectacularRedocView,
+)
 
 urlpatterns = [
-    path("admin/", admin.site.urls, name="admin"),
-    path("app/news/", app_views.NewsView.as_view(), name="get_news"),
-    path("accounts/", include("accounts.urls")),
-    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("admin", admin.site.urls, name="admin"),
+    path(
+        "real-estate/<int:id>",
+        app_views.GetRealEstateView.as_view(),
+        name="get-real-estate",
+    ),
+    path(
+        "real-estate/<int:id>/<str:deal_type>/deals",
+        app_views.GetDealsView.as_view(),
+        name="get-deals",
+    ),
+    path(
+        "real-estates/<str:deal_type>/keyword",
+        app_views.GetRealEstatesOnSearchView.as_view(),
+        name="get-real-estates-on-search",
+    ),
+    path(
+        "real-estates/<str:deal_type>",
+        app_views.GetRealEstatesOnMapView.as_view(),
+        name="get-real-estates-on-map",
+    ),
+    path("accounts", include("accounts.urls")),
+    path("api/token", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/refresh", TokenRefreshView.as_view(), name="token_refresh"),
+    path(
+        "api/schema",
+        SpectacularAPIView.as_view(),
+        name="schema",
+    ),
+    path(
+        "api/docs",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
+    ),
+    path(
+        "api/redoc",
+        SpectacularRedocView.as_view(url_name="schema"),
+        name="redoc",
+    ),
+    path("manticore", app_views.ManticoreView.as_view(), name="manticore"),
 ]

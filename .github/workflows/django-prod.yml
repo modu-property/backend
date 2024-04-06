@@ -10,14 +10,12 @@ env:
   SECRET_KEY: ${{secrets.SECRET_KEY}}
   DB_ENGINE: ${{secrets.DB_ENGINE}}
   DB_NAME: ${{secrets.DB_NAME}}
-  USER: ${{secrets.USER}}
+  DB_USER: ${{secrets.USER}}
   DB_PASSWORD: ${{secrets.PASSWORD}}
   DB_HOST: ${{secrets.HOST}}
   DB_PORT: ${{secrets.PORT}}
   CELERY_BROKER_URL: ${{secrets.CELERY_BROKER_URL}}
   LOG_LEVEL: ${{secrets.LOG_LEVEL}}
-  NAVER_NEWS_API_CLIENT_ID: ${{secrets.NAVER_NEWS_API_CLIENT_ID}}
-  NAVER_NEWS_API_CLIENT_SECRET: ${{secrets.NAVER_NEWS_API_CLIENT_SECRET}}
   DJANGO_ALLOWED_HOSTS: ${{secrets.DJANGO_ALLOWED_HOSTS}}
 
 jobs:
