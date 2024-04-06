@@ -210,10 +210,11 @@ class CollectDealPriceOfRealEstateService:
         dong = deal_price_of_real_estate["법정동"]
         lot_number = deal_price_of_real_estate["지번"]
         query: str = f"{dong} {lot_number}"
-        address_info = self.address_converter.convert_address(query=query)
 
-        if not address_info:
+        if not self.address_converter.convert_address(query=query):
             return False
+
+        address_info = self.address_converter.get_address()
 
         real_estate_model: RealEstate = self.create_real_estate_model(
             deal_price_of_real_estate=deal_price_of_real_estate,

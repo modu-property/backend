@@ -20,7 +20,7 @@ class AddressCollector:
         self.service_key = os.getenv("SERVICE_KEY")
         self.api = TransactionPrice(self.service_key)
         self.real_estate_repository = RealEstateRepository()
-        self.kakao_address_converter = KakaoAddressConverter()
+        self.address_converter = KakaoAddressConverter()
 
     def collect_region(self) -> Union[List[Region], bool]:
         """
@@ -60,8 +60,11 @@ class AddressCollector:
 
             query: str = f"{sido} {sigungu} {ubmyundong} {dongri}".strip()
 
+            if not self.address_converter.convert_address(query=query):
+                return False
+
             address_info: Union[dict[str, str], dict, bool] = (
-                self.kakao_address_converter.convert_address(query=query)
+                self.address_converter.get_address()
             )
             logger.info(address_info)
 
