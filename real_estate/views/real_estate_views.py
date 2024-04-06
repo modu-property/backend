@@ -13,7 +13,6 @@ from real_estate.dto.get_real_estate_dto import (
 from real_estate.dto.service_result_dto import ServiceResultDto
 from real_estate.enum.real_estate_enum import RealEstateZoomLevel
 from real_estate.serializers import (
-    DealSerializer,
     GetDealsRequestSerializer,
     GetDealsResponseSerializer,
     GetRealEstateResponseSerializer,
@@ -24,8 +23,7 @@ from real_estate.serializers import (
     GetRealEstatesOnSearchRequestSerializer,
     GetRegionsOnMapResponseSerializer,
 )
-from real_estate.services.get_deal_price_of_real_estate_service import (
-    GetRealEstatesOnMapService,
+from real_estate.services.get_real_estates_on_search_service import (
     GetRealEstatesOnSearchService,
 )
 from drf_spectacular.utils import (
@@ -40,6 +38,9 @@ from rest_framework.views import APIView
 from real_estate.services.get_deals_service import GetDealsService
 from manticore.manticore_client import ManticoreClient
 from real_estate.services.get_real_estate_service import GetRealEstateService
+from real_estate.services.get_real_estates_on_map_service import (
+    GetRealEstatesOnMapService,
+)
 
 
 class GetRealEstateView(APIView):
