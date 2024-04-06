@@ -14,7 +14,7 @@ class CollectRegionPriceService:
     ) -> None:
         self.real_estate_repository = RealEstateRepository()
 
-    def execute(self, dto: CollectRegionPriceDto) -> bool:
+    def collect_region_price(self, dto: CollectRegionPriceDto) -> bool:
         """
         real_estate.address에 시~리 있는거 가져오기
         real_estate.deals에서 deal 연월에 해당하는거 가져오기
@@ -41,13 +41,13 @@ class CollectRegionPriceService:
         region_price = self.real_estate_repository.create_region_price(dto=dto)
         return region_price
 
-    def set_deal_date(self, dto):
+    def set_deal_date(self, dto: CollectRegionPriceDto):
         dto.deal_date = datetime.strftime(
             datetime.strptime(f"{dto.deal_year}-{dto.deal_month}-01", "%Y-%m-%d"),
             "%Y-%m-%d",
         )
 
-    def calc_jeonse_price_per_pyung(self, dto):
+    def calc_jeonse_price_per_pyung(self, dto: CollectRegionPriceDto):
         dto.average_jeonse_price_per_pyung = str(
             Decimal(
                 Decimal(str(dto.total_jeonse_price_per_pyung)) / dto.jeonse_count
@@ -56,7 +56,7 @@ class CollectRegionPriceService:
             else Decimal(0)
         )
 
-    def calc_average_deal_price_per_pyung(self, dto):
+    def calc_average_deal_price_per_pyung(self, dto: CollectRegionPriceDto):
         dto.average_deal_price_per_pyung = str(
             Decimal(
                 Decimal(str(dto.total_deal_price_per_pyung)) / dto.deal_count
@@ -65,7 +65,7 @@ class CollectRegionPriceService:
             else Decimal(0)
         )
 
-    def calc_average_jeonse_price(self, dto):
+    def calc_average_jeonse_price(self, dto: CollectRegionPriceDto):
         dto.average_jeonse_price = str(
             Decimal(Decimal(str(dto.total_jeonse_price)) / dto.jeonse_count).quantize(
                 Decimal(".00"), rounding=ROUND_UP
@@ -74,7 +74,7 @@ class CollectRegionPriceService:
             else Decimal(0)
         )
 
-    def calc_average_deal_price(self, dto):
+    def calc_average_deal_price(self, dto: CollectRegionPriceDto):
         dto.average_deal_price = str(
             Decimal(Decimal(str(dto.total_deal_price)) / dto.deal_count).quantize(
                 Decimal(".00"), rounding=ROUND_UP
@@ -83,11 +83,11 @@ class CollectRegionPriceService:
             else Decimal(0)
         )
 
-    def to_string(self, dto):
+    def to_string(self, dto: CollectRegionPriceDto):
         dto.total_deal_price_per_pyung = str(dto.total_deal_price_per_pyung)
         dto.total_jeonse_price_per_pyung = str(dto.total_jeonse_price_per_pyung)
 
-    def calc_prices(self, dto, real_estates):
+    def calc_prices(self, dto: CollectRegionPriceDto, real_estates):
         for real_estate in real_estates:
             deals: list[Deal] = list(real_estate.deals.all())
             for deal in deals:

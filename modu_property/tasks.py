@@ -57,7 +57,9 @@ def run_service(regional_codes, year_and_month):
                             regional_code=regional_code,
                         )
                     )
-                    t = threading.Thread(target=service.execute, args=(dto,))
+                    t = threading.Thread(
+                        target=service.collect_deal_price_of_real_estate, args=(dto,)
+                    )
 
                     t.start()
                     threads.append(t)

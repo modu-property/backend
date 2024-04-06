@@ -69,7 +69,11 @@ class TestCollectDealPriceOfRealEstateService:
             year_month="202001",
         )
 
-        result = CollectDealPriceOfRealEstateService().execute(dto=dto)
+        result = (
+            CollectDealPriceOfRealEstateService().collect_deal_price_of_real_estate(
+                dto=dto
+            )
+        )
 
         assert result == True
 

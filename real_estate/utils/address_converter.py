@@ -31,6 +31,7 @@ class KakaoAddressConverter:
                 "latitude": latitude,
                 "longitude": longitude,
             }
+            return True
         except Exception as e:
             logger.error(f"주소 변환 실패 e : {e}")
             return False

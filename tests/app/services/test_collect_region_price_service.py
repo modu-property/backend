@@ -87,7 +87,7 @@ class TestCollectRegionPriceService:
             is_deal_canceled=False,
         )
 
-        region_price = CollectRegionPriceService().execute(dto=dto)
+        region_price = CollectRegionPriceService().collect_region_price(dto=dto)
 
         assert isinstance(region_price, RegionPrice)
 
@@ -226,7 +226,7 @@ class TestCollectRegionPriceService:
             is_deal_canceled=False,
         )
 
-        region_price = CollectRegionPriceService().execute(dto=dto)
+        region_price = CollectRegionPriceService().collect_region_price(dto=dto)
 
         assert isinstance(region_price, RegionPrice)
 

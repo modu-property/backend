@@ -122,11 +122,13 @@ class Command(BaseCommand, CollectCommandMixin):
                 is_deal_canceled=False,
             )
             if self.not_test_env():
-                t = threading.Thread(target=self.service.execute, args=(dto,))
+                t = threading.Thread(
+                    target=self.service.collect_region_price, args=(dto,)
+                )
                 t.start()
                 threads.append(t)
             else:
-                self.service.execute(dto=dto)
+                self.service.collect_region_price(dto=dto)
 
         if self.not_test_env():
             for _thread in threads:
