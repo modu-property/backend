@@ -11,6 +11,6 @@ class Command(BaseCommand):
         self.service = InsertAddressService()
 
     def handle(self, *args, **options):
-        result = self.service.execute()
+        result = self.service.insert_address()
 
         logger.info(f"result : {result}")
