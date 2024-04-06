@@ -12,7 +12,7 @@ class TestCollectRegionService:
             return_value=dongs_df,
         )
 
-        result: bool = CollectRegionService().collect()
+        result: bool = CollectRegionService().collect_region()
 
         assert result == True
 

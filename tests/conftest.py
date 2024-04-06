@@ -14,6 +14,8 @@ import pytest
 from modu_property.settings.test_settings import SECRET_KEY
 from django.contrib.auth.hashers import make_password
 from accounts.models import User
+from real_estate.services.insert_address_service import InsertRegionsService
+from tests.conftest import insert_regions
 
 
 @pytest.fixture()
@@ -123,28 +125,11 @@ def mock_collect_deal_price_of_real_estate():
 
 
 @pytest.fixture
-def insert_regional_codes():
-    def _insert_regional_codes(start: int = 0, end: int = 30000):
-        connection = connections["default"]
+def insert_regions():
+    def _insert_regions(start: int = 0, end: int = 30000):
+        InsertRegionsService().insert_regions()
 
-        path: str = FileUtil.get_file_path(
-            dir_name="tests/files/", file_name="insert_regional_codes.sql"
-        )
-
-        # Read SQL commands from the file
-        with open(path, "r") as file:
-            sql_commands = file.read()
-
-        # Split the SQL commands if there are multiple commands
-        commands = sql_commands.split(";")[start : end + 1]
-
-        # Execute each SQL command
-        with connection.cursor() as cursor:
-            for command in commands:
-                if command.strip():
-                    cursor.execute(command)
-
-    return _insert_regional_codes
+    return _insert_regions
 
 
 @pytest.fixture

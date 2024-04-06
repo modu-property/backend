@@ -11,7 +11,7 @@ class CollectRegionService:
         self.address_collector = AddressCollector()
         self.real_estate_repository = RealEstateRepository()
 
-    def collect(self) -> bool:
+    def collect_region(self) -> bool:
         regions: Union[List[Region], bool] = self.address_collector.collect_region()
 
         if not regions:

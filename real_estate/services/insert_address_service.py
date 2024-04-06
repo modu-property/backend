@@ -4,13 +4,13 @@ from django.db import connections
 from modu_property.utils.file import FileUtil
 
 
-class InsertAddressService:
+class InsertRegionsService:
     def __init__(
         self,
     ) -> None:
         pass
 
-    def insert_address(self) -> None:
+    def insert_regions(self) -> None:
         connection = connections["default"]
 
         path: str = FileUtil.get_file_path(

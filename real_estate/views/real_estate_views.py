@@ -87,7 +87,7 @@ class GetRealEstateView(APIView):
             return JsonResponse(data={}, status=400)
 
         dto = GetRealEstateDto(**data)
-        result: ServiceResultDto = GetRealEstateService().execute(dto=dto)
+        result: ServiceResultDto = GetRealEstateService().get_real_estate(dto=dto)
 
         return JsonResponse(
             data=result.data,
@@ -202,7 +202,9 @@ class GetRealEstatesOnSearchView(ListAPIView):
             return JsonResponse(data={}, status=400)
 
         dto = GetRealEstatesOnSearchDto(**data)
-        result: ServiceResultDto = GetRealEstatesOnSearchService().execute(dto=dto)
+        result: ServiceResultDto = GetRealEstatesOnSearchService().get_real_estates(
+            dto=dto
+        )
 
         return JsonResponse(
             data=result.data,
@@ -376,7 +378,9 @@ class GetRealEstatesOnMapView(ListAPIView):
             return JsonResponse(data={}, status=400)
 
         dto = GetRealEstatesOnMapDto(**data)
-        result: ServiceResultDto = GetRealEstatesOnMapService().execute(dto=dto)
+        result: ServiceResultDto = GetRealEstatesOnMapService().get_real_estates(
+            dto=dto
+        )
 
         return JsonResponse(
             data=result.data,

@@ -27,7 +27,7 @@ class GetRealEstateService:
     def __init__(self) -> None:
         self.repository = RealEstateRepository()
 
-    def execute(self, dto: GetRealEstateDto) -> ServiceResultDto:
+    def get_real_estate(self, dto: GetRealEstateDto) -> ServiceResultDto:
         real_estate: Optional[RealEstate] = self.repository.get_real_estate(id=dto.id)
 
         if not real_estate:
@@ -48,7 +48,7 @@ class GetRealEstatesOnSearchService:
     def __init__(self) -> None:
         self.manticoresearch_client = ManticoreClient()
 
-    def execute(self, dto: GetRealEstatesOnSearchDto) -> ServiceResultDto:
+    def get_real_estates(self, dto: GetRealEstatesOnSearchDto) -> ServiceResultDto:
         result: dict[str, list] = {}
 
         regions: list = self.get_real_estates(dto=dto, index="region_index")
@@ -118,7 +118,7 @@ class GetRealEstatesOnMapService:
     def __init__(self) -> None:
         self.repository = RealEstateRepository()
 
-    def execute(self, dto: GetRealEstatesOnMapDto) -> ServiceResultDto:
+    def get_real_estates(self, dto: GetRealEstatesOnMapDto) -> ServiceResultDto:
         if (
             RealEstateZoomLevel.MIN.value <= dto.zoom_level
             and dto.zoom_level <= RealEstateZoomLevel.MAX.value

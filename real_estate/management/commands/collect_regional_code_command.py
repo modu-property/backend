@@ -11,6 +11,6 @@ class Command(BaseCommand):
         self.service = CollectRegionService()
 
     def handle(self, *args, **options):
-        result = self.service.collect()
+        result = self.service.collect_region()
 
         logger.error(f"result : {result}")
