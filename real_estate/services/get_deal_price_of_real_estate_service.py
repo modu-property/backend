@@ -23,27 +23,6 @@ from real_estate.serializers import (
 from django.db.models import QuerySet
 
 
-class GetRealEstateService:
-    def __init__(self) -> None:
-        self.repository = RealEstateRepository()
-
-    def get_real_estate(self, dto: GetRealEstateDto) -> ServiceResultDto:
-        real_estate: Optional[RealEstate] = self.repository.get_real_estate(id=dto.id)
-
-        if not real_estate:
-            return ServiceResultDto(status_code=404)
-
-        data: Any = validate_data(
-            serializer=GetRealEstateResponseSerializer,
-            queryset=real_estate,
-        )
-        if not data:
-            return ServiceResultDto(
-                message="GetRealEstateResponseSerializer 에러", status_code=400
-            )
-        return ServiceResultDto(data=data)
-
-
 class GetRealEstatesOnSearchService:
     def __init__(self) -> None:
         self.manticoresearch_client = ManticoreClient()

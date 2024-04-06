@@ -26,7 +26,6 @@ from real_estate.serializers import (
 )
 from real_estate.services.get_deal_price_of_real_estate_service import (
     GetRealEstatesOnMapService,
-    GetRealEstateService,
     GetRealEstatesOnSearchService,
 )
 from drf_spectacular.utils import (
@@ -40,6 +39,7 @@ from modu_property.utils.loggers import logger
 from rest_framework.views import APIView
 from real_estate.services.get_deals_service import GetDealsService
 from manticore.manticore_client import ManticoreClient
+from real_estate.services.get_real_estate_service import GetRealEstateService
 
 
 class GetRealEstateView(APIView):

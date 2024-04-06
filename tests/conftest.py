@@ -1,21 +1,17 @@
-from datetime import datetime, date, timedelta
-from pandas import DataFrame
+import jwt
 import pandas
 import pytest
-from modu_property.utils.file import FileUtil
-from real_estate.models import Deal, RealEstate, MonthlyRent, Region, RegionPrice
+
+from pandas import DataFrame
 from django.contrib.gis.geos import Point
-import os
-from django.db import connections
-
-import jwt
-import pytest
-
-from modu_property.settings.test_settings import SECRET_KEY
+from datetime import datetime, date, timedelta
 from django.contrib.auth.hashers import make_password
+
 from accounts.models import User
+from modu_property.utils.file import FileUtil
+from modu_property.settings.test_settings import SECRET_KEY
+from real_estate.models import Deal, RealEstate, MonthlyRent, Region, RegionPrice
 from real_estate.services.insert_address_service import InsertRegionsService
-from tests.conftest import insert_regions
 
 
 @pytest.fixture()
