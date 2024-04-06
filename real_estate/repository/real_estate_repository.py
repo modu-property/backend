@@ -2,6 +2,7 @@ from typing import List, Optional, Union
 from django.forms import model_to_dict
 from real_estate.dto.collect_region_price_dto import CollectRegionPriceDto
 from real_estate.dto.get_real_estate_dto import GetDealsDto, GetRealEstatesOnMapDto
+from real_estate.enum.real_estate_enum import RegionZoomLevel
 from real_estate.models import Deal, RealEstate, Region, RegionPrice
 from modu_property.utils.loggers import logger
 from django.db.models import (
@@ -85,7 +86,7 @@ class RealEstateRepository:
                     longitude__lte=dto.ne_lng,
                 )
             )
-            return real_estates
+            return real_estates[:150]
         except Exception as e:
             logger.error(f"get_individual_real_estates e : {e}")
             return False
@@ -188,20 +189,20 @@ class RealEstateRepository:
 
         if isinstance(dto, GetRealEstatesOnMapDto):
             logger.debug(dto.__dict__)
-            if dto.zoom_level == 5:
+            if dto.zoom_level == RegionZoomLevel.DONGRI.value:
                 # dongri
                 _q = _q.exclude(region__dongri="")
-            elif dto.zoom_level == 4:
+            elif dto.zoom_level == RegionZoomLevel.UBMYUNDONG.value:
                 # ubmyundong
                 _q = _q.exclude(region__ubmyundong="").filter(region__dongri="")
-            elif dto.zoom_level == 3:
+            elif dto.zoom_level == RegionZoomLevel.SIGUNGU.value:
                 # sigungu
                 _q = (
                     _q.exclude(region__sigungu="")
                     .filter(region__ubmyundong="")
                     .filter(region__dongri="")
                 )
-            elif dto.zoom_level == 2:
+            elif dto.zoom_level == RegionZoomLevel.SIDO.value:
                 # sido
                 _q = (
                     _q.exclude(region__sido="")

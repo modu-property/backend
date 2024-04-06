@@ -9,6 +9,7 @@ from real_estate.dto.get_real_estate_dto import (
     GetRealEstatesOnSearchDto,
 )
 from real_estate.dto.service_result_dto import ServiceResultDto
+from real_estate.enum.real_estate_enum import RealEstateZoomLevel, RegionZoomLevel
 from real_estate.models import RealEstate
 from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.serializers import (
@@ -118,9 +119,10 @@ class GetRealEstatesOnMapService:
         self.repository = RealEstateRepository()
 
     def execute(self, dto: GetRealEstatesOnMapDto) -> ServiceResultDto:
-        # TODO : zoom_level이 5 -> dongri, 4 -> ubmyundong, 3 -> sigungu, 2 -> sido, 1 -> 전국. 나중에 프론트엔드랑 맞춰서 변경해야함.
-
-        if dto.zoom_level >= 6:
+        if (
+            RealEstateZoomLevel.MIN.value <= dto.zoom_level
+            and dto.zoom_level <= RealEstateZoomLevel.MAX.value
+        ):
             real_estates: Union[QuerySet, bool] = (
                 self.repository.get_individual_real_estates(dto=dto)
             )
@@ -139,7 +141,10 @@ class GetRealEstatesOnMapService:
                         message="GetRealEstatesOnMapResponseSerializer 에러",
                         status_code=400,
                     )
-        else:
+        elif (
+            RegionZoomLevel.DONGRI.value <= dto.zoom_level
+            and dto.zoom_level <= RegionZoomLevel.SIDO.value
+        ):
             """
             region 테이블의 위경도 내에 있고, 시군구동 단위 일치하는것들을 region_price랑 join해서 응답
             """

@@ -11,6 +11,7 @@ from real_estate.dto.get_real_estate_dto import (
     GetRealEstatesOnSearchDto,
 )
 from real_estate.dto.service_result_dto import ServiceResultDto
+from real_estate.enum.real_estate_enum import RealEstateZoomLevel
 from real_estate.serializers import (
     DealSerializer,
     GetDealsRequestSerializer,
@@ -324,14 +325,14 @@ class GetRealEstatesOnMapView(ListAPIView):
                 required=True,
                 examples=[
                     OpenApiExample(
-                        name="줌 레벨 5",
-                        description="5 이하면 지역 부동산 정보를 응답함",
-                        value="5",
+                        name="줌 레벨 6",
+                        description="6 이상 9이하면 지역 부동산 정보를 응답함",
+                        value="6",
                     ),
                     OpenApiExample(
-                        name="줌 레벨 6",
-                        description="6이상이면 개별 부동산 정보를 응답함",
-                        value="6",
+                        name="줌 레벨 5",
+                        description="5 이하면 개별 부동산 정보를 응답함",
+                        value="5",
                     ),
                 ],
             ),
@@ -362,7 +363,9 @@ class GetRealEstatesOnMapView(ListAPIView):
             "sw_lng": request.query_params.get("sw_lng"),
             "ne_lat": request.query_params.get("ne_lat"),
             "ne_lng": request.query_params.get("ne_lng"),
-            "zoom_level": request.query_params.get("zoom_level", default=6),
+            "zoom_level": request.query_params.get(
+                "zoom_level", default=RealEstateZoomLevel.DEFAULT.value
+            ),
         }
 
         data: Any = validate_data(
