@@ -465,7 +465,7 @@ class GetDealsView(ListAPIView):
             return JsonResponse(data={}, status=400)
 
         dto = GetDealsDto(**data)
-        result: ServiceResultDto = GetDealsService().execute(dto=dto)
+        result: ServiceResultDto = GetDealsService().get_deals(dto=dto)
 
         return JsonResponse(
             data=result.data,

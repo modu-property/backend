@@ -17,7 +17,7 @@ class GetDealsService:
         self.repository = RealEstateRepository()
         self.paginator = PaginatorUtil()
 
-    def execute(self, dto: GetDealsDto) -> ServiceResultDto:
+    def get_deals(self, dto: GetDealsDto) -> ServiceResultDto:
         deals = self.repository.get_deals(dto=dto)
 
         deals, total_pages, current_page = self.paginator.get_page_info(
@@ -28,12 +28,7 @@ class GetDealsService:
 
         deals_list = self.create_deal_list(deals)
 
-        data = {
-            "deals": deals_list,
-            "current_page": current_page,
-            "total_pages": total_pages,
-        }
-        data = validate_data(serializer=GetDealsResponseSerializer, data=data)
+        data = self.get_validated_data(total_pages, current_page, deals_list)
 
         try:
             return ServiceResultDto(data=data)
@@ -42,6 +37,14 @@ class GetDealsService:
             return ServiceResultDto(
                 status_code=400, message="GetDealsResponseSerializer error"
             )
+
+    def get_validated_data(self, total_pages, current_page, deals_list):
+        data = {
+            "deals": deals_list,
+            "current_page": current_page,
+            "total_pages": total_pages,
+        }
+        return validate_data(serializer=GetDealsResponseSerializer, data=data)
 
     def create_deal_list(self, deals):
         deals_list = []
