@@ -39,7 +39,7 @@ from real_estate.services.get_deals_service import GetDealsService
 from manticore.manticore_client import ManticoreClient
 from real_estate.services.get_real_estate_service import GetRealEstateService
 from real_estate.services.get_real_estates_on_map_service import (
-    GetRealEstatesOnMapService,
+    GetPropertiesOnMapService,
 )
 
 
@@ -328,14 +328,14 @@ class GetRealEstatesOnMapView(ListAPIView):
                 required=True,
                 examples=[
                     OpenApiExample(
-                        name="줌 레벨 6",
-                        description="6 이상 9이하면 지역 부동산 정보를 응답함",
-                        value="6",
+                        name="줌 레벨 5",
+                        description="5 이하면 150개의 개별 부동산 정보를 응답함",
+                        value="5",
                     ),
                     OpenApiExample(
-                        name="줌 레벨 5",
-                        description="5 이하면 개별 부동산 정보를 응답함",
-                        value="5",
+                        name="줌 레벨 6",
+                        description="6 이상 9이하면 20개의 지역 부동산 정보를 응답함",
+                        value="6",
                     ),
                 ],
             ),
@@ -379,9 +379,7 @@ class GetRealEstatesOnMapView(ListAPIView):
             return JsonResponse(data={}, status=400)
 
         dto = GetRealEstatesOnMapDto(**data)
-        result: ServiceResultDto = GetRealEstatesOnMapService().get_real_estates(
-            dto=dto
-        )
+        result: ServiceResultDto = GetPropertiesOnMapService().get_properties(dto=dto)
 
         return JsonResponse(
             data=result.data,
