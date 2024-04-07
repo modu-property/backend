@@ -13,19 +13,19 @@ from real_estate.serializers import (
 )
 
 
-class GetProperty(ABC):
+class GetRealEstatesInterface(ABC):
     @abstractmethod
-    def get_property(
+    def get_real_estates(
         self, dto: GetRealEstatesOnMapDto
     ) -> Union[List[OrderedDict[str, Union[int, str]]], ServiceResultDto, bool]:
         pass
 
 
-class GetRealEstates(GetProperty):
+class GetRealEstates(GetRealEstatesInterface):
     def __init__(self) -> None:
         self.repository = RealEstateRepository()
 
-    def get_property(
+    def get_real_estates(
         self, dto: GetRealEstatesOnMapDto
     ) -> Union[List[OrderedDict[str, Union[int, str]]], ServiceResultDto, bool]:
         real_estates: Union[QuerySet, bool] = (
@@ -51,11 +51,11 @@ class GetRealEstates(GetProperty):
         )
 
 
-class GetRegions(GetProperty):
+class GetRegions(GetRealEstatesInterface):
     def __init__(self) -> None:
         self.repository = RealEstateRepository()
 
-    def get_property(
+    def get_real_estates(
         self, dto: GetRealEstatesOnMapDto
     ) -> Union[List[OrderedDict[str, Union[int, str]]], ServiceResultDto, bool]:
         regions: Union[QuerySet, bool] = self.repository.get_region_prices(dto=dto)
@@ -89,7 +89,7 @@ class GetPropertiesOnMapService:
         if self._is_real_estates_zoom_level(dto=dto):
             real_estates: Union[
                 List[OrderedDict[str, Union[int, str]]], ServiceResultDto, bool
-            ] = self.get_real_estates.get_property(dto=dto)
+            ] = self.get_real_estates.get_real_estates(dto=dto)
 
             if real_estates is None:
                 return ServiceResultDto(status_code=404)
@@ -98,7 +98,7 @@ class GetPropertiesOnMapService:
         elif self._is_regions_zoom_level(dto=dto):
             regions: Union[
                 List[OrderedDict[str, Union[int, str]]], ServiceResultDto, bool
-            ] = self.get_regions.get_property(dto=dto)
+            ] = self.get_regions.get_real_estates(dto=dto)
 
             if regions is None:
                 return ServiceResultDto(status_code=404)
