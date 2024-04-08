@@ -31,35 +31,28 @@ class GetRealEstates(GetRealEstatesInterface):
             self.repository.get_individual_real_estates(dto=dto)
         )
 
-        data: Union[List[OrderedDict[str, Union[int, str]]], bool] = (
-            self._validate_data(real_estates=real_estates)
-        )
-
-        if data:
-            return ServiceResultDto(data=data)
-        elif data is False:
-            return ServiceResultDto(
-                message="GetRealEstatesOnMapResponseSerializer 에러",
-                status_code=400,
-            )
-        else:
-            return ServiceResultDto(
-                status_code=404,
+        if real_estates:
+            data: Union[List[OrderedDict[str, Union[int, str]]], bool] = validate_data(
+                queryset=real_estates,
+                serializer=GetRealEstatesOnMapResponseSerializer,
+                many=True,
             )
 
-    def _validate_data(
-        self, real_estates
-    ) -> Union[List[OrderedDict[str, Union[int, str]]], bool]:
-        return validate_data(
-            queryset=real_estates,
-            serializer=GetRealEstatesOnMapResponseSerializer,
-            many=True,
+            if data:
+                return ServiceResultDto(data=data)
+            elif data is False:
+                return ServiceResultDto(
+                    message="GetRealEstatesOnMapResponseSerializer 에러",
+                    status_code=400,
+                )
+        return ServiceResultDto(
+            status_code=404,
         )
 
 
 class GetRegions(GetRealEstatesInterface):
-    def __init__(self) -> None:
-        self.repository = RealEstateRepository()
+    def __init__(self, repository: RealEstateRepository) -> None:
+        self.repository = repository
 
     def get_real_estates(
         self, dto: GetRealEstatesOnMapDto

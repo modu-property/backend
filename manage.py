@@ -3,8 +3,6 @@
 import os
 import sys
 
-from modu_property.container import ServiceContainer
-
 
 def main():
     server_env = os.getenv("SERVER_ENV")
@@ -16,10 +14,6 @@ def main():
 
     try:
         from django.core.management import execute_from_command_line
-
-        ServiceContainer.wire(
-            modules=["real_estate.services.get_real_estates_on_map_service"]
-        )
     except ImportError as exc:
         raise ImportError(
             "Couldn't import Django. Are you sure it's installed and "

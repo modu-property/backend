@@ -5,17 +5,24 @@ from real_estate.enum.real_estate_enum import RealEstateZoomLevel, RegionZoomLev
 from real_estate.repository.real_estate_repository import RealEstateRepository
 
 from dependency_injector.wiring import inject, Provide
-from modu_property.container import ServiceContainer
-from real_estate.services.get_real_estates import GetRealEstatesInterface, GetRegions
+from real_estate.container import RepositoryContainer, ServiceContainer
+from real_estate.services.get_real_estates import (
+    GetRealEstates,
+    GetRegions,
+)
 
 
 class GetPropertiesOnMapService:
     @inject
-    def __init__(self, get_real_estates: GetRealEstatesInterface) -> None:
-        self.repository = RealEstateRepository()
-        # self.get_real_estates = GetRealEstates()
+    def __init__(
+        self,
+        get_real_estates: GetRealEstates = Provide[ServiceContainer.get_real_estates],
+        get_regions: GetRegions = Provide[ServiceContainer.get_regions],
+        repository: RealEstateRepository = Provide[RepositoryContainer.repository],
+    ) -> None:
+        self.repository = repository
         self.get_real_estates = get_real_estates
-        self.get_regions = GetRegions()
+        self.get_regions = get_regions
 
     def get_properties(self, dto: GetRealEstatesOnMapDto) -> ServiceResultDto:
         if self._is_real_estates_zoom_level(dto=dto):

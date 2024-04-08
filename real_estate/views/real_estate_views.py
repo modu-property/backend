@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from rest_framework.request import Request
 from rest_framework.generics import ListAPIView
 from accounts.util.authenticator import jwt_authenticator
-from modu_property.container import ServiceContainer
+from real_estate.container import ServiceContainer
 from modu_property.utils.validator import validate_data
 from real_estate.dto.get_real_estate_dto import (
     GetDealsDto,
@@ -380,9 +380,7 @@ class GetRealEstatesOnMapView(ListAPIView):
             return JsonResponse(data={}, status=400)
 
         dto = GetRealEstatesOnMapDto(**data)
-        result: ServiceResultDto = GetPropertiesOnMapService(
-            get_real_estates=ServiceContainer().get_real_estates()
-        ).get_properties(dto=dto)
+        result: ServiceResultDto = GetPropertiesOnMapService().get_properties(dto=dto)
 
         return JsonResponse(
             data=result.data,
