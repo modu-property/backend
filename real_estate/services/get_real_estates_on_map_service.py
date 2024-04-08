@@ -2,10 +2,9 @@ from typing import List, OrderedDict, Union
 from real_estate.dto.get_real_estate_dto import GetRealEstatesOnMapDto
 from real_estate.dto.service_result_dto import ServiceResultDto
 from real_estate.enum.real_estate_enum import RealEstateZoomLevel, RegionZoomLevel
-from real_estate.repository.real_estate_repository import RealEstateRepository
 
 from dependency_injector.wiring import inject, Provide
-from real_estate.container import RepositoryContainer, ServiceContainer
+from real_estate.container import ServiceContainer
 from real_estate.services.get_real_estates import (
     GetRealEstates,
     GetRegions,
@@ -18,9 +17,7 @@ class GetPropertiesOnMapService:
         self,
         get_real_estates: GetRealEstates = Provide[ServiceContainer.get_real_estates],
         get_regions: GetRegions = Provide[ServiceContainer.get_regions],
-        repository: RealEstateRepository = Provide[RepositoryContainer.repository],
     ) -> None:
-        self.repository = repository
         self.get_real_estates = get_real_estates
         self.get_regions = get_regions
 
