@@ -9,9 +9,6 @@ from real_estate.services.get_real_estates import (
 
 class RepositoryContainer(containers.DeclarativeContainer):
     config = providers.Configuration()
-    # wiring_config = containers.WiringConfiguration(
-    #     modules=["real_estate.services.get_real_estates_on_map_service"]
-    # )
 
     repository = providers.Singleton(RealEstateRepository)
 
@@ -22,7 +19,6 @@ class ServiceContainer(containers.DeclarativeContainer):
         modules=["real_estate.services.get_real_estates_on_map_service"]
     )
 
-    # repository = providers.Singleton(RealEstateRepository)
     repository = RepositoryContainer().repository
 
     get_real_estates = providers.Factory(provides=GetRealEstates, repository=repository)
