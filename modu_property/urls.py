@@ -65,5 +65,5 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
-    path("manticore", maticore_views.ManticoreView.as_view(), name="manticore"),
+    path("manticore", maticore_views.IndexSearchEngineView.as_view(), name="manticore"),
 ]

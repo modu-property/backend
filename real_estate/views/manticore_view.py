@@ -11,7 +11,7 @@ from real_estate.schema.manticore_view_schema import get_manticore_view_get_deco
 from dependency_injector.wiring import inject, Provide
 
 
-class ManticoreView(APIView):
+class IndexSearchEngineView(APIView):
     @inject
     def __init__(
         self,
@@ -30,8 +30,6 @@ class ManticoreView(APIView):
         *args,
         **kwargs,
     ) -> JsonResponse:
-        logger.info("ManticoreView")
-
         try:
             self.search_client.run_indexer()
             return JsonResponse(
