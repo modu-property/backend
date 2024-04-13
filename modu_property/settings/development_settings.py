@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 
-load_dotenv(".env.testing")
+load_dotenv(".env.development")
 
 from .base_settings import *
 from modu_property.utils.loggers import logger
