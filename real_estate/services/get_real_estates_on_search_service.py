@@ -20,11 +20,14 @@ class SetRealEstate:
         ] = serializer
         self.key = key
 
-    def _set(
+    def set(
         self,
         result: Dict,
         data: list,
-    ):
+    ) -> Optional[bool]:
+        if data == []:
+            return None
+
         if not data:
             return False
 
@@ -37,6 +40,7 @@ class SetRealEstate:
             return False
 
         result[self.key] = list(data)
+        return True
 
 
 class SearchRealEstates:
@@ -81,7 +85,7 @@ class GetRealEstatesOnSearchService:
 
         regions = self.search_real_estate.search(dto=dto, index="region_index")
 
-        is_regions_set: Optional[bool] = self.set_region._set(
+        is_regions_set: Optional[bool] = self.set_region.set(
             result=result, data=regions
         )
         if is_regions_set is False:
@@ -94,7 +98,7 @@ class GetRealEstatesOnSearchService:
             dto=dto, index="real_estates"
         )
 
-        is_real_estates_set: Optional[bool] = self.set_region._set(
+        is_real_estates_set: Optional[bool] = self.set_real_estate.set(
             result=result,
             data=real_estates,
         )

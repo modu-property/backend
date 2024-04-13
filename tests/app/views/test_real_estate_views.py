@@ -537,7 +537,7 @@ def test_get_region_prices_on_map_view(
 
 
 @pytest.mark.django_db(transaction=True, reset_sequences=True)
-@pytest.mark.skip()
+# @pytest.mark.skip()
 def test_get_real_estates_with_keyword_view(client, get_jwt):
     """
     !!로컬 데이터 사라지므로 주의!!
