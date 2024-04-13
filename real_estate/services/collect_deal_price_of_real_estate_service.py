@@ -25,7 +25,7 @@ class CollectDealPriceOfRealEstateService:
         self.real_estate_collector = RealEstateCollector()
         self.address_converter = KakaoAddressConverter()
 
-    def execute(self, dto: CollectDealPriceOfRealEstateDto):
+    def collect_deal_price_of_real_estate(self, dto: CollectDealPriceOfRealEstateDto):
         deal_prices_of_real_estate: DataFrame = (
             self.real_estate_collector.collect_deal_price_of_real_estate(dto=dto)
         )
@@ -68,9 +68,11 @@ class CollectDealPriceOfRealEstateService:
             logger.error(f"deal bulk_create e : {e}")
         return False
 
-    def delete_duplication(self, dto, deal_prices_of_real_estate):
+    def delete_duplication(
+        self, dto: CollectDealPriceOfRealEstateDto, deal_prices_of_real_estate
+    ):
         file_logger.info("delete_duplication")
-        unique_keys_in_db = self.create_unique_keys_in_db(dto)
+        unique_keys_in_db = self.create_unique_keys_in_db(dto=dto)
 
         indexes_to_drop = self.create_indexes_to_drop(
             deal_prices_of_real_estate, unique_keys_in_db
@@ -91,7 +93,7 @@ class CollectDealPriceOfRealEstateService:
                 indexes_to_drop.append(deal_prices_of_real_estate.index[index])
         return indexes_to_drop
 
-    def create_unique_keys_in_db(self, dto):
+    def create_unique_keys_in_db(self, dto: CollectDealPriceOfRealEstateDto):
         unique_keys_in_db = {}
         data_in_db = self.get_data_in_db(dto)
         for data in data_in_db:
@@ -210,10 +212,11 @@ class CollectDealPriceOfRealEstateService:
         dong = deal_price_of_real_estate["법정동"]
         lot_number = deal_price_of_real_estate["지번"]
         query: str = f"{dong} {lot_number}"
-        address_info = self.address_converter.convert_address(query=query)
 
-        if not address_info:
+        if not self.address_converter.convert_address(query=query):
             return False
+
+        address_info = self.address_converter.get_address()
 
         real_estate_model: RealEstate = self.create_real_estate_model(
             deal_price_of_real_estate=deal_price_of_real_estate,
@@ -224,7 +227,10 @@ class CollectDealPriceOfRealEstateService:
         return validate_data(serializer=RealEstateSerializer, model=real_estate_model)
 
     def create_deal_models(
-        self, dto, deal_price_of_real_estate_list, inserted_real_estate_models_dict
+        self,
+        dto: CollectDealPriceOfRealEstateDto,
+        deal_price_of_real_estate_list,
+        inserted_real_estate_models_dict,
     ):
         deal_models = []
         for deal_price_of_real_estate in deal_price_of_real_estate_list:
@@ -289,7 +295,7 @@ class CollectDealPriceOfRealEstateService:
             real_estate_id=inserted_real_estate_model.id,
         )
 
-    def get_data_in_db(self, dto):
+    def get_data_in_db(self, dto: CollectDealPriceOfRealEstateDto):
         return list(
             RealEstate.objects.prefetch_related("deals")
             .filter(

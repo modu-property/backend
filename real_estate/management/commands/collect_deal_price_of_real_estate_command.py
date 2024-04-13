@@ -77,12 +77,13 @@ class Command(BaseCommand, CollectCommandMixin):
                         )
                         if self.not_test_env():
                             t = threading.Thread(
-                                target=self.service.execute, args=(dto,)
+                                target=self.service.collect_deal_price_of_real_estate,
+                                args=(dto,),
                             )
                             t.start()
                             threads.append(t)
                         else:
-                            self.service.execute(dto=dto)
+                            self.service.collect_deal_price_of_real_estate(dto=dto)
 
                     if self.not_test_env():
                         for _thread in threads:

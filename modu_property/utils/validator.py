@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any, List, OrderedDict, Union
 from django.db import models
 from rest_framework.exceptions import ValidationError
 from django.db.models import QuerySet
@@ -18,7 +18,7 @@ def validate_data(
     ] = None,
     model: Union[models.Model, None] = None,
     many: bool = False,
-) -> Union[dict, bool, Any]:
+) -> Union[List[OrderedDict[str, Union[int, str]]], bool]:
     """
     model and data
     model과 dict data 있을 때?

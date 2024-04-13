@@ -107,7 +107,7 @@ class GetRealEstatesOnMapRequestSerializer(serializers.Serializer):
     sw_lng = serializers.FloatField()
     ne_lat = serializers.FloatField()
     ne_lng = serializers.FloatField()
-    zoom_level = serializers.IntegerField(max_value=6, min_value=0)
+    zoom_level = serializers.IntegerField(min_value=1, max_value=9)
 
 
 class GetRealEstatesOnMapResponseSerializer(serializers.Serializer):

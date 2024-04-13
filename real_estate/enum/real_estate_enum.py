@@ -31,3 +31,16 @@ REAL_ESTATE_TYPES = (
         RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value,
     ),
 )
+
+
+class RealEstateZoomLevel(Enum):
+    DEFAULT = 4
+    MIN = 1
+    MAX = 5
+
+
+class RegionZoomLevel(Enum):
+    DONGRI = 6
+    UBMYUNDONG = 7
+    SIGUNGU = 8
+    SIDO = 9

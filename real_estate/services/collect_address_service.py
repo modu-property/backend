@@ -4,17 +4,15 @@ from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.utils.address_collector import AddressCollector
 
 
-class CollectAddressService:
+class CollectRegionService:
     def __init__(
         self,
     ) -> None:
         self.address_collector = AddressCollector()
         self.real_estate_repository = RealEstateRepository()
 
-    def execute(self) -> bool:
-        regions: Union[
-            List[Region], bool
-        ] = self.address_collector.collect_regional_info()
+    def collect_region(self) -> bool:
+        regions: Union[List[Region], bool] = self.address_collector.collect_region()
 
         if not regions:
             return False

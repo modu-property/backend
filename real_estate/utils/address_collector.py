@@ -2,6 +2,7 @@ import os
 from typing import List, Union
 import PublicDataReader as pdr
 
+from pandas.core.series import Series
 from PublicDataReader import TransactionPrice
 from django.forms import model_to_dict
 from pandas import DataFrame
@@ -19,9 +20,9 @@ class AddressCollector:
         self.service_key = os.getenv("SERVICE_KEY")
         self.api = TransactionPrice(self.service_key)
         self.real_estate_repository = RealEstateRepository()
-        self.kakao_address_converter = KakaoAddressConverter()
+        self.address_converter = KakaoAddressConverter()
 
-    def collect_regional_info(self) -> Union[List[Region], bool]:
+    def collect_region(self) -> Union[List[Region], bool]:
         """
         법정동 코드, 시도, 시군구, 읍면동 수집
         """
@@ -29,37 +30,7 @@ class AddressCollector:
 
         region_models = []
         for _, row in table.iterrows():
-            if not row.get("말소일자"):
-                regional_code = row.get("시군구코드", None)
-                sido = row.get("시도명", None)
-                sigungu = row.get("시군구명", None)
-                ubmyundong = row.get("읍면동명", None)
-                dongri = row.get("동리명", None)
-
-                logger.info(row)
-
-                query: str = f"{sido} {sigungu} {ubmyundong} {dongri}".strip()
-
-                address_info: Union[dict[str, str], dict, bool] = (
-                    self.kakao_address_converter.convert_address(query=query)
-                )
-                logger.info(address_info)
-
-                if not address_info:
-                    continue
-
-                region = Region(
-                    sido=sido,
-                    regional_code=regional_code,
-                    sigungu=sigungu,
-                    ubmyundong=ubmyundong,
-                    dongri=dongri,
-                    latitude=address_info["latitude"],
-                    longitude=address_info["longitude"],
-                )
-                logger.info(f"region : {region}")
-
-                region_models.append(region)
+            self.get_region_models(row=row, region_models=region_models)
 
         logger.info(f"region_models count {len(region_models)}")
 
@@ -76,3 +47,39 @@ class AddressCollector:
         )
 
         return result
+
+    def get_region_models(self, row: Series, region_models: List[Region]):
+        if not row.get("말소일자"):
+            regional_code = row.get("시군구코드", None)
+            sido = row.get("시도명", None)
+            sigungu = row.get("시군구명", None)
+            ubmyundong = row.get("읍면동명", None)
+            dongri = row.get("동리명", None)
+
+            logger.info(row)
+
+            query: str = f"{sido} {sigungu} {ubmyundong} {dongri}".strip()
+
+            if not self.address_converter.convert_address(query=query):
+                return False
+
+            address_info: Union[dict[str, str], dict, bool] = (
+                self.address_converter.get_address()
+            )
+            logger.info(address_info)
+
+            if address_info is False:
+                return None
+
+            region = Region(
+                sido=sido,
+                regional_code=regional_code,
+                sigungu=sigungu,
+                ubmyundong=ubmyundong,
+                dongri=dongri,
+                latitude=address_info["latitude"],
+                longitude=address_info["longitude"],
+            )
+            logger.info(f"region : {region}")
+
+            region_models.append(region)

@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from real_estate.views import real_estate_views as app_views
+from real_estate.views import manticore_view as maticore_views
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularSwaggerView,
@@ -64,5 +65,5 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
-    path("manticore", app_views.ManticoreView.as_view(), name="manticore"),
+    path("manticore", maticore_views.ManticoreView.as_view(), name="manticore"),
 ]

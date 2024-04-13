@@ -1,10 +1,10 @@
 import pytest
 from real_estate.repository.real_estate_repository import RealEstateRepository
-from real_estate.services.collect_address_service import CollectAddressService
+from real_estate.services.collect_address_service import CollectRegionService
 
 
 @pytest.mark.django_db
-class TestCollectAddressService:
+class TestCollectRegionService:
     def test_collect_address(self, mocker, get_dongs):
         dongs_df = get_dongs(count=5)
         mocker.patch(
@@ -12,7 +12,7 @@ class TestCollectAddressService:
             return_value=dongs_df,
         )
 
-        result: bool = CollectAddressService().execute()
+        result: bool = CollectRegionService().collect_region()
 
         assert result == True
 

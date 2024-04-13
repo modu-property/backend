@@ -270,6 +270,14 @@ _serializer.is_valid(raise_exception=True)
 data = _serializer.data
 ```
 
+# schema decorator 작성 방법
+schema 디렉토리에 파일 생성하고 아래 형식으로 작성
+"""
+def get_xxx_view_get_decorator(view_function):
+    decorated_view_function =extend_schema()(view_function)
+
+    return decorated_view_function
+"""
 
 # TODO
 23.12.05  
