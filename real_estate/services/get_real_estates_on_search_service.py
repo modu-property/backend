@@ -1,46 +1,17 @@
-from typing import Any, Dict, Optional, Union
+from typing import Optional
 from manticore.manticore_client import ManticoreClient
 from modu_property.utils.validator import validate_data
+from real_estate.containers.container import ServiceContainer
 from real_estate.dto.get_real_estate_dto import (
     GetRealEstatesOnSearchDto,
 )
 from real_estate.dto.service_result_dto import ServiceResultDto
 from real_estate.serializers import (
     GetRealEstatesAndRegionsOnSearchResponseSerializer,
-    GetRealEstatesOnSearchResponseSerializer,
-    GetRegionsOnSearchResponseSerializer,
 )
+from dependency_injector.wiring import inject, Provide
 
-
-class SetRealEstate:
-    def __init__(self, serializer, key) -> None:
-        self.serializer: Union[
-            GetRealEstatesOnSearchResponseSerializer,
-            GetRegionsOnSearchResponseSerializer,
-        ] = serializer
-        self.key = key
-
-    def set(
-        self,
-        result: Dict,
-        data: list,
-    ) -> Optional[bool]:
-        if data == []:
-            return None
-
-        if not data:
-            return False
-
-        _data: Any = validate_data(
-            data=list(data),
-            serializer=self.serializer,
-            many=True,
-        )
-        if not _data:
-            return False
-
-        result[self.key] = list(data)
-        return True
+from real_estate.services.set_real_estates import SetRealEstates
 
 
 class SearchRealEstates:
@@ -70,14 +41,17 @@ class SearchRealEstates:
 
 
 class GetRealEstatesOnSearchService:
-    def __init__(self) -> None:
+    @inject
+    def __init__(
+        self,
+        set_real_estate: SetRealEstates = Provide[
+            ServiceContainer.set_real_estate_real_estates
+        ],
+        set_region: SetRealEstates = Provide[ServiceContainer.set_real_estate_regions],
+    ) -> None:
         self.manticoresearch_client = ManticoreClient()
-        self.set_real_estate = SetRealEstate(
-            serializer=GetRealEstatesOnSearchResponseSerializer, key="real_estates"
-        )
-        self.set_region = SetRealEstate(
-            serializer=GetRegionsOnSearchResponseSerializer, key="regions"
-        )
+        self.set_real_estate = set_real_estate
+        self.set_region = set_region
         self.search_real_estate = SearchRealEstates()
 
     def get_real_estates(self, dto: GetRealEstatesOnSearchDto) -> ServiceResultDto:
