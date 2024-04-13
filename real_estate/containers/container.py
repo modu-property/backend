@@ -45,5 +45,6 @@ ServiceContainer().wire(
     modules=[
         "real_estate.services.get_real_estates_on_map_service",
         "real_estate.services.get_real_estates_on_search_service",
+        "real_estate.views.manticore_view",
     ]
 )
