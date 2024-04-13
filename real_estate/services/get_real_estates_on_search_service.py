@@ -1,5 +1,5 @@
 from typing import Optional
-from manticore.manticore_client import ManticoreClient
+from manticore.manticore_client import SearchClientInterface
 from modu_property.utils.validator import validate_data
 from real_estate.containers.container import ServiceContainer
 from real_estate.dto.get_real_estate_dto import (
@@ -15,8 +15,13 @@ from real_estate.services.set_real_estates import SetRealEstates
 
 
 class SearchRealEstates:
-    def __init__(self) -> None:
-        self.manticoresearch_client = ManticoreClient()
+    def __init__(
+        self,
+        search_client: SearchClientInterface = Provide[
+            ServiceContainer.search_real_estates
+        ],
+    ) -> None:
+        self.search_client: SearchClientInterface = search_client
 
     def search(self, dto: GetRealEstatesOnSearchDto, index: str = "") -> list:
         real_estates = []
@@ -24,9 +29,7 @@ class SearchRealEstates:
 
         self._set_region_count_limit(dto, index)
 
-        hits = self.manticoresearch_client.search(
-            index=index, query=query, limit=dto.limit
-        )
+        hits = self.search_client.search(index=index, query=query, limit=dto.limit)
 
         for hit in hits:
             real_estate_info = hit["_source"]
@@ -49,7 +52,6 @@ class GetRealEstatesOnSearchService:
         ],
         set_region: SetRealEstates = Provide[ServiceContainer.set_real_estate_regions],
     ) -> None:
-        self.manticoresearch_client = ManticoreClient()
         self.set_real_estate = set_real_estate
         self.set_region = set_region
         self.search_real_estate = SearchRealEstates()

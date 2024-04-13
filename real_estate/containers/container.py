@@ -1,5 +1,6 @@
 from dependency_injector import containers, providers
 
+from manticore.manticore_client import ManticoreClient
 from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.serializers import (
     GetRealEstatesOnSearchResponseSerializer,
@@ -36,6 +37,8 @@ class ServiceContainer(containers.DeclarativeContainer):
         serializer=GetRegionsOnSearchResponseSerializer,
         key="regions",
     )
+
+    search_real_estates = providers.Factory(provides=ManticoreClient)
 
 
 ServiceContainer().wire(
