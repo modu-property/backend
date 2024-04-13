@@ -33,7 +33,7 @@
 
 파일 검증 : 
 * docker compose -f docker-compose.local.yml config
-* docker-compose -f docker-compose.testing.yml config
+* docker-compose -f docker-compose.development.yml config
 * docker-compose -f docker-compose.dev.yml config
 
 ## postgis
@@ -49,8 +49,8 @@ brew install postgis gdal libgeoip
 * SERVER_ENV=local python manage.py runserver --settings modu_property.settings.local_settings  
 
 테스팅 서버
-* docker-compose -f docker-compose.testing.yml up -d --build
-* docker-compose -f docker-compose.testing.yml up -d --build --force-recreate
+* docker-compose -f docker-compose.development.yml up -d --build
+* docker-compose -f docker-compose.development.yml up -d --build --force-recreate
 
 # migrate
 SERVER_ENV 설정하기, django container에서 실행하기
@@ -60,11 +60,11 @@ SERVER_ENV 설정하기, django container에서 실행하기
 * migrate
     * SERVER_ENV=local python manage.py migrate --settings=modu_property.settings.local_settings
 
-## testing용 (ec2, RDS)
+## development용 (ec2, RDS)
 * migrate
-    로컬에서 testing 컨테이너 띄우고 장고 컨테이너 접속, migrate
+    로컬에서 development 컨테이너 띄우고 장고 컨테이너 접속, migrate
     * docker exec -it {container id} sh
-    * SERVER_ENV=testing python3 manage.py migrate --settings=modu_property.settings.testing_settings
+    * SERVER_ENV=development python3 manage.py migrate --settings=modu_property.settings.development_settings
 
 ### migrate
 #### rollback  
@@ -216,18 +216,18 @@ pytest 관련 로그는 pytest.ini에서 설정함
 SERVER_ENV=local python manage.py collect_regional_code_command  
 
 ec2 사양 딸려서 로컬 터미널에서 실행  
-SERVER_ENV=testing python manage.py collect_regional_code_command
+SERVER_ENV=development python manage.py collect_regional_code_command
 
 sql 파일에 있는거 insert
-SERVER_ENV=testing python manage.py insert_regional_code_command
+SERVER_ENV=development python manage.py insert_regional_code_command
 
 
 ## 전체/특정지역 부동산 매매 정보 수집 명령어
 전국의 빌라, 아파트에 대해 2006년부터 현재까지 수집하도록 함, docker 사용하기 때문에 container 안에서 실행하면 안됨!. DB_HOST=127.0.0.1로 바꿔야함  
 SERVER_ENV=local python manage.py collect_deal_price_of_real_estate_command 서울특별시  
 
-로컬 터미널에서 testing RDS에 반영  
-SERVER_ENV=testing python manage.py collect_deal_price_of_real_estate_command 서울특별시  
+로컬 터미널에서 development RDS에 반영  
+SERVER_ENV=development python manage.py collect_deal_price_of_real_estate_command 서울특별시  
 
 # 현재 연월의 부동산 매매 정보 수집 스케쥴러
 collect_deal_price_of_real_estate_command 으로 전체 수집을 했다면, collect_deal_price_of_real_estate_task 스케쥴러로 최신 데이터 수집함  
@@ -235,7 +235,7 @@ collect_deal_price_of_real_estate_command 으로 전체 수집을 했다면, col
 # 전체/특정지역 통계 정보 수집 명령어
 SERVER_ENV=local python manage.py collect_region_price_command 서울특별시  
 
-SERVER_ENV=testing python manage.py collect_region_price_command 서울특별시  
+SERVER_ENV=development python manage.py collect_region_price_command 서울특별시  
 
 # ngrok
 `ngrok http --host-header=localhost 80`  
@@ -246,7 +246,7 @@ loclx tunnel http --to localhost:80
 # docker hub에 push된 이미지로 로컬에서 테스트하기
 docker login -u gidlemyeon -p {password}  
 docker pull gidlemyeon/modu_property_platform_development:django  
-docker-compose -f docker-compose.testing.yml up -d
+docker-compose -f docker-compose.development.yml up -d
 
 # serializer 사용 방법
 https://velog.io/write?id=d7202849-3ed9-4fc2-931b-f4f6968cb834

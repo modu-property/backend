@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 env:
-  SERVER_ENV: "testing"
+  SERVER_ENV: "development"
   DEBUG: ${{secrets.DEBUG}}
   SECRET_KEY: ${{secrets.SECRET_KEY}}
   DB_ENGINE: ${{secrets.DB_ENGINE}}
@@ -42,29 +42,29 @@ jobs:
 
       - name: Set env
         run: |
-          echo "SERVER_ENV=$SERVER_ENV" >> .env.testing
-          echo "DEBUG=$DEBUG" >> .env.testing
-          echo "SECRET_KEY=$SECRET_KEY" >> .env.testing
-          echo "DB_ENGINE=$DB_ENGINE" >> .env.testing
-          echo "DB_NAME=$DB_NAME" >> .env.testing
-          echo "DB_USER=$DB_USER" >> .env.testing
-          echo "DB_PASSWORD=$DB_PASSWORD" >> .env.testing
-          echo "DB_HOST=$DB_HOST" >> .env.testing
-          echo "DB_PORT=$DB_PORT" >> .env.testing
-          echo "CELERY_BROKER_URL=$CELERY_BROKER_URL" >> .env.testing
-          echo "CELERY_BACKEND=$CELERY_BACKEND" >> .env.testing
-          echo "LOG_LEVEL=$LOG_LEVEL" >> .env.testing
-          echo "DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS" >> .env.testing
-          echo "SERVICE_KEY=$SERVICE_KEY" >> .env.testing
-          echo "KAKAO_API_KEY=$KAKAO_API_KEY" >> .env.testing
-          echo "FLOWER_PORT=$FLOWER_PORT" >> .env.testing
-          echo "DB_HOST_FOR_MANTICORE=$DB_HOST_FOR_MANTICORE" >> .env.testing
+          echo "SERVER_ENV=$SERVER_ENV" >> .env.development
+          echo "DEBUG=$DEBUG" >> .env.development
+          echo "SECRET_KEY=$SECRET_KEY" >> .env.development
+          echo "DB_ENGINE=$DB_ENGINE" >> .env.development
+          echo "DB_NAME=$DB_NAME" >> .env.development
+          echo "DB_USER=$DB_USER" >> .env.development
+          echo "DB_PASSWORD=$DB_PASSWORD" >> .env.development
+          echo "DB_HOST=$DB_HOST" >> .env.development
+          echo "DB_PORT=$DB_PORT" >> .env.development
+          echo "CELERY_BROKER_URL=$CELERY_BROKER_URL" >> .env.development
+          echo "CELERY_BACKEND=$CELERY_BACKEND" >> .env.development
+          echo "LOG_LEVEL=$LOG_LEVEL" >> .env.development
+          echo "DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS" >> .env.development
+          echo "SERVICE_KEY=$SERVICE_KEY" >> .env.development
+          echo "KAKAO_API_KEY=$KAKAO_API_KEY" >> .env.development
+          echo "FLOWER_PORT=$FLOWER_PORT" >> .env.development
+          echo "DB_HOST_FOR_MANTICORE=$DB_HOST_FOR_MANTICORE" >> .env.development
 
       - name: Docker build & push to docker repo
         run: |
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
             
-            docker-compose -f docker-compose.testing.yml build
+            docker-compose -f docker-compose.development.yml build
 
             docker push gidlemyeon/modu_property_platform_development:django
 
@@ -93,11 +93,11 @@ jobs:
             cd ~/backend
             ${{secrets.GIT_PULL_SCRIPT}}
             ls -al
-            cat docker-compose.testing.yml
+            cat docker-compose.development.yml
 
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
             docker pull gidlemyeon/modu_property_platform_development:django
-            docker-compose -f docker-compose.testing.yml up -d
+            docker-compose -f docker-compose.development.yml up -d
             docker system prune --volumes -af
 
       - name: Remove Github Actions IP From Security Group
