@@ -4,7 +4,7 @@ from real_estate.dto.service_result_dto import ServiceResultDto
 from real_estate.enum.real_estate_enum import RealEstateZoomLevel, RegionZoomLevel
 
 from dependency_injector.wiring import inject, Provide
-from real_estate.container import ServiceContainer
+from real_estate.containers.container import ServiceContainer
 from real_estate.services.get_real_estates import (
     GetRealEstates,
     GetRegions,
