@@ -31,22 +31,23 @@ class GetRealEstates(GetRealEstatesInterface):
             self.repository.get_individual_real_estates(dto=dto)
         )
 
-        if real_estates:
-            data: Union[List[OrderedDict[str, Union[int, str]]], bool] = validate_data(
-                queryset=real_estates,
-                serializer=GetRealEstatesOnMapResponseSerializer,
-                many=True,
+        if not real_estates:
+            return ServiceResultDto(
+                status_code=404,
             )
 
-            if data:
-                return ServiceResultDto(data=data)
-            elif data is False:
-                return ServiceResultDto(
-                    message="GetRealEstatesOnMapResponseSerializer 에러",
-                    status_code=400,
-                )
+        data: Union[List[OrderedDict[str, Union[int, str]]], bool] = validate_data(
+            queryset=real_estates,
+            serializer=GetRealEstatesOnMapResponseSerializer,
+            many=True,
+        )
+
+        if data:
+            return ServiceResultDto(data=data)
+
         return ServiceResultDto(
-            status_code=404,
+            message="GetRealEstatesOnMapResponseSerializer 에러",
+            status_code=400,
         )
 
 
@@ -59,20 +60,21 @@ class GetRegions(GetRealEstatesInterface):
     ) -> Union[List[OrderedDict[str, Union[int, str]]], ServiceResultDto, bool]:
         regions: Union[QuerySet, bool] = self.repository.get_region_prices(dto=dto)
 
-        if regions:
-            data: Union[List[OrderedDict[str, Union[int, str]]], bool] = validate_data(
-                queryset=regions,
-                serializer=GetRegionsOnMapResponseSerializer,
-                many=True,
+        if not regions:
+            return ServiceResultDto(
+                status_code=404,
             )
 
-            if data:
-                return ServiceResultDto(data=data)
-            elif data is False:
-                return ServiceResultDto(
-                    message="GetRegionsOnMapResponseSerializer 에러",
-                    status_code=400,
-                )
+        data: Union[List[OrderedDict[str, Union[int, str]]], bool] = validate_data(
+            queryset=regions,
+            serializer=GetRegionsOnMapResponseSerializer,
+            many=True,
+        )
+
+        if data:
+            return ServiceResultDto(data=data)
+
         return ServiceResultDto(
-            status_code=404,
+            message="GetRegionsOnMapResponseSerializer 에러",
+            status_code=400,
         )
