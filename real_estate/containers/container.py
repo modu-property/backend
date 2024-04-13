@@ -38,7 +38,7 @@ class ServiceContainer(containers.DeclarativeContainer):
         key="regions",
     )
 
-    search_real_estates = providers.Factory(provides=ManticoreClient)
+    search_client = providers.Factory(provides=ManticoreClient)
 
 
 ServiceContainer().wire(

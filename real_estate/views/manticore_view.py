@@ -15,9 +15,7 @@ class IndexSearchEngineView(APIView):
     @inject
     def __init__(
         self,
-        search_client: SearchClientInterface = Provide[
-            ServiceContainer.search_real_estates
-        ],
+        search_client: SearchClientInterface = Provide[ServiceContainer.search_client],
         **kwargs: Any,
     ) -> None:
         super().__init__(**kwargs)

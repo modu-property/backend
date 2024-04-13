@@ -17,9 +17,7 @@ from real_estate.services.set_real_estates import SetRealEstates
 class SearchRealEstates:
     def __init__(
         self,
-        search_client: SearchClientInterface = Provide[
-            ServiceContainer.search_real_estates
-        ],
+        search_client: SearchClientInterface = Provide[ServiceContainer.search_client],
     ) -> None:
         self.search_client: SearchClientInterface = search_client
 
@@ -27,7 +25,7 @@ class SearchRealEstates:
         real_estates = []
         query = {"query_string": f"@* *{dto.keyword}*"}
 
-        self._set_region_count_limit(dto, index)
+        self._set_region_count_limit(dto=dto)
 
         hits = self.search_client.search(index=index, query=query, limit=dto.limit)
 
@@ -39,7 +37,7 @@ class SearchRealEstates:
 
         return real_estates
 
-    def _set_region_count_limit(self, dto, index):
+    def _set_region_count_limit(self, dto: GetRealEstatesOnSearchDto) -> None:
         dto.limit = 3
 
 
