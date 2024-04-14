@@ -1,6 +1,7 @@
 from dependency_injector import containers, providers
 
 from manticore.manticore_client import ManticoreClient
+from real_estate.containers.repository_container import RepositoryContainer
 from real_estate.containers.search_container import SearchContainer
 from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.services.get_real_estates import (
@@ -13,12 +14,6 @@ from real_estate.serializers import (
 )
 from real_estate.services.search_real_estates import SearchRealEstates
 from real_estate.services.set_real_estates import SetRealEstates
-
-
-class RepositoryContainer(containers.DeclarativeContainer):
-    config = providers.Configuration()
-
-    repository = providers.Singleton(provides=RealEstateRepository)
 
 
 class ServiceContainer(containers.DeclarativeContainer):

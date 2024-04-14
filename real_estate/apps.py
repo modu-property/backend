@@ -8,3 +8,11 @@ class PropertyConfig(AppConfig):
     # django 시작될 때 schema 등록하기 위함
     def ready(self):
         from modu_property.schema import CustomSimpleJWTScheme  # noqa: E402
+
+        # 컨테이너 초기화용 import
+        from real_estate.containers.service_container import ServiceContainer  # noqa
+        from real_estate.containers.search_container import SearchContainer  # noqa
+
+        from real_estate.containers.repository_container import (
+            RepositoryContainer,
+        )  # noqa

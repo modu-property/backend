@@ -1,6 +1,7 @@
 import os
 from typing import List, Union
 import PublicDataReader as pdr
+from dependency_injector.wiring import inject, Provide
 
 from pandas.core.series import Series
 from PublicDataReader import TransactionPrice
@@ -9,6 +10,8 @@ from pandas import DataFrame
 from modu_property.utils.loggers import logger
 
 from modu_property.utils.validator import validate_data
+
+from real_estate.containers.repository_container import RepositoryContainer
 from real_estate.models import Region
 from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.serializers import RegionSerializer
@@ -16,10 +19,16 @@ from real_estate.utils.address_converter import KakaoAddressConverter
 
 
 class AddressCollector:
-    def __init__(self) -> None:
+    @inject
+    def __init__(
+        self,
+        real_estate_repository: RealEstateRepository = Provide[
+            RepositoryContainer.repository
+        ],
+    ) -> None:
         self.service_key = os.getenv("SERVICE_KEY")
         self.api = TransactionPrice(self.service_key)
-        self.real_estate_repository = RealEstateRepository()
+        self.real_estate_repository: RealEstateRepository = real_estate_repository
         self.address_converter = KakaoAddressConverter()
 
     def collect_region(self) -> Union[List[Region], bool]:
