@@ -1,6 +1,7 @@
 from dependency_injector.wiring import inject, Provide
 
 from manticore.manticore_client import SearchClientInterface
+
 from real_estate.containers.search_container import SearchContainer
 from real_estate.dto.get_real_estate_dto import GetRealEstatesOnSearchDto
 
