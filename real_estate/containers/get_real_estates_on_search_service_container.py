@@ -4,7 +4,7 @@ from real_estate.containers.search_container import SearchContainer
 from real_estate.containers.service_container import ServiceContainer
 
 
-class Container(containers.DeclarativeContainer):
+class GetRealEstatesOnSearchServiceContainer(containers.DeclarativeContainer):
 
     search_client = SearchContainer.search_client
 
@@ -14,7 +14,7 @@ class Container(containers.DeclarativeContainer):
     )
 
 
-Container().wire(
+GetRealEstatesOnSearchServiceContainer().wire(
     modules=[
         "real_estate.services.get_real_estates_on_search_service",
     ]

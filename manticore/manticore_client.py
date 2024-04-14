@@ -28,7 +28,7 @@ class ManticoreClient(SearchClientInterface):
             host=f"http://{os.getenv('HTTP_HOST')}:{os.getenv('HTTP_PORT')}"
         )
         self.api_client = manticoresearch.ApiClient(self.configuration)
-        self.search_instance = search_api.SearchApi(self.api_client)
+        self.search_api = search_api.SearchApi(self.api_client)
 
     def run_indexer(self) -> None:
         logger.info("run_indexer")
@@ -51,7 +51,7 @@ class ManticoreClient(SearchClientInterface):
         try:
             search_request = SearchRequest(index=index, query=query, limit=limit)
 
-            search_response = self.search_instance.search(search_request)
+            search_response = self.search_api.search(search_request)
             hits = search_response.hits
             if not hits:
                 return []

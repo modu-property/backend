@@ -1,8 +1,10 @@
 from typing import Optional
 
 from modu_property.utils.validator import validate_data
-from real_estate.containers.container import Container
 
+from real_estate.containers.get_real_estates_on_search_service_container import (
+    GetRealEstatesOnSearchServiceContainer,
+)
 from real_estate.dto.get_real_estate_dto import GetRealEstatesOnSearchDto
 from real_estate.dto.service_result_dto import ServiceResultDto
 from real_estate.serializers import (
@@ -19,12 +21,14 @@ class GetRealEstatesOnSearchService:
     def __init__(
         self,
         set_real_estate: SetRealEstates = Provide[
-            Container.service_package.set_real_estate_real_estates
+            GetRealEstatesOnSearchServiceContainer.service_package.set_real_estate_real_estates
         ],
         set_region: SetRealEstates = Provide[
-            Container.service_package.set_real_estate_regions
+            GetRealEstatesOnSearchServiceContainer.service_package.set_real_estate_regions
         ],
-        search_real_estates=Provide[Container.service_package.search_real_estates],
+        search_real_estates=Provide[
+            GetRealEstatesOnSearchServiceContainer.service_package.search_real_estates
+        ],
     ) -> None:
         self.set_real_estate: SetRealEstates = set_real_estate
         self.set_region: SetRealEstates = set_region
