@@ -19,3 +19,4 @@ DATABASES = {
 }
 
 LOGGING["loggers"]["django"]["handlers"] = ["console", "file"]
+LOGGING["loggers"]["django"]["level"] = os.getenv("LOG_LEVEL")
