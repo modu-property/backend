@@ -1,44 +1,17 @@
 from typing import Optional
-from manticore.manticore_client import SearchClientInterface
+
 from modu_property.utils.validator import validate_data
-from real_estate.containers.container import ServiceContainer
-from real_estate.dto.get_real_estate_dto import (
-    GetRealEstatesOnSearchDto,
-)
+from real_estate.containers.container import Container
+
+from real_estate.dto.get_real_estate_dto import GetRealEstatesOnSearchDto
 from real_estate.dto.service_result_dto import ServiceResultDto
 from real_estate.serializers import (
     GetRealEstatesAndRegionsOnSearchResponseSerializer,
 )
 from dependency_injector.wiring import inject, Provide
 
+from real_estate.services.search_real_estates import SearchRealEstates
 from real_estate.services.set_real_estates import SetRealEstates
-
-
-class SearchRealEstates:
-    def __init__(
-        self,
-        search_client: SearchClientInterface = Provide[ServiceContainer.search_client],
-    ) -> None:
-        self.search_client: SearchClientInterface = search_client
-
-    def search(self, dto: GetRealEstatesOnSearchDto, index: str = "") -> list:
-        real_estates = []
-        query = {"query_string": f"@* *{dto.keyword}*"}
-
-        self._set_region_count_limit(dto=dto)
-
-        hits = self.search_client.search(index=index, query=query, limit=dto.limit)
-
-        for hit in hits:
-            real_estate_info = hit["_source"]
-            real_estate_id = int(hit["_id"])
-            real_estate_info["id"] = real_estate_id
-            real_estates.append(real_estate_info)
-
-        return real_estates
-
-    def _set_region_count_limit(self, dto: GetRealEstatesOnSearchDto) -> None:
-        dto.limit = 3
 
 
 class GetRealEstatesOnSearchService:
@@ -46,18 +19,21 @@ class GetRealEstatesOnSearchService:
     def __init__(
         self,
         set_real_estate: SetRealEstates = Provide[
-            ServiceContainer.set_real_estate_real_estates
+            Container.service_package.set_real_estate_real_estates
         ],
-        set_region: SetRealEstates = Provide[ServiceContainer.set_real_estate_regions],
+        set_region: SetRealEstates = Provide[
+            Container.service_package.set_real_estate_regions
+        ],
+        search_real_estates=Provide[Container.service_package.search_real_estates],
     ) -> None:
-        self.set_real_estate = set_real_estate
-        self.set_region = set_region
-        self.search_real_estate = SearchRealEstates()
+        self.set_real_estate: SetRealEstates = set_real_estate
+        self.set_region: SetRealEstates = set_region
+        self.search_real_estates: SearchRealEstates = search_real_estates
 
     def get_real_estates(self, dto: GetRealEstatesOnSearchDto) -> ServiceResultDto:
         result: dict[str, list] = {}
 
-        regions = self.search_real_estate.search(dto=dto, index="region_index")
+        regions = self.search_real_estates.search(dto=dto, index="region_index")
 
         is_regions_set: Optional[bool] = self.set_region.set(
             result=result, data=regions
@@ -68,7 +44,7 @@ class GetRealEstatesOnSearchService:
                 status_code=400,
             )
 
-        real_estates: list = self.search_real_estate.search(
+        real_estates: list = self.search_real_estates.search(
             dto=dto, index="real_estates"
         )
 
