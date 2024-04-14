@@ -10,9 +10,11 @@ from modu_property.utils.loggers import logger
 
 from modu_property.utils.validator import validate_data
 
+from real_estate.containers.utils.address_converter_container import (
+    AddressConverterContainer,
+)
 from real_estate.containers.repository_container import RepositoryContainer
-from real_estate.containers.third_party_container import ThirdPartyContainer
-from real_estate.containers.util_container import UtilContainer
+from real_estate.containers.utils.third_party_container import ThirdPartyContainer
 from real_estate.models import Region
 from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.serializers import RegionSerializer
@@ -27,7 +29,7 @@ class AddressCollector:
             RepositoryContainer.repository
         ],
         address_converter: KakaoAddressConverter = Provide[
-            UtilContainer.address_converter
+            AddressConverterContainer.address_converter
         ],
         transaction_price: TransactionPrice = Provide[
             ThirdPartyContainer.transaction_price

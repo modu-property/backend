@@ -1,15 +1,14 @@
 from dependency_injector import containers, providers
-
 from real_estate.utils.address_converter import KakaoAddressConverter
 
 
-class UtilContainer(containers.DeclarativeContainer):
+class AddressConverterContainer(containers.DeclarativeContainer):
     config = providers.Configuration()
 
-    address_converter = providers.Factory(provides=KakaoAddressConverter)
+    address_converter = providers.Singleton(provides=KakaoAddressConverter)
 
 
-UtilContainer().wire(
+AddressConverterContainer().wire(
     modules=[
         "real_estate.utils.address_collector",
     ]
