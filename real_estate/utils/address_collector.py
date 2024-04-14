@@ -1,4 +1,3 @@
-import os
 from typing import List, Union
 import PublicDataReader as pdr
 from dependency_injector.wiring import inject, Provide
@@ -12,6 +11,8 @@ from modu_property.utils.loggers import logger
 from modu_property.utils.validator import validate_data
 
 from real_estate.containers.repository_container import RepositoryContainer
+from real_estate.containers.third_party_container import ThirdPartyContainer
+from real_estate.containers.util_container import UtilContainer
 from real_estate.models import Region
 from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.serializers import RegionSerializer
@@ -25,11 +26,16 @@ class AddressCollector:
         real_estate_repository: RealEstateRepository = Provide[
             RepositoryContainer.repository
         ],
+        address_converter: KakaoAddressConverter = Provide[
+            UtilContainer.address_converter
+        ],
+        transaction_price: TransactionPrice = Provide[
+            ThirdPartyContainer.transaction_price
+        ],
     ) -> None:
-        self.service_key = os.getenv("SERVICE_KEY")
-        self.api = TransactionPrice(self.service_key)
+        self.api: TransactionPrice = transaction_price
         self.real_estate_repository: RealEstateRepository = real_estate_repository
-        self.address_converter = KakaoAddressConverter()
+        self.address_converter: KakaoAddressConverter = address_converter
 
     def collect_region(self) -> Union[List[Region], bool]:
         """

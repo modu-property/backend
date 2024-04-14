@@ -271,13 +271,19 @@ data = _serializer.data
 ```
 
 # schema decorator 작성 방법
-schema 디렉토리에 파일 생성하고 아래 형식으로 작성
-"""
+schema 디렉토리에 파일 생성하고 아래 형식으로 작성  
+
+```python
 def get_xxx_view_get_decorator(view_function):
     decorated_view_function =extend_schema()(view_function)
 
     return decorated_view_function
-"""
+```
+
+# dependency injection
+container 디렉토리에 container.py 파일에다 provider 만들고 wiring 해주기  
+apps.py의 ready() 함수 안에 container import해서 초기화해주기  
+안되면 사용되는 파일의 디렉토리의 `__init__.py`에 넣기  
 
 # TODO
 23.12.05  
