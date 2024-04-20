@@ -2,6 +2,8 @@ from typing import Any, List, OrderedDict, Union
 from django.db import models
 from rest_framework.exceptions import ValidationError
 from django.db.models import QuerySet
+from rest_framework.utils.serializer_helpers import ReturnDict
+
 from modu_property.utils.loggers import logger
 
 
@@ -18,7 +20,7 @@ def validate_data(
     ] = None,
     model: Union[models.Model, None] = None,
     many: bool = False,
-) -> Union[List[OrderedDict[str, Union[int, str]]], bool]:
+) -> Union[List[OrderedDict[str, Union[int, str]]], ReturnDict, bool]:
     """
     model and data
     model과 dict data 있을 때?

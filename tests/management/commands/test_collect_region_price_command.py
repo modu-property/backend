@@ -11,7 +11,9 @@ from django.contrib.gis.geos import Point
 
 
 @pytest.mark.django_db(transaction=True, reset_sequences=True)
-def test_collect_region_price_command(create_real_estate, create_deal, create_region):
+def test_collect_region_price_command(
+    create_real_estate, create_deal, create_region
+):
     real_estate1 = create_real_estate(
         name="풍림팍사이드빌라",
         build_year=1996,

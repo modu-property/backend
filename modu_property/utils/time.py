@@ -36,7 +36,9 @@ class TimeUtil:
         year = _now.year
         month = _now.month
 
-        return datetime.strftime(datetime.strptime(f"{year}{month}", "%Y%m"), "%Y%m")
+        return datetime.strftime(
+            datetime.strptime(f"{year}{month}", "%Y%m"), "%Y%m"
+        )
 
     @staticmethod
     def split_year_and_month(year_and_month: str) -> tuple[int, int]:

@@ -1,10 +1,13 @@
 from typing import List, OrderedDict, Union
 from real_estate.dto.get_real_estate_dto import GetRealEstatesOnMapDto
 from real_estate.dto.service_result_dto import ServiceResultDto
-from real_estate.enum.real_estate_enum import RealEstateZoomLevel, RegionZoomLevel
+from real_estate.enum.real_estate_enum import (
+    RealEstateZoomLevelEnum,
+    RegionZoomLevelEnum,
+)
 
 from dependency_injector.wiring import inject, Provide
-from real_estate.containers.container import ServiceContainer
+from real_estate.containers.service_container import ServiceContainer
 from real_estate.services.get_real_estates import (
     GetRealEstates,
     GetRegions,
@@ -15,7 +18,9 @@ class GetPropertiesOnMapService:
     @inject
     def __init__(
         self,
-        get_real_estates: GetRealEstates = Provide[ServiceContainer.get_real_estates],
+        get_real_estates: GetRealEstates = Provide[
+            ServiceContainer.get_real_estates
+        ],
         get_regions: GetRegions = Provide[ServiceContainer.get_regions],
     ) -> None:
         self.get_real_estates = get_real_estates
@@ -43,8 +48,8 @@ class GetPropertiesOnMapService:
 
         return ServiceResultDto(status_code=404)
 
+    @staticmethod
     def _return_result(
-        self,
         properties: Union[
             List[OrderedDict[str, Union[int, str]]], ServiceResultDto, bool
         ],
@@ -55,14 +60,18 @@ class GetPropertiesOnMapService:
             return properties
         return ServiceResultDto(data=properties)
 
-    def _is_real_estates_zoom_level(self, dto):
+    @staticmethod
+    def _is_real_estates_zoom_level(dto):
         return (
-            RealEstateZoomLevel.MIN.value <= dto.zoom_level
-            and dto.zoom_level <= RealEstateZoomLevel.MAX.value
+            RealEstateZoomLevelEnum.MIN.value
+            <= dto.zoom_level
+            <= RealEstateZoomLevelEnum.MAX.value
         )
 
-    def _is_regions_zoom_level(self, dto):
+    @staticmethod
+    def _is_regions_zoom_level(dto):
         return (
-            RegionZoomLevel.DONGRI.value <= dto.zoom_level
-            and dto.zoom_level <= RegionZoomLevel.SIDO.value
+            RegionZoomLevelEnum.DONGRI.value
+            <= dto.zoom_level
+            <= RegionZoomLevelEnum.SIDO.value
         )

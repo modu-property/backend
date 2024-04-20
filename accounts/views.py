@@ -75,7 +75,9 @@ def login(request: Request) -> Response:
         try:
             if server_env == "test":
                 client = Client()
-                response = client.post(path=reverse("token_obtain_pair"), data=data)
+                response = client.post(
+                    path=reverse("token_obtain_pair"), data=data
+                )
                 token = response.json()
 
                 if response.status_code != 200:
@@ -93,7 +95,10 @@ def login(request: Request) -> Response:
                 access_token = str(token.access_token)
 
                 return Response(
-                    data={"access_token": access_token, "refresh_token": refresh_token}
+                    data={
+                        "access_token": access_token,
+                        "refresh_token": refresh_token,
+                    }
                 )
 
         except Exception as e:

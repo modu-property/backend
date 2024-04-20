@@ -1,5 +1,7 @@
+from abc import ABC, abstractmethod
 import os
 import subprocess
+from typing import Any, Dict, List, Optional
 from modu_property.utils.loggers import logger
 import manticoresearch
 import manticoresearch
@@ -8,15 +10,27 @@ from manticoresearch.api import search_api
 from manticoresearch.model.search_request import SearchRequest
 
 
-class ManticoreClient:
+class SearchClientInterface(ABC):
+    @abstractmethod
+    def run_indexer(self) -> None:
+        pass
+
+    @abstractmethod
+    def search(
+        self, index: str, query: dict, limit: int
+    ) -> List[Optional[Dict[str, Any]]]:
+        pass
+
+
+class ManticoreClient(SearchClientInterface):
     def __init__(self) -> None:
         self.configuration = manticoresearch.Configuration(
             host=f"http://{os.getenv('HTTP_HOST')}:{os.getenv('HTTP_PORT')}"
         )
         self.api_client = manticoresearch.ApiClient(self.configuration)
-        self.search_instance = search_api.SearchApi(self.api_client)
+        self.search_api = search_api.SearchApi(self.api_client)
 
-    def run_indexer(self):
+    def run_indexer(self) -> None:
         logger.info("run_indexer")
         try:
             dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -31,11 +45,15 @@ class ManticoreClient:
         except Exception as e:
             logger.error(f"ManticoreClient run_indexer e : {e}")
 
-    def search(self, index: str, query: dict, limit: int):
+    def search(
+        self, index: str, query: dict, limit: int
+    ) -> List[Optional[Dict[str, Any]]]:
         try:
-            search_request = SearchRequest(index=index, query=query, limit=limit)
+            search_request = SearchRequest(
+                index=index, query=query, limit=limit
+            )
 
-            search_response = self.search_instance.search(search_request)
+            search_response = self.search_api.search(search_request)
             hits = search_response.hits
             if not hits:
                 return []

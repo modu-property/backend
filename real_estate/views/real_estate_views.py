@@ -12,7 +12,7 @@ from real_estate.dto.get_real_estate_dto import (
     GetRealEstatesOnSearchDto,
 )
 from real_estate.dto.service_result_dto import ServiceResultDto
-from real_estate.enum.real_estate_enum import RealEstateZoomLevel
+from real_estate.enum.real_estate_enum import RealEstateZoomLevelEnum
 from real_estate.serializers import (
     GetDealsRequestSerializer,
     GetRealEstateRequestSerializer,
@@ -59,7 +59,9 @@ class GetRealEstateView(APIView):
             return JsonResponse(data={}, status=400)
 
         dto = GetRealEstateDto(**data)
-        result: ServiceResultDto = GetRealEstateService().get_real_estate(dto=dto)
+        result: ServiceResultDto = GetRealEstateService().get_real_estate(
+            dto=dto
+        )
 
         return JsonResponse(
             data=result.data,
@@ -91,8 +93,8 @@ class GetRealEstatesOnSearchView(ListAPIView):
             return JsonResponse(data={}, status=400)
 
         dto = GetRealEstatesOnSearchDto(**data)
-        result: ServiceResultDto = GetRealEstatesOnSearchService().get_real_estates(
-            dto=dto
+        result: ServiceResultDto = (
+            GetRealEstatesOnSearchService().get_real_estates(dto=dto)
         )
 
         return JsonResponse(
@@ -118,7 +120,7 @@ class GetRealEstatesOnMapView(ListAPIView):
             "ne_lat": request.query_params.get("ne_lat"),
             "ne_lng": request.query_params.get("ne_lng"),
             "zoom_level": request.query_params.get(
-                "zoom_level", default=RealEstateZoomLevel.DEFAULT.value
+                "zoom_level", default=RealEstateZoomLevelEnum.DEFAULT.value
             ),
         }
 
@@ -130,7 +132,9 @@ class GetRealEstatesOnMapView(ListAPIView):
             return JsonResponse(data={}, status=400)
 
         dto = GetRealEstatesOnMapDto(**data)
-        result: ServiceResultDto = GetPropertiesOnMapService().get_properties(dto=dto)
+        result: ServiceResultDto = GetPropertiesOnMapService().get_properties(
+            dto=dto
+        )
 
         return JsonResponse(
             data=result.data,

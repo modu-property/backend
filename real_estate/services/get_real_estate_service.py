@@ -1,5 +1,10 @@
 from typing import Any, Optional
+
+from dependency_injector.wiring import Provide, inject
+from django.db.models import QuerySet
+
 from modu_property.utils.validator import validate_data
+from real_estate.containers.repository_container import RepositoryContainer
 from real_estate.dto.get_real_estate_dto import GetRealEstateDto
 from real_estate.dto.service_result_dto import ServiceResultDto
 from real_estate.models import RealEstate
@@ -8,11 +13,19 @@ from real_estate.serializers import GetRealEstateResponseSerializer
 
 
 class GetRealEstateService:
-    def __init__(self) -> None:
-        self.repository = RealEstateRepository()
+    @inject
+    def __init__(
+        self,
+        repository: RealEstateRepository = Provide[
+            RepositoryContainer.repository
+        ],
+    ) -> None:
+        self.repository = repository
 
     def get_real_estate(self, dto: GetRealEstateDto) -> ServiceResultDto:
-        real_estate: Optional[RealEstate] = self.repository.get_real_estate(id=dto.id)
+        real_estate: Optional[QuerySet[RealEstate]] = (
+            self.repository.get_real_estate(real_estate_id=dto.id)
+        )
 
         if not real_estate:
             return ServiceResultDto(status_code=404)

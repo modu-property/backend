@@ -36,10 +36,12 @@ class GetRealEstates(GetRealEstatesInterface):
                 status_code=404,
             )
 
-        data: Union[List[OrderedDict[str, Union[int, str]]], bool] = validate_data(
-            queryset=real_estates,
-            serializer=GetRealEstatesOnMapResponseSerializer,
-            many=True,
+        data: Union[List[OrderedDict[str, Union[int, str]]], bool] = (
+            validate_data(
+                queryset=real_estates,
+                serializer=GetRealEstatesOnMapResponseSerializer,
+                many=True,
+            )
         )
 
         if data:
@@ -58,17 +60,21 @@ class GetRegions(GetRealEstatesInterface):
     def get_real_estates(
         self, dto: GetRealEstatesOnMapDto
     ) -> Union[List[OrderedDict[str, Union[int, str]]], ServiceResultDto, bool]:
-        regions: Union[QuerySet, bool] = self.repository.get_region_prices(dto=dto)
+        regions: Union[QuerySet, bool] = self.repository.get_region_prices(
+            dto=dto
+        )
 
         if not regions:
             return ServiceResultDto(
                 status_code=404,
             )
 
-        data: Union[List[OrderedDict[str, Union[int, str]]], bool] = validate_data(
-            queryset=regions,
-            serializer=GetRegionsOnMapResponseSerializer,
-            many=True,
+        data: Union[List[OrderedDict[str, Union[int, str]]], bool] = (
+            validate_data(
+                queryset=regions,
+                serializer=GetRegionsOnMapResponseSerializer,
+                many=True,
+            )
         )
 
         if data:

@@ -5,7 +5,7 @@ on:
     branches:
       - main
 env:
-  SERVER_ENV: "prod"
+  SERVER_ENV: "production"
   DEBUG: ${{secrets.DEBUG}}
   SECRET_KEY: ${{secrets.SECRET_KEY}}
   DB_ENGINE: ${{secrets.DB_ENGINE}}

@@ -28,11 +28,14 @@ class DealSerializer(serializers.ModelSerializer):
     area_for_exclusive_use_price_per_pyung = serializers.SerializerMethodField(
         "calc_price_per_pyung"
     )
-    is_deal_canceled = serializers.SerializerMethodField("calc_is_deal_canceled")
+    is_deal_canceled = serializers.SerializerMethodField(
+        "calc_is_deal_canceled"
+    )
     floor = serializers.SerializerMethodField("stringify_floor")
 
     def __init__(self, instance=None, data=..., **kwargs):
         super().__init__(instance, data, **kwargs)
+        self.pyung = None
         self.area_for_exclusive_use_pyung = None
 
     class Meta:
@@ -64,7 +67,8 @@ class DealSerializer(serializers.ModelSerializer):
     def calc_price_per_pyung(self, instance) -> Decimal:
         return round(instance.deal_price / self.pyung, 2)
 
-    def calc_is_deal_canceled(self, instance) -> bool:
+    @staticmethod
+    def calc_is_deal_canceled(instance) -> bool:
         if instance.is_deal_canceled == "O":
             return True
         return False
@@ -172,9 +176,13 @@ class GetRegionsOnSearchResponseSerializer(serializers.Serializer):
     longitude = serializers.FloatField()
 
 
-class GetRealEstatesAndRegionsOnSearchResponseSerializer(serializers.Serializer):
+class GetRealEstatesAndRegionsOnSearchResponseSerializer(
+    serializers.Serializer
+):
     regions = GetRegionsOnSearchResponseSerializer(many=True, required=False)
-    real_estates = GetRealEstatesOnSearchResponseSerializer(many=True, required=False)
+    real_estates = GetRealEstatesOnSearchResponseSerializer(
+        many=True, required=False
+    )
 
 
 class GetDealsRequestSerializer(serializers.Serializer):

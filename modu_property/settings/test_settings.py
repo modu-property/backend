@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 
-load_dotenv(".env.test")
+load_dotenv("./env/.env.test")
 
 from .base_settings import *
 
@@ -19,3 +19,4 @@ DATABASES = {
 }
 
 LOGGING["loggers"]["django"]["handlers"] = ["console", "file"]
+LOGGING["loggers"]["django"]["level"] = os.getenv("LOG_LEVEL")

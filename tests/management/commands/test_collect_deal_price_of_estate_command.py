@@ -29,7 +29,9 @@ def test_collect_deal_price_of_estate_command(insert_regions):
             isinstance(real_estate.road_name_address, str)
             or real_estate.road_name_address is None
         )
-        assert isinstance(real_estate.address, str) or real_estate.address is None
+        assert (
+            isinstance(real_estate.address, str) or real_estate.address is None
+        )
         assert isinstance(real_estate.latitude, str)
         assert isinstance(real_estate.longitude, str)
         assert isinstance(real_estate.point, Point)
@@ -38,7 +40,10 @@ def test_collect_deal_price_of_estate_command(insert_regions):
             assert real_estate.id == deal.real_estate.id
 
             assert isinstance(deal.deal_price, int)
-            assert isinstance(deal.brokerage_type, str) or deal.brokerage_type is None
+            assert (
+                isinstance(deal.brokerage_type, str)
+                or deal.brokerage_type is None
+            )
             assert isinstance(deal.deal_year, int)
             assert isinstance(deal.land_area, str)
             assert isinstance(deal.deal_month, int)

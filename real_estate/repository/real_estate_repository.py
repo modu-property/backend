@@ -1,8 +1,11 @@
 from typing import List, Optional, Union
 from django.forms import model_to_dict
 from real_estate.dto.collect_region_price_dto import CollectRegionPriceDto
-from real_estate.dto.get_real_estate_dto import GetDealsDto, GetRealEstatesOnMapDto
-from real_estate.enum.real_estate_enum import RegionZoomLevel
+from real_estate.dto.get_real_estate_dto import (
+    GetDealsDto,
+    GetRealEstatesOnMapDto,
+)
+from real_estate.enum.real_estate_enum import RegionZoomLevelEnum
 from real_estate.models import Deal, RealEstate, Region, RegionPrice
 from modu_property.utils.loggers import logger
 from django.db.models import (
@@ -20,14 +23,16 @@ from real_estate.serializers import RegionPriceSerializer
 
 
 class RealEstateRepository:
-    def get_real_estate(self, id: int) -> Optional[RealEstate]:
+    @staticmethod
+    def get_real_estate(real_estate_id: int) -> Optional[QuerySet[RealEstate]]:
         try:
-            return RealEstate.objects.filter(id=id).get()
+            return RealEstate.objects.filter(id=real_estate_id).get()
         except Exception as e:
             logger.error(f"get_real_estate e : {e}")
             return None
 
-    def get_real_estates(self, dto: CollectRegionPriceDto = None):
+    @staticmethod
+    def get_real_estates(dto: CollectRegionPriceDto = None):
         _qs = RealEstate.objects
 
         if isinstance(dto, CollectRegionPriceDto) and dto.target_region:
@@ -49,7 +54,8 @@ class RealEstateRepository:
 
         return _qs.prefetch_related("deals").all()
 
-    def get_individual_real_estates(self, dto: GetRealEstatesOnMapDto):
+    @staticmethod
+    def get_individual_real_estates(dto: GetRealEstatesOnMapDto):
         """
         시, 군, 구, 동이 아닌 개별 부동산 정보를 응답함
         """
@@ -77,7 +83,9 @@ class RealEstateRepository:
                     ),
                     deal_price=F("deals__deal_price"),
                 )
-                .prefetch_related(Prefetch("deals", Deal.objects.filter(id=subquery)))
+                .prefetch_related(
+                    Prefetch("deals", Deal.objects.filter(id=subquery))
+                )
                 .filter(
                     deals__is_deal_canceled=False,
                     latitude__gte=dto.sw_lat,
@@ -91,8 +99,9 @@ class RealEstateRepository:
             logger.error(f"get_individual_real_estates e : {e}")
             return False
 
+    @staticmethod
     def bulk_create_regions(
-        self, region_models: List[Region]
+        region_models: List[Region],
     ) -> Union[List[Region], bool]:
         try:
             result: list[Region] = Region.objects.bulk_create(region_models)
@@ -101,7 +110,8 @@ class RealEstateRepository:
             logger.error(f"bulk_create_regions 실패 e : {e}")
             return False
 
-    def update_region(self, region: Region) -> bool:
+    @staticmethod
+    def update_region(region: Region) -> bool:
         try:
             region.save()
             return True
@@ -109,21 +119,29 @@ class RealEstateRepository:
             logger.error(f"update_region 실패 e : {e}")
             return False
 
-    def get_regions(self, sido: str = "") -> Union[QuerySet, bool]:
+    @staticmethod
+    def get_regions(sido: str = "") -> Union[QuerySet, bool]:
         _q = Region.objects
         if sido:
             return _q.filter(sido=sido)
         else:
             return _q.all()
 
-    def get_regions_exclude_branch(self, sido: str):
-        qs = Region.objects.values("sido", "regional_code").annotate(c=Count("id"))
+    @staticmethod
+    def get_regions_exclude_branch(sido: str):
+        qs = Region.objects.values("sido", "regional_code").annotate(
+            c=Count("id")
+        )
         qs = qs.filter(sido=sido)
         regions = qs.exclude(sido__contains="출장소").exclude(sigungu="")
         return regions
 
+    @staticmethod
     def get_region(
-        self, sido: str = "", sigungu: str = "", ubmyundong: str = "", dongri: str = ""
+        sido: str = "",
+        sigungu: str = "",
+        ubmyundong: str = "",
+        dongri: str = "",
     ):
         _q = Region.objects
 
@@ -132,7 +150,9 @@ class RealEstateRepository:
                 sido=sido, sigungu=sigungu, ubmyundong=ubmyundong, dongri=dongri
             )
         elif ubmyundong:
-            _q = _q.filter(sido=sido, sigungu=sigungu, ubmyundong=ubmyundong, dongri="")
+            _q = _q.filter(
+                sido=sido, sigungu=sigungu, ubmyundong=ubmyundong, dongri=""
+            )
         elif sigungu:
             _q = _q.filter(sido=sido, sigungu=sigungu, ubmyundong="", dongri="")
         elif sido:
@@ -149,7 +169,9 @@ class RealEstateRepository:
     ) -> Union[RegionPrice, bool]:
         try:
             model: RegionPrice = self.create_region_price_model(dto=dto)
-            region_price_serializer = RegionPriceSerializer(data=model_to_dict(model))
+            region_price_serializer = RegionPriceSerializer(
+                data=model_to_dict(model)
+            )
             region_price_serializer.is_valid(raise_exception=True)
             region_price = region_price_serializer.save()
             return region_price
@@ -159,7 +181,8 @@ class RealEstateRepository:
             )
             return False
 
-    def create_region_price_model(self, dto) -> RegionPrice:
+    @staticmethod
+    def create_region_price_model(dto) -> RegionPrice:
         return RegionPrice(
             region_id=dto.region.id,
             total_deal_price=dto.total_deal_price,
@@ -175,7 +198,8 @@ class RealEstateRepository:
             jeonse_count=dto.jeonse_count,
         )
 
-    def get_region_prices(self, dto: GetRealEstatesOnMapDto = None):
+    @staticmethod
+    def get_region_prices(dto: GetRealEstatesOnMapDto = None):
         _q = RegionPrice.objects.select_related("region")
 
         """
@@ -189,20 +213,20 @@ class RealEstateRepository:
 
         if isinstance(dto, GetRealEstatesOnMapDto):
             logger.debug(dto.__dict__)
-            if dto.zoom_level == RegionZoomLevel.DONGRI.value:
+            if dto.zoom_level == RegionZoomLevelEnum.DONGRI.value:
                 # dongri
                 _q = _q.exclude(region__dongri="")
-            elif dto.zoom_level == RegionZoomLevel.UBMYUNDONG.value:
+            elif dto.zoom_level == RegionZoomLevelEnum.UBMYUNDONG.value:
                 # ubmyundong
                 _q = _q.exclude(region__ubmyundong="").filter(region__dongri="")
-            elif dto.zoom_level == RegionZoomLevel.SIGUNGU.value:
+            elif dto.zoom_level == RegionZoomLevelEnum.SIGUNGU.value:
                 # sigungu
                 _q = (
                     _q.exclude(region__sigungu="")
                     .filter(region__ubmyundong="")
                     .filter(region__dongri="")
                 )
-            elif dto.zoom_level == RegionZoomLevel.SIDO.value:
+            elif dto.zoom_level == RegionZoomLevelEnum.SIDO.value:
                 # sido
                 _q = (
                     _q.exclude(region__sido="")
@@ -230,7 +254,8 @@ class RealEstateRepository:
                 logger.error(f"get_region_price 실패 e : {e}")
                 return False
 
-    def get_deals(self, dto: GetDealsDto = None):
+    @staticmethod
+    def get_deals(dto: GetDealsDto = None):
         return (
             Deal.objects.select_related("real_estate")
             .filter(real_estate__id=dto.real_estate_id)
@@ -239,8 +264,10 @@ class RealEstateRepository:
             .order_by("-deal_year", "-deal_month", "-deal_day")
         )
 
-    def get_last_region_price(self):
+    @staticmethod
+    def get_last_region_price():
         return RegionPrice.objects.order_by("-id").first()
 
-    def get_last_deal(self):
+    @staticmethod
+    def get_last_deal():
         return Deal.objects.order_by("-id").first()

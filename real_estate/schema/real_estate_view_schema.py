@@ -127,7 +127,9 @@ def get_real_estates_on_search_view_get_decorator(view_function):
         responses={
             200: PolymorphicProxySerializer(
                 component_name="RealEstatesAndRegions",
-                serializers=[GetRealEstatesAndRegionsOnSearchResponseSerializer],
+                serializers=[
+                    GetRealEstatesAndRegionsOnSearchResponseSerializer
+                ],
                 resource_type_field_name=None,
             ),
             400: OpenApiResponse(description="bad request"),

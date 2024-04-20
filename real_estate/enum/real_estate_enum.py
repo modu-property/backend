@@ -33,14 +33,18 @@ REAL_ESTATE_TYPES = (
 )
 
 
-class RealEstateZoomLevel(Enum):
+class RealEstateZoomLevelEnum(Enum):
     DEFAULT = 4
     MIN = 1
     MAX = 5
 
 
-class RegionZoomLevel(Enum):
+class RegionZoomLevelEnum(Enum):
     DONGRI = 6
     UBMYUNDONG = 7
     SIGUNGU = 8
     SIDO = 9
+
+
+class RegionCodeEnum(Enum):
+    SEJONG = "36110"

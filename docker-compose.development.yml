@@ -5,9 +5,9 @@ services:
     image: gidlemyeon/modu_property_platform_development:django
     build:
       context: .
-      dockerfile: ./dockerfile-development
+      dockerfile: dockerfile-development
     restart: always
-    env_file: .env.development
+    env_file: env/.env.development
     ports:
       - "8000:8000"
     command:
@@ -30,7 +30,7 @@ services:
     image: manticoresearch/manticore
     environment:
       - EXTRA=1
-    env_file: .env.development
+    env_file: env/.env.development
     restart: always
     ports:
       - 127.0.0.1:9306:9306
@@ -79,7 +79,7 @@ services:
     depends_on:
       - django
       - redis
-    env_file: .env.development
+    env_file: env/.env.development
     network_mode: "host"
 
   celery_beat:
@@ -96,13 +96,13 @@ services:
       - django
       - redis
       - celery_worker
-    env_file: .env.development
+    env_file: env/.env.development
     network_mode: "host"
 
   flower:
     container_name: celery_flower
     image: mher/flower
-    env_file: .env.development
+    env_file: env/.env.development
     ports:
       - 5555:5555
     depends_on:
