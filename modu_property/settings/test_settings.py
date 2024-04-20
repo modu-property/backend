@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 
-load_dotenv(".env.test")
+load_dotenv("./env/.env.test")
 
 from .base_settings import *
 

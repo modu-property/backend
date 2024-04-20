@@ -35,6 +35,7 @@ class DealSerializer(serializers.ModelSerializer):
 
     def __init__(self, instance=None, data=..., **kwargs):
         super().__init__(instance, data, **kwargs)
+        self.pyung = None
         self.area_for_exclusive_use_pyung = None
 
     class Meta:
@@ -66,7 +67,8 @@ class DealSerializer(serializers.ModelSerializer):
     def calc_price_per_pyung(self, instance) -> Decimal:
         return round(instance.deal_price / self.pyung, 2)
 
-    def calc_is_deal_canceled(self, instance) -> bool:
+    @staticmethod
+    def calc_is_deal_canceled(instance) -> bool:
         if instance.is_deal_canceled == "O":
             return True
         return False

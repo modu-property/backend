@@ -5,9 +5,9 @@ services:
     container_name: django
     build:
       context: .
-      dockerfile: ./dockerfile-local
+      dockerfile: dockerfile-local
     restart: always
-    env_file: .env.local
+    env_file: env/.env.local
     ports:
       - "8000:8000"
     command:
@@ -27,7 +27,7 @@ services:
     image: manticoresearch/manticore
     environment:
       - EXTRA=1
-    env_file: .env.local
+    env_file: env/.env.local
     restart: always
     ports:
       - 127.0.0.1:9306:9306
@@ -77,7 +77,7 @@ services:
     depends_on:
       - django
       - redis
-    env_file: .env.local
+    env_file: env/.env.local
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -96,14 +96,14 @@ services:
       - django
       - redis
       - celery_worker
-    env_file: .env.local
+    env_file: env/.env.local
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
   flower:
     container_name: celery_flower
     image: mher/flower
-    env_file: .env.local
+    env_file: env/.env.local
     ports:
       - 5555:5555
     extra_hosts:
