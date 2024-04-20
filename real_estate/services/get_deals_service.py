@@ -1,6 +1,10 @@
 import logging
 
+from dependency_injector.wiring import Provide, inject
+
 from modu_property.utils.validator import validate_data
+from real_estate.containers.repository_container import RepositoryContainer
+from real_estate.containers.utils.paginator_container import PaginatorContainer
 from real_estate.dto.get_real_estate_dto import GetDealsDto
 from real_estate.dto.service_result_dto import ServiceResultDto
 from real_estate.enum.deal_enum import DealPerPageEnum
@@ -13,9 +17,16 @@ from real_estate.utils.paginator import PaginatorUtil
 
 
 class GetDealsService:
-    def __init__(self) -> None:
-        self.repository = RealEstateRepository()
-        self.paginator = PaginatorUtil()
+    @inject
+    def __init__(
+        self,
+        repository: RealEstateRepository = Provide[
+            RepositoryContainer.repository
+        ],
+        paginator: PaginatorUtil = Provide[PaginatorContainer.paginator],
+    ) -> None:
+        self.repository = repository
+        self.paginator = paginator
 
     def get_deals(self, dto: GetDealsDto) -> ServiceResultDto:
         deals = self.repository.get_deals(dto=dto)
