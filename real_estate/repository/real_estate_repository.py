@@ -23,14 +23,16 @@ from real_estate.serializers import RegionPriceSerializer
 
 
 class RealEstateRepository:
-    def get_real_estate(self, id: int) -> Optional[RealEstate]:
+    @staticmethod
+    def get_real_estate(real_estate_id: int) -> Optional[QuerySet[RealEstate]]:
         try:
-            return RealEstate.objects.filter(id=id).get()
+            return RealEstate.objects.filter(id=real_estate_id).get()
         except Exception as e:
             logger.error(f"get_real_estate e : {e}")
             return None
 
-    def get_real_estates(self, dto: CollectRegionPriceDto = None):
+    @staticmethod
+    def get_real_estates(dto: CollectRegionPriceDto = None):
         _qs = RealEstate.objects
 
         if isinstance(dto, CollectRegionPriceDto) and dto.target_region:
@@ -52,7 +54,8 @@ class RealEstateRepository:
 
         return _qs.prefetch_related("deals").all()
 
-    def get_individual_real_estates(self, dto: GetRealEstatesOnMapDto):
+    @staticmethod
+    def get_individual_real_estates(dto: GetRealEstatesOnMapDto):
         """
         시, 군, 구, 동이 아닌 개별 부동산 정보를 응답함
         """
@@ -96,8 +99,9 @@ class RealEstateRepository:
             logger.error(f"get_individual_real_estates e : {e}")
             return False
 
+    @staticmethod
     def bulk_create_regions(
-        self, region_models: List[Region]
+        region_models: List[Region],
     ) -> Union[List[Region], bool]:
         try:
             result: list[Region] = Region.objects.bulk_create(region_models)
@@ -106,7 +110,8 @@ class RealEstateRepository:
             logger.error(f"bulk_create_regions 실패 e : {e}")
             return False
 
-    def update_region(self, region: Region) -> bool:
+    @staticmethod
+    def update_region(region: Region) -> bool:
         try:
             region.save()
             return True
@@ -114,14 +119,16 @@ class RealEstateRepository:
             logger.error(f"update_region 실패 e : {e}")
             return False
 
-    def get_regions(self, sido: str = "") -> Union[QuerySet, bool]:
+    @staticmethod
+    def get_regions(sido: str = "") -> Union[QuerySet, bool]:
         _q = Region.objects
         if sido:
             return _q.filter(sido=sido)
         else:
             return _q.all()
 
-    def get_regions_exclude_branch(self, sido: str):
+    @staticmethod
+    def get_regions_exclude_branch(sido: str):
         qs = Region.objects.values("sido", "regional_code").annotate(
             c=Count("id")
         )
@@ -129,8 +136,8 @@ class RealEstateRepository:
         regions = qs.exclude(sido__contains="출장소").exclude(sigungu="")
         return regions
 
+    @staticmethod
     def get_region(
-        self,
         sido: str = "",
         sigungu: str = "",
         ubmyundong: str = "",
@@ -174,7 +181,8 @@ class RealEstateRepository:
             )
             return False
 
-    def create_region_price_model(self, dto) -> RegionPrice:
+    @staticmethod
+    def create_region_price_model(dto) -> RegionPrice:
         return RegionPrice(
             region_id=dto.region.id,
             total_deal_price=dto.total_deal_price,
@@ -190,7 +198,8 @@ class RealEstateRepository:
             jeonse_count=dto.jeonse_count,
         )
 
-    def get_region_prices(self, dto: GetRealEstatesOnMapDto = None):
+    @staticmethod
+    def get_region_prices(dto: GetRealEstatesOnMapDto = None):
         _q = RegionPrice.objects.select_related("region")
 
         """
@@ -245,7 +254,8 @@ class RealEstateRepository:
                 logger.error(f"get_region_price 실패 e : {e}")
                 return False
 
-    def get_deals(self, dto: GetDealsDto = None):
+    @staticmethod
+    def get_deals(dto: GetDealsDto = None):
         return (
             Deal.objects.select_related("real_estate")
             .filter(real_estate__id=dto.real_estate_id)
@@ -254,8 +264,10 @@ class RealEstateRepository:
             .order_by("-deal_year", "-deal_month", "-deal_day")
         )
 
-    def get_last_region_price(self):
+    @staticmethod
+    def get_last_region_price():
         return RegionPrice.objects.order_by("-id").first()
 
-    def get_last_deal(self):
+    @staticmethod
+    def get_last_deal():
         return Deal.objects.order_by("-id").first()
