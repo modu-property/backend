@@ -12,7 +12,7 @@ from real_estate.dto.get_real_estate_dto import (
     GetRealEstatesOnSearchDto,
 )
 from real_estate.dto.service_result_dto import ServiceResultDto
-from real_estate.enum.real_estate_enum import RealEstateZoomLevel
+from real_estate.enum.real_estate_enum import RealEstateZoomLevelEnum
 from real_estate.serializers import (
     GetDealsRequestSerializer,
     GetRealEstateRequestSerializer,
@@ -118,7 +118,7 @@ class GetRealEstatesOnMapView(ListAPIView):
             "ne_lat": request.query_params.get("ne_lat"),
             "ne_lng": request.query_params.get("ne_lng"),
             "zoom_level": request.query_params.get(
-                "zoom_level", default=RealEstateZoomLevel.DEFAULT.value
+                "zoom_level", default=RealEstateZoomLevelEnum.DEFAULT.value
             ),
         }
 

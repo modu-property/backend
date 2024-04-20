@@ -2,7 +2,10 @@ import threading
 from django.core.management.base import BaseCommand
 from manticore.manticore_client import ManticoreClient
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
-from real_estate.enum.real_estate_enum import RealEstateTypesForQueryEnum
+from real_estate.enum.real_estate_enum import (
+    RealEstateTypesForQueryEnum,
+    RegionCodeEnum,
+)
 from real_estate.enum.deal_enum import DealTypesForQueryEnum
 from real_estate.management.commands.collect_command_mixin import CollectCommandMixin
 from modu_property.utils.time import TimeUtil
@@ -30,8 +33,6 @@ class Command(BaseCommand, CollectCommandMixin):
     def handle(self, *args, **options):
         sido, start_date, end_date = self.get_command_params(options)
 
-        sejong_regional_code = "36110"
-
         regional_codes = []
         if sido:
             regions = self.repository.get_regions_exclude_branch(sido=sido)
@@ -40,7 +41,7 @@ class Command(BaseCommand, CollectCommandMixin):
                 set([region.get("regional_code") for region in regions])
             )
         else:
-            regional_codes.append(sejong_regional_code)
+            regional_codes.append(RegionCodeEnum.SEJONG.value)
 
         years_and_months = None
         if not all([start_date, end_date]):

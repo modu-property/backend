@@ -3,7 +3,10 @@ import requests
 from celery import shared_task
 from modu_property.utils.time import TimeUtil
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
-from real_estate.enum.real_estate_enum import RealEstateTypesForQueryEnum
+from real_estate.enum.real_estate_enum import (
+    RealEstateTypesForQueryEnum,
+    RegionCodeEnum,
+)
 from real_estate.enum.deal_enum import DealTypesForQueryEnum
 from real_estate.repository.real_estate_repository import RealEstateRepository
 
@@ -21,7 +24,6 @@ def collect_deal_price_of_real_estate_task(
     sido: str,
 ):
     repository = RealEstateRepository()
-    sejong_regional_code = "36110"
 
     regions = []
     # qs = Region.objects.values("sido", "regional_code").annotate(c=Count("id"))
@@ -31,7 +33,7 @@ def collect_deal_price_of_real_estate_task(
     regions = repository.get_regions_exclude_branch(sido=sido)
 
     regional_codes = list(set([region.get("regional_code") for region in regions]))
-    regional_codes.append(sejong_regional_code)
+    regional_codes.append(RegionCodeEnum.SEJONG.value)
 
     year_and_month = TimeUtil.get_current_year_and_month()
     run_service(regional_codes=regional_codes, year_and_month=year_and_month)

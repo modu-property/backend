@@ -5,8 +5,8 @@ import pytest
 from real_estate.enum.deal_enum import BrokerageTypesEnum, DealTypesForDBEnum
 from real_estate.enum.real_estate_enum import (
     RealEstateTypesForDBEnum,
-    RealEstateZoomLevel,
-    RegionZoomLevel,
+    RealEstateZoomLevelEnum,
+    RegionZoomLevelEnum,
 )
 from django.contrib.gis.geos import Point
 from datetime import datetime
@@ -161,7 +161,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
     query_params = {
         "latitude": 37.5054,
         "longitude": 127.0216,
-        "zoom_level": RealEstateZoomLevel.DEFAULT.value,
+        "zoom_level": RealEstateZoomLevelEnum.DEFAULT.value,
         "keyword": "",
         "sw_lat": 37.5053,
         "sw_lng": 127.0215,
@@ -332,7 +332,7 @@ def test_get_real_estates_on_map_view(client, get_jwt, create_real_estate, creat
         "sw_lng": 127.0215,
         "ne_lat": 37.5055,
         "ne_lng": 127.0217,
-        "zoom_level": RealEstateZoomLevel.DEFAULT.value,
+        "zoom_level": RealEstateZoomLevelEnum.DEFAULT.value,
         "keyword": "",
     }
 
@@ -354,14 +354,14 @@ def test_get_real_estates_on_map_view(client, get_jwt, create_real_estate, creat
 @pytest.mark.parametrize(
     "title, zoom_level, expected_region",
     [
-        ("zoom_level 6 then dongri", RegionZoomLevel.DONGRI.value, "dongri"),
+        ("zoom_level 6 then dongri", RegionZoomLevelEnum.DONGRI.value, "dongri"),
         (
             "zoom_level 7 then ubmyundong",
-            RegionZoomLevel.UBMYUNDONG.value,
+            RegionZoomLevelEnum.UBMYUNDONG.value,
             "ubmyundong",
         ),
-        ("zoom_level 8 then sigungu", RegionZoomLevel.SIGUNGU.value, "sigungu"),
-        ("zoom_level 9 then sido", RegionZoomLevel.SIDO.value, "sido"),
+        ("zoom_level 8 then sigungu", RegionZoomLevelEnum.SIGUNGU.value, "sigungu"),
+        ("zoom_level 9 then sido", RegionZoomLevelEnum.SIDO.value, "sido"),
     ],
 )
 @pytest.mark.django_db(transaction=True, reset_sequences=True)

@@ -2,7 +2,7 @@ from typing import List, Optional, Union
 from django.forms import model_to_dict
 from real_estate.dto.collect_region_price_dto import CollectRegionPriceDto
 from real_estate.dto.get_real_estate_dto import GetDealsDto, GetRealEstatesOnMapDto
-from real_estate.enum.real_estate_enum import RegionZoomLevel
+from real_estate.enum.real_estate_enum import RegionZoomLevelEnum
 from real_estate.models import Deal, RealEstate, Region, RegionPrice
 from modu_property.utils.loggers import logger
 from django.db.models import (
@@ -189,20 +189,20 @@ class RealEstateRepository:
 
         if isinstance(dto, GetRealEstatesOnMapDto):
             logger.debug(dto.__dict__)
-            if dto.zoom_level == RegionZoomLevel.DONGRI.value:
+            if dto.zoom_level == RegionZoomLevelEnum.DONGRI.value:
                 # dongri
                 _q = _q.exclude(region__dongri="")
-            elif dto.zoom_level == RegionZoomLevel.UBMYUNDONG.value:
+            elif dto.zoom_level == RegionZoomLevelEnum.UBMYUNDONG.value:
                 # ubmyundong
                 _q = _q.exclude(region__ubmyundong="").filter(region__dongri="")
-            elif dto.zoom_level == RegionZoomLevel.SIGUNGU.value:
+            elif dto.zoom_level == RegionZoomLevelEnum.SIGUNGU.value:
                 # sigungu
                 _q = (
                     _q.exclude(region__sigungu="")
                     .filter(region__ubmyundong="")
                     .filter(region__dongri="")
                 )
-            elif dto.zoom_level == RegionZoomLevel.SIDO.value:
+            elif dto.zoom_level == RegionZoomLevelEnum.SIDO.value:
                 # sido
                 _q = (
                     _q.exclude(region__sido="")

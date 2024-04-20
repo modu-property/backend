@@ -11,8 +11,8 @@ class CollectCommandMixin:
     def __init__(self) -> None:
         self.real_estate_repository = RealEstateRepository()
 
+    @staticmethod
     def get_collecting_period(
-        self,
         instance: Union[RegionPrice, Deal, None] = None,
         start_date: str = "",
         end_date: str = "",
@@ -41,7 +41,8 @@ class CollectCommandMixin:
 
         return years_and_months
 
-    def add_arguments(self, parser):
+    @staticmethod
+    def add_arguments(parser):
         parser.add_argument(
             "sido",
             type=str,
@@ -58,11 +59,13 @@ class CollectCommandMixin:
             help="200612",
         )
 
-    def get_command_params(self, options):
+    @staticmethod
+    def get_command_params(options):
         sido = options.get("sido")
         start_date = options.get("start_date", 0)
         end_date = options.get("end_date", 0)
         return sido, start_date, end_date
 
-    def not_test_env(self) -> bool:
+    @staticmethod
+    def not_test_env() -> bool:
         return os.getenv("SERVER_ENV") != "test"
