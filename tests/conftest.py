@@ -10,7 +10,13 @@ from django.contrib.auth.hashers import make_password
 from accounts.models import User
 from modu_property.utils.file import FileUtil
 from modu_property.settings.test_settings import SECRET_KEY
-from real_estate.models import Deal, RealEstate, MonthlyRent, Region, RegionPrice
+from real_estate.models import (
+    Deal,
+    RealEstate,
+    MonthlyRent,
+    Region,
+    RegionPrice,
+)
 from real_estate.services.insert_address_service import InsertRegionsService
 
 

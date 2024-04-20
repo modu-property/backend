@@ -25,7 +25,9 @@ class CollectCommandMixin:
             end_date = datetime.strftime(
                 instance.deal_date + timedelta(weeks=52 * 2), "%Y%m%d"
             )
-            end_year, end_month = TimeUtil.split_year_and_month(year_and_month=end_date)
+            end_year, end_month = TimeUtil.split_year_and_month(
+                year_and_month=end_date
+            )
         else:
             start_year: int = int(start_date[:4])
             start_month: int = int(start_date[4:])

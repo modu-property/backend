@@ -9,10 +9,10 @@ class PropertyConfig(AppConfig):
     def ready(self):
         from modu_property.schema import CustomSimpleJWTScheme  # noqa: E402
 
-        # 컨테이너 초기화용 import
-        from real_estate.containers.service_container import ServiceContainer  # noqa
-        from real_estate.containers.search_container import SearchContainer  # noqa
-
-        from real_estate.containers.repository_container import (
-            RepositoryContainer,
+        # 컨테이너 초기화용 import. real_estate/__init__.py엔 작성할 수 없음
+        from real_estate.containers.service_container import (
+            ServiceContainer,
+        )  # noqa
+        from real_estate.containers.search_container import (
+            SearchContainer,
         )  # noqa

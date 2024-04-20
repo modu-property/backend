@@ -40,7 +40,11 @@ class KakaoAddressConverter:
         return self.address_info
 
     def _get_address(self, document):
-        return document["address"]["address_name"] if document.get("address") else ""
+        return (
+            document["address"]["address_name"]
+            if document.get("address")
+            else ""
+        )
 
     def _get_road_name_address(self, document):
         return (
@@ -58,7 +62,9 @@ class KakaoAddressConverter:
             )
 
             if response.status_code != 200:
-                logger.error(f"카카오 주소 변환 실패 response : {response.__dict__}")
+                logger.error(
+                    f"카카오 주소 변환 실패 response : {response.__dict__}"
+                )
                 return False
 
             try:

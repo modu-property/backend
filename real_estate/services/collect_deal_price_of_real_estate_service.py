@@ -1,3 +1,4 @@
+from dependency_injector.wiring import Provide, inject
 from django.forms import model_to_dict
 from django.contrib.gis.geos import Point
 from pandas import DataFrame
@@ -5,6 +6,9 @@ from rest_framework.utils.serializer_helpers import ReturnDict
 
 from modu_property.utils.loggers import logger, file_logger
 from modu_property.utils.validator import validate_data
+from real_estate.containers.utils.address_converter_container import (
+    AddressConverterContainer,
+)
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
 from real_estate.enum.deal_enum import BrokerageTypesEnum, DealTypesForDBEnum
 from real_estate.enum.real_estate_enum import (
@@ -16,6 +20,9 @@ from real_estate.models import Deal, RealEstate
 from real_estate.serializers import DealSerializer, RealEstateSerializer
 from real_estate.utils.address_converter import KakaoAddressConverter
 from real_estate.utils.real_estate_collector import RealEstateCollector
+from real_estate.containers.utils.real_estate_collector_container import (
+    RealEstateCollectorContainer,
+)
 
 """
 일단 한 클래스에서 수집하고 나중에 필요하면 아파트, 빌라별로 클래스 생성
@@ -23,16 +30,32 @@ from real_estate.utils.real_estate_collector import RealEstateCollector
 
 
 class CollectDealPriceOfRealEstateService:
-    def __init__(self) -> None:
-        self.real_estate_collector = RealEstateCollector()
-        self.address_converter = KakaoAddressConverter()
+    @inject
+    def __init__(
+        self,
+        real_estate_collector: RealEstateCollector = Provide[
+            RealEstateCollectorContainer.real_estate_collector
+        ],
+        address_converter: KakaoAddressConverter = Provide[
+            AddressConverterContainer.address_converter
+        ],
+    ) -> None:
+        self.real_estate_collector: RealEstateCollector = real_estate_collector
+        self.address_converter: KakaoAddressConverter = address_converter
 
-    def collect_deal_price_of_real_estate(self, dto: CollectDealPriceOfRealEstateDto):
+    def collect_deal_price_of_real_estate(
+        self, dto: CollectDealPriceOfRealEstateDto
+    ):
         deal_prices_of_real_estate: DataFrame = (
-            self.real_estate_collector.collect_deal_price_of_real_estate(dto=dto)
+            self.real_estate_collector.collect_deal_price_of_real_estate(
+                dto=dto
+            )
         )
 
-        if deal_prices_of_real_estate is False or deal_prices_of_real_estate.empty:
+        if (
+            deal_prices_of_real_estate is False
+            or deal_prices_of_real_estate.empty
+        ):
             return
 
         deal_prices_of_real_estate = self.delete_duplication(
@@ -54,12 +77,16 @@ class CollectDealPriceOfRealEstateService:
             deal_price_of_real_estate_list,
         ) = result
 
-        inserted_real_estate_models_dict = self.create_inserted_real_estate_models_dict(
-            inserted_real_estate_models
+        inserted_real_estate_models_dict = (
+            self.create_inserted_real_estate_models_dict(
+                inserted_real_estate_models
+            )
         )
 
         deal_models = self.create_deal_models(
-            dto, deal_price_of_real_estate_list, inserted_real_estate_models_dict
+            dto,
+            deal_price_of_real_estate_list,
+            inserted_real_estate_models_dict,
         )
 
         try:
@@ -80,14 +107,19 @@ class CollectDealPriceOfRealEstateService:
             deal_prices_of_real_estate, unique_keys_in_db
         )
 
-        deal_prices_of_real_estate = deal_prices_of_real_estate.drop(indexes_to_drop)
+        deal_prices_of_real_estate = deal_prices_of_real_estate.drop(
+            indexes_to_drop
+        )
 
         return deal_prices_of_real_estate
 
     @staticmethod
     def create_indexes_to_drop(deal_prices_of_real_estate, unique_keys_in_db):
         indexes_to_drop = []
-        for index, deal_price_of_real_estate in deal_prices_of_real_estate.iterrows():
+        for (
+            index,
+            deal_price_of_real_estate,
+        ) in deal_prices_of_real_estate.iterrows():
             regional_code = deal_price_of_real_estate["지역코드"]
             lot_number = deal_price_of_real_estate["지번"]
             unique_key = f"{regional_code}{lot_number}"
@@ -114,12 +146,17 @@ class CollectDealPriceOfRealEstateService:
             regional_code = inserted_real_estate_model.regional_code
             lot_number = inserted_real_estate_model.lot_number
             unique_key = f"{regional_code}{lot_number}"
-            inserted_real_estate_models_dict[unique_key] = inserted_real_estate_model
+            inserted_real_estate_models_dict[unique_key] = (
+                inserted_real_estate_model
+            )
         return inserted_real_estate_models_dict
 
     @staticmethod
     def convert_real_estate_type(dto: CollectDealPriceOfRealEstateDto) -> str:
-        if dto.real_estate_type == RealEstateTypesForQueryEnum.MULTI_UNIT_HOUSE.value:
+        if (
+            dto.real_estate_type
+            == RealEstateTypesForQueryEnum.MULTI_UNIT_HOUSE.value
+        ):
             return RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value
         return ""
 
@@ -134,10 +171,15 @@ class CollectDealPriceOfRealEstateService:
 
         real_estate_type = self.convert_real_estate_type(dto)
         if not real_estate_type:
-            logger.error(f"right real_estate_type not exist : {real_estate_type}")
+            logger.error(
+                f"right real_estate_type not exist : {real_estate_type}"
+            )
             return False
 
-        for _, deal_price_of_real_estate in deal_prices_of_real_estate.iterrows():
+        for (
+            _,
+            deal_price_of_real_estate,
+        ) in deal_prices_of_real_estate.iterrows():
             regional_code = deal_price_of_real_estate["지역코드"]
             lot_number = deal_price_of_real_estate["지번"]
             unique_key = f"{regional_code}{lot_number}"
@@ -158,7 +200,10 @@ class CollectDealPriceOfRealEstateService:
             deal_price_of_real_estate_list.append(deal_price_of_real_estate)
 
             self.append_real_estate(
-                unique_keys, real_estate_models, unique_key, validated_real_estate
+                unique_keys,
+                real_estate_models,
+                unique_key,
+                validated_real_estate,
             )
 
         inserted_real_estate_models = []
@@ -174,8 +219,9 @@ class CollectDealPriceOfRealEstateService:
             )
             return False
 
+    @staticmethod
     def append_real_estate(
-        self, unique_keys, real_estate_models, unique_key, validated_real_estate
+        unique_keys, real_estate_models, unique_key, validated_real_estate
     ):
         if unique_key not in unique_keys:
             real_estate_models.append(RealEstate(**validated_real_estate))
@@ -210,7 +256,8 @@ class CollectDealPriceOfRealEstateService:
             latitude=address_info["latitude"],
             longitude=address_info["longitude"],
             point=Point(
-                float(address_info["latitude"]), float(address_info["longitude"])
+                float(address_info["latitude"]),
+                float(address_info["longitude"]),
             ),
         )
 
@@ -232,7 +279,9 @@ class CollectDealPriceOfRealEstateService:
             real_estate_type=real_estate_type,
         )
 
-        return validate_data(serializer=RealEstateSerializer, model=real_estate_model)
+        return validate_data(
+            serializer=RealEstateSerializer, model=real_estate_model
+        )
 
     def create_deal_models(
         self,

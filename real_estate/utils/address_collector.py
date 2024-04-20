@@ -3,7 +3,6 @@ import PublicDataReader as pdr
 from dependency_injector.wiring import inject, Provide
 
 from pandas.core.series import Series
-from PublicDataReader import TransactionPrice
 from django.forms import model_to_dict
 from pandas import DataFrame
 from modu_property.utils.loggers import logger
@@ -14,7 +13,6 @@ from real_estate.containers.utils.address_converter_container import (
     AddressConverterContainer,
 )
 from real_estate.containers.repository_container import RepositoryContainer
-from real_estate.containers.utils.third_party_container import ThirdPartyContainer
 from real_estate.models import Region
 from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.serializers import RegionSerializer
@@ -31,12 +29,10 @@ class AddressCollector:
         address_converter: KakaoAddressConverter = Provide[
             AddressConverterContainer.address_converter
         ],
-        transaction_price: TransactionPrice = Provide[
-            ThirdPartyContainer.transaction_price
-        ],
     ) -> None:
-        self.api: TransactionPrice = transaction_price
-        self.real_estate_repository: RealEstateRepository = real_estate_repository
+        self.real_estate_repository: RealEstateRepository = (
+            real_estate_repository
+        )
         self.address_converter: KakaoAddressConverter = address_converter
 
     def collect_region(self) -> Union[List[Region], bool]:
@@ -60,7 +56,9 @@ class AddressCollector:
             return False
 
         result: Union[List[Region], bool] = (
-            self.real_estate_repository.bulk_create_regions(region_models=region_models)
+            self.real_estate_repository.bulk_create_regions(
+                region_models=region_models
+            )
         )
 
         return result

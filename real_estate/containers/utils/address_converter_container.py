@@ -11,5 +11,6 @@ class AddressConverterContainer(containers.DeclarativeContainer):
 AddressConverterContainer().wire(
     modules=[
         "real_estate.utils.address_collector",
+        "real_estate.services.collect_deal_price_of_real_estate_service",
     ]
 )

@@ -4,10 +4,14 @@ from modu_property.utils.loggers import logger
 from real_estate.dto.collect_region_price_dto import CollectRegionPriceDto
 from real_estate.enum.deal_enum import DealTypesForDBEnum
 from modu_property.utils.time import TimeUtil
-from real_estate.management.commands.collect_command_mixin import CollectCommandMixin
+from real_estate.management.commands.collect_command_mixin import (
+    CollectCommandMixin,
+)
 from real_estate.models import Region
 from real_estate.repository.real_estate_repository import RealEstateRepository
-from real_estate.services.collect_region_price_service import CollectRegionPriceService
+from real_estate.services.collect_region_price_service import (
+    CollectRegionPriceService,
+)
 from django.core.management.base import BaseCommand
 
 
@@ -28,13 +32,17 @@ class Command(BaseCommand, CollectCommandMixin):
 
         years_and_months = None
         if not all([start_date, end_date]):
-            last_region_price = self.real_estate_repository.get_last_region_price()
+            last_region_price = (
+                self.real_estate_repository.get_last_region_price()
+            )
             if not last_region_price:
                 raise Exception(
                     "시작/종료 연월과 region_price 둘 다 없음. 둘 중에 하나는 있어야 함"
                 )
 
-            years_and_months = self.get_collecting_period(instance=last_region_price)
+            years_and_months = self.get_collecting_period(
+                instance=last_region_price
+            )
         else:
             years_and_months = self.get_collecting_period(
                 start_date=start_date, end_date=end_date
@@ -77,7 +85,9 @@ class Command(BaseCommand, CollectCommandMixin):
                     dongri=region.dongri,
                 )
                 if not _region:
-                    raise Exception(f"specific region not found : {region.__dict__}")
+                    raise Exception(
+                        f"specific region not found : {region.__dict__}"
+                    )
 
                 self.run_service(
                     deal_year=deal_year, deal_month=deal_month, _region=_region
@@ -110,7 +120,9 @@ class Command(BaseCommand, CollectCommandMixin):
             region_prices_dict[region_price_key] = None
         return region_prices_dict
 
-    def run_service(self, deal_year: int, deal_month: int, _region: Region) -> None:
+    def run_service(
+        self, deal_year: int, deal_month: int, _region: Region
+    ) -> None:
         dto = None
         threads = []
         for deal_type in self.deal_types:

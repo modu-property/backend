@@ -18,7 +18,9 @@ class GetPropertiesOnMapService:
     @inject
     def __init__(
         self,
-        get_real_estates: GetRealEstates = Provide[ServiceContainer.get_real_estates],
+        get_real_estates: GetRealEstates = Provide[
+            ServiceContainer.get_real_estates
+        ],
         get_regions: GetRegions = Provide[ServiceContainer.get_regions],
     ) -> None:
         self.get_real_estates = get_real_estates

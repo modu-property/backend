@@ -12,7 +12,9 @@ class GetRealEstateService:
         self.repository = RealEstateRepository()
 
     def get_real_estate(self, dto: GetRealEstateDto) -> ServiceResultDto:
-        real_estate: Optional[RealEstate] = self.repository.get_real_estate(id=dto.id)
+        real_estate: Optional[RealEstate] = self.repository.get_real_estate(
+            id=dto.id
+        )
 
         if not real_estate:
             return ServiceResultDto(status_code=404)

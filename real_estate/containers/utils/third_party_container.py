@@ -15,5 +15,6 @@ class ThirdPartyContainer(containers.DeclarativeContainer):
 ThirdPartyContainer().wire(
     modules=[
         "real_estate.utils.address_collector",
+        "real_estate.utils.real_estate_collector",
     ]
 )

@@ -43,14 +43,17 @@ class CollectRegionPriceService:
 
     def set_deal_date(self, dto: CollectRegionPriceDto):
         dto.deal_date = datetime.strftime(
-            datetime.strptime(f"{dto.deal_year}-{dto.deal_month}-01", "%Y-%m-%d"),
+            datetime.strptime(
+                f"{dto.deal_year}-{dto.deal_month}-01", "%Y-%m-%d"
+            ),
             "%Y-%m-%d",
         )
 
     def calc_jeonse_price_per_pyung(self, dto: CollectRegionPriceDto):
         dto.average_jeonse_price_per_pyung = str(
             Decimal(
-                Decimal(str(dto.total_jeonse_price_per_pyung)) / dto.jeonse_count
+                Decimal(str(dto.total_jeonse_price_per_pyung))
+                / dto.jeonse_count
             ).quantize(Decimal(".00"), rounding=ROUND_UP)
             if dto.jeonse_count
             else Decimal(0)
@@ -67,18 +70,18 @@ class CollectRegionPriceService:
 
     def calc_average_jeonse_price(self, dto: CollectRegionPriceDto):
         dto.average_jeonse_price = str(
-            Decimal(Decimal(str(dto.total_jeonse_price)) / dto.jeonse_count).quantize(
-                Decimal(".00"), rounding=ROUND_UP
-            )
+            Decimal(
+                Decimal(str(dto.total_jeonse_price)) / dto.jeonse_count
+            ).quantize(Decimal(".00"), rounding=ROUND_UP)
             if dto.jeonse_count
             else Decimal(0)
         )
 
     def calc_average_deal_price(self, dto: CollectRegionPriceDto):
         dto.average_deal_price = str(
-            Decimal(Decimal(str(dto.total_deal_price)) / dto.deal_count).quantize(
-                Decimal(".00"), rounding=ROUND_UP
-            )
+            Decimal(
+                Decimal(str(dto.total_deal_price)) / dto.deal_count
+            ).quantize(Decimal(".00"), rounding=ROUND_UP)
             if dto.deal_count
             else Decimal(0)
         )
@@ -113,9 +116,7 @@ class CollectRegionPriceService:
         if dto.region.dongri:
             dto.target_region = f"{dto.region.sido} {dto.region.sigungu} {dto.region.ubmyundong} {dto.region.dongri}"
         elif dto.region.ubmyundong:
-            dto.target_region = (
-                f"{dto.region.sido} {dto.region.sigungu} {dto.region.ubmyundong}"
-            )
+            dto.target_region = f"{dto.region.sido} {dto.region.sigungu} {dto.region.ubmyundong}"
         elif dto.region.sigungu:
             dto.target_region = f"{dto.region.sido} {dto.region.sigungu}"
         elif dto.region.sido:

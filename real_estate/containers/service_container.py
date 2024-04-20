@@ -23,7 +23,9 @@ class ServiceContainer(containers.DeclarativeContainer):
         RepositoryContainer().repository
     )
 
-    get_real_estates = providers.Factory(provides=GetRealEstates, repository=repository)
+    get_real_estates = providers.Factory(
+        provides=GetRealEstates, repository=repository
+    )
     get_regions = providers.Factory(provides=GetRegions, repository=repository)
 
     set_real_estate_real_estates = providers.Factory(
@@ -37,7 +39,9 @@ class ServiceContainer(containers.DeclarativeContainer):
         key="regions",
     )
 
-    search_client: providers.Factory[ManticoreClient] = SearchContainer.search_client
+    search_client: providers.Factory[ManticoreClient] = (
+        SearchContainer.search_client
+    )
     search_real_estates = providers.Singleton(
         provides=SearchRealEstates,
         search_client=search_client,

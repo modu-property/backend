@@ -182,7 +182,9 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
 
 
 @pytest.mark.django_db(transaction=True, reset_sequences=True)
-def test_get_real_estates_on_map_view(client, get_jwt, create_real_estate, create_deal):
+def test_get_real_estates_on_map_view(
+    client, get_jwt, create_real_estate, create_deal
+):
     real_estate1 = create_real_estate(
         name="테스트빌라 1",
         build_year=1990,
@@ -354,13 +356,21 @@ def test_get_real_estates_on_map_view(client, get_jwt, create_real_estate, creat
 @pytest.mark.parametrize(
     "title, zoom_level, expected_region",
     [
-        ("zoom_level 6 then dongri", RegionZoomLevelEnum.DONGRI.value, "dongri"),
+        (
+            "zoom_level 6 then dongri",
+            RegionZoomLevelEnum.DONGRI.value,
+            "dongri",
+        ),
         (
             "zoom_level 7 then ubmyundong",
             RegionZoomLevelEnum.UBMYUNDONG.value,
             "ubmyundong",
         ),
-        ("zoom_level 8 then sigungu", RegionZoomLevelEnum.SIGUNGU.value, "sigungu"),
+        (
+            "zoom_level 8 then sigungu",
+            RegionZoomLevelEnum.SIGUNGU.value,
+            "sigungu",
+        ),
         ("zoom_level 9 then sido", RegionZoomLevelEnum.SIDO.value, "sido"),
     ],
 )
@@ -636,7 +646,14 @@ def test_get_real_estate(client, get_jwt, create_real_estate, create_deal):
     [
         ("when deal count is 0, page is None then return 0", 0, None, 0, 1, 1),
         ("when deal count is 0, page is 1 then return 0", 0, 1, 0, 1, 1),
-        ("when deal count is 11, page is None then return 10", 11, None, 10, 1, 2),
+        (
+            "when deal count is 11, page is None then return 10",
+            11,
+            None,
+            10,
+            1,
+            2,
+        ),
         ("when deal count is 12, page is 2 then return 2", 12, 2, 2, 2, 2),
         ("when deal count is 25, page is 2 then return 10", 25, 2, 10, 2, 3),
         ("when deal count is 25, page is 3 then return 5", 25, 3, 5, 3, 3),
@@ -719,7 +736,10 @@ def test_when_get_deals_then_return_deals(
 
     url = reverse(
         "get-deals",
-        kwargs={"id": real_estate.id, "deal_type": DealTypesForDBEnum.DEAL.value},
+        kwargs={
+            "id": real_estate.id,
+            "deal_type": DealTypesForDBEnum.DEAL.value,
+        },
     )
 
     _jwt = get_jwt

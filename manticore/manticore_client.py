@@ -49,7 +49,9 @@ class ManticoreClient(SearchClientInterface):
         self, index: str, query: dict, limit: int
     ) -> List[Optional[Dict[str, Any]]]:
         try:
-            search_request = SearchRequest(index=index, query=query, limit=limit)
+            search_request = SearchRequest(
+                index=index, query=query, limit=limit
+            )
 
             search_response = self.search_api.search(search_request)
             hits = search_response.hits

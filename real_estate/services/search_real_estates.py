@@ -10,7 +10,9 @@ class SearchRealEstates:
     @inject
     def __init__(
         self,
-        search_client: SearchClientInterface = Provide[SearchContainer.search_client],
+        search_client: SearchClientInterface = Provide[
+            SearchContainer.search_client
+        ],
     ) -> None:
         self.search_client: SearchClientInterface = search_client
 
@@ -20,7 +22,9 @@ class SearchRealEstates:
 
         self._set_region_count_limit(dto=dto)
 
-        hits = self.search_client.search(index=index, query=query, limit=dto.limit)
+        hits = self.search_client.search(
+            index=index, query=query, limit=dto.limit
+        )
 
         for hit in hits:
             real_estate_info = hit["_source"]

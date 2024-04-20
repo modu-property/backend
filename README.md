@@ -199,9 +199,12 @@ curl --location 'http://host.docker.internal:9308/search' --header 'Content-Type
 ## 카카오 API
 * 구주소 -> 신주소 변환 및 위도경도 구하기 : [로컬](https://developers.kakao.com/docs/latest/ko/local/common)
 
+# black formatter
 ## pre-commit
 커밋할 때 black 적용 안되어 있으면 커밋 실패하게 하는 용도로 씀.  
 .pre-commit-config.yaml
+## terminal
+ black --line-length=80 .
 
 # open api
 http://localhost:8000/api/docs/  

@@ -23,14 +23,18 @@ class GetRealEstatesOnSearchService:
         set_real_estate: SetRealEstates = Provide[
             ServiceContainer.set_real_estate_real_estates
         ],
-        set_region: SetRealEstates = Provide[ServiceContainer.set_real_estate_regions],
+        set_region: SetRealEstates = Provide[
+            ServiceContainer.set_real_estate_regions
+        ],
         search_real_estates=Provide[ServiceContainer.search_real_estates],
     ) -> None:
         self.set_real_estate: SetRealEstates = set_real_estate
         self.set_region: SetRealEstates = set_region
         self.search_real_estates: SearchRealEstates = search_real_estates
 
-    def get_real_estates(self, dto: GetRealEstatesOnSearchDto) -> ServiceResultDto:
+    def get_real_estates(
+        self, dto: GetRealEstatesOnSearchDto
+    ) -> ServiceResultDto:
         result: dict[str, list] = {}
 
         regions = self.search_real_estates.search(dto=dto, index="region_index")

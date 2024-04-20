@@ -6,13 +6,17 @@ from real_estate.enum.real_estate_enum import RealEstateTypesForDBEnum
 from real_estate.models import RegionPrice
 from real_estate.repository.real_estate_repository import RealEstateRepository
 
-from real_estate.services.collect_region_price_service import CollectRegionPriceService
+from real_estate.services.collect_region_price_service import (
+    CollectRegionPriceService,
+)
 from django.contrib.gis.geos import Point
 
 
 @pytest.mark.django_db
 class TestCollectRegionPriceService:
-    def test_collect_region_price(self, create_real_estate, create_deal, create_region):
+    def test_collect_region_price(
+        self, create_real_estate, create_deal, create_region
+    ):
         repository = RealEstateRepository()
 
         real_estate1 = create_real_estate(
@@ -215,7 +219,9 @@ class TestCollectRegionPriceService:
         region = create_region(sigungu="종로구", ubmyundong="청운동")
 
         region = repository.get_region(
-            sido=region.sido, sigungu=region.sigungu, ubmyundong=region.ubmyundong
+            sido=region.sido,
+            sigungu=region.sigungu,
+            ubmyundong=region.ubmyundong,
         )
 
         dto: CollectRegionPriceDto = CollectRegionPriceDto(

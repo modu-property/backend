@@ -32,7 +32,9 @@ def collect_deal_price_of_real_estate_task(
 
     regions = repository.get_regions_exclude_branch(sido=sido)
 
-    regional_codes = list(set([region.get("regional_code") for region in regions]))
+    regional_codes = list(
+        set([region.get("regional_code") for region in regions])
+    )
     regional_codes.append(RegionCodeEnum.SEJONG.value)
 
     year_and_month = TimeUtil.get_current_year_and_month()
@@ -60,7 +62,8 @@ def run_service(regional_codes, year_and_month):
                         )
                     )
                     t = threading.Thread(
-                        target=service.collect_deal_price_of_real_estate, args=(dto,)
+                        target=service.collect_deal_price_of_real_estate,
+                        args=(dto,),
                     )
 
                     t.start()
