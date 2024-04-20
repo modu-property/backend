@@ -240,7 +240,9 @@ collect_deal_price_of_real_estate_command 으로 전체 수집을 했다면, col
 # 전체/특정지역 통계 정보 수집 명령어
 SERVER_ENV=local python manage.py collect_region_price_command 서울특별시  
 
-SERVER_ENV=development python manage.py collect_region_price_command 서울특별시  
+SERVER_ENV=development python manage.py collect_region_price_command 서울특별시 
+SERVER_ENV=development python manage.py collect_region_price_command 서울특별시 200602 200812  
+
 
 # ngrok
 `ngrok http --host-header=localhost 80`  
