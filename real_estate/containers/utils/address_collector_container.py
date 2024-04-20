@@ -1,12 +1,8 @@
-from PublicDataReader.PublicDataPortal.molit import TransactionPrice
 from dependency_injector import containers, providers
 
 from real_estate.containers.repository_container import RepositoryContainer
 from real_estate.containers.utils.address_converter_container import (
     AddressConverterContainer,
-)
-from real_estate.containers.utils.third_party_container import (
-    ThirdPartyContainer,
 )
 from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.utils.address_collector import AddressCollector

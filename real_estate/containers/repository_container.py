@@ -12,5 +12,6 @@ class RepositoryContainer(containers.DeclarativeContainer):
 RepositoryContainer().wire(
     modules=[
         "real_estate.utils.address_collector",
+        "real_estate.services.collect_region_price_service",
     ]
 )

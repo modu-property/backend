@@ -2,6 +2,9 @@ from datetime import datetime
 from decimal import ROUND_UP, Decimal
 from typing import List
 
+from dependency_injector.wiring import Provide
+
+from real_estate.containers.repository_container import RepositoryContainer
 from real_estate.dto.collect_region_price_dto import CollectRegionPriceDto
 from real_estate.enum.deal_enum import DealTypesForDBEnum
 from real_estate.models import Deal, RealEstate
@@ -11,8 +14,11 @@ from real_estate.repository.real_estate_repository import RealEstateRepository
 class CollectRegionPriceService:
     def __init__(
         self,
+        real_estate_repository: RealEstateRepository = Provide[
+            RepositoryContainer.repository
+        ],
     ) -> None:
-        self.real_estate_repository = RealEstateRepository()
+        self.real_estate_repository = real_estate_repository
 
     def collect_region_price(self, dto: CollectRegionPriceDto) -> bool:
         """
