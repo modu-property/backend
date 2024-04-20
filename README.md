@@ -202,9 +202,11 @@ curl --location 'http://host.docker.internal:9308/search' --header 'Content-Type
 # black formatter
 ## pre-commit
 커밋할 때 black 적용 안되어 있으면 커밋 실패하게 하는 용도로 씀.  
-.pre-commit-config.yaml
+.pre-commit-config.yaml  
+pre-commit 실행해보기  
+`pre-commit run --all-files`  
 ## terminal
- black --line-length=80 .
+`black .`
 
 # open api
 http://localhost:8000/api/docs/  
