@@ -49,7 +49,8 @@ class GetDealsService:
                 status_code=400, message="GetDealsResponseSerializer error"
             )
 
-    def get_validated_data(self, total_pages, current_page, deals_list):
+    @staticmethod
+    def get_validated_data(total_pages, current_page, deals_list):
         data = {
             "deals": deals_list,
             "current_page": current_page,
@@ -57,7 +58,8 @@ class GetDealsService:
         }
         return validate_data(serializer=GetDealsResponseSerializer, data=data)
 
-    def create_deal_list(self, deals):
+    @staticmethod
+    def create_deal_list(deals):
         deals_list = []
         if deals:
             validated_deals = validate_data(
