@@ -92,7 +92,7 @@ jobs:
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
             cd ~/backend
-            ${{secrets.GIT_PULL_SCRIPT}}
+            sudo git pull origin development
             ls -al
             cat docker-compose.development.yml
 
