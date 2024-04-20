@@ -34,5 +34,6 @@ class SearchRealEstates:
 
         return real_estates
 
-    def _set_region_count_limit(self, dto: GetRealEstatesOnSearchDto) -> None:
+    @staticmethod
+    def _set_region_count_limit(dto: GetRealEstatesOnSearchDto) -> None:
         dto.limit = 3
