@@ -42,6 +42,7 @@ jobs:
 
       - name: Set env
         run: |
+          mkdir env
           echo "SERVER_ENV=$SERVER_ENV" >> env/.env.development
           echo "DEBUG=$DEBUG" >> env/.env.development
           echo "SECRET_KEY=$SECRET_KEY" >> env/.env.development
