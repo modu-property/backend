@@ -26,6 +26,23 @@ class Command(BaseCommand, CollectCommandMixin):
         self.deal_types = [DealTypesForDBEnum.DEAL.value]
         self.repository = RealEstateRepository()
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "sido",
+            type=str,
+            help="서울특별시, 세종특별자치시, ...",
+        )
+        parser.add_argument(
+            "start_date",
+            type=str,
+            help="200601",
+        )
+        parser.add_argument(
+            "end_date",
+            type=str,
+            help="200612",
+        )
+
     @TimeUtil.timer
     def handle(self, *args, **options):
         sido, start_date, end_date = self.get_command_params(options)

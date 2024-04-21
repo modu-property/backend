@@ -44,24 +44,6 @@ class CollectCommandMixin:
         return years_and_months
 
     @staticmethod
-    def add_arguments(parser):
-        parser.add_argument(
-            "sido",
-            type=str,
-            help="서울특별시, 세종특별자치시, ...",
-        )
-        parser.add_argument(
-            "start_date",
-            type=str,
-            help="200601",
-        )
-        parser.add_argument(
-            "end_date",
-            type=str,
-            help="200612",
-        )
-
-    @staticmethod
     def get_command_params(options):
         sido = options.get("sido")
         start_date = options.get("start_date", 0)
