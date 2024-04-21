@@ -9,7 +9,7 @@ from requests.adapters import HTTPAdapter
 from modu_property.utils.loggers import logger
 
 
-class KakaoAddressConverter:
+class KakaoAddressConverterUtil:
     def __init__(self) -> None:
         self.address_info = {}
 

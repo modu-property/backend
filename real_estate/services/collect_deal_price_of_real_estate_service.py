@@ -18,8 +18,8 @@ from real_estate.enum.real_estate_enum import (
 
 from real_estate.models import Deal, RealEstate
 from real_estate.serializers import DealSerializer, RealEstateSerializer
-from real_estate.utils.address_converter import KakaoAddressConverter
-from real_estate.utils.real_estate_collector import RealEstateCollector
+from real_estate.utils.address_converter_util import KakaoAddressConverterUtil
+from real_estate.utils.real_estate_collector_util import RealEstateCollectorUtil
 from real_estate.containers.utils.real_estate_collector_container import (
     RealEstateCollectorContainer,
 )
@@ -33,15 +33,19 @@ class CollectDealPriceOfRealEstateService:
     @inject
     def __init__(
         self,
-        real_estate_collector: RealEstateCollector = Provide[
+        real_estate_collector: RealEstateCollectorUtil = Provide[
             RealEstateCollectorContainer.real_estate_collector
         ],
-        address_converter: KakaoAddressConverter = Provide[
+        address_converter_util: KakaoAddressConverterUtil = Provide[
             AddressConverterContainer.address_converter
         ],
     ) -> None:
-        self.real_estate_collector: RealEstateCollector = real_estate_collector
-        self.address_converter: KakaoAddressConverter = address_converter
+        self.real_estate_collector: RealEstateCollectorUtil = (
+            real_estate_collector
+        )
+        self.address_converter_util: KakaoAddressConverterUtil = (
+            address_converter_util
+        )
 
     def collect_deal_price_of_real_estate(
         self, dto: CollectDealPriceOfRealEstateDto
@@ -268,10 +272,10 @@ class CollectDealPriceOfRealEstateService:
         lot_number = deal_price_of_real_estate["지번"]
         query: str = f"{dong} {lot_number}"
 
-        if not self.address_converter.convert_address(query=query):
+        if not self.address_converter_util.convert_address(query=query):
             return False
 
-        address_info = self.address_converter.get_address()
+        address_info = self.address_converter_util.get_address()
 
         real_estate_model: RealEstate = self.create_real_estate_model(
             deal_price_of_real_estate=deal_price_of_real_estate,

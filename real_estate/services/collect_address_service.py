@@ -6,7 +6,7 @@ from real_estate.containers.utils.address_collector_container import (
 )
 from real_estate.models import Region
 from real_estate.repository.real_estate_repository import RealEstateRepository
-from real_estate.utils.address_collector import AddressCollector
+from real_estate.utils.address_collector_util import AddressCollectorUtil
 
 from dependency_injector.wiring import inject, Provide
 
@@ -20,7 +20,7 @@ class CollectRegionService:
             RepositoryContainer.repository
         ],
     ) -> None:
-        self.address_collector: AddressCollector = address_collector
+        self.address_collector: AddressCollectorUtil = address_collector
         self.repository: RealEstateRepository = repository
 
     def collect_region(self) -> bool:

@@ -12,25 +12,27 @@ from real_estate.serializers import (
 )
 from dependency_injector.wiring import inject, Provide
 
-from real_estate.services.search_real_estates import SearchRealEstates
-from real_estate.services.set_real_estates import SetRealEstates
+from real_estate.services.search_real_estates_service import (
+    SearchRealEstatesService,
+)
+from real_estate.services.set_real_estates_service import SetRealEstatesService
 
 
 class GetRealEstatesOnSearchService:
     @inject
     def __init__(
         self,
-        set_real_estate: SetRealEstates = Provide[
+        set_real_estate: SetRealEstatesService = Provide[
             ServiceContainer.set_real_estate_real_estates
         ],
-        set_region: SetRealEstates = Provide[
+        set_region: SetRealEstatesService = Provide[
             ServiceContainer.set_real_estate_regions
         ],
         search_real_estates=Provide[ServiceContainer.search_real_estates],
     ) -> None:
-        self.set_real_estate: SetRealEstates = set_real_estate
-        self.set_region: SetRealEstates = set_region
-        self.search_real_estates: SearchRealEstates = search_real_estates
+        self.set_real_estate: SetRealEstatesService = set_real_estate
+        self.set_region: SetRealEstatesService = set_region
+        self.search_real_estates: SearchRealEstatesService = search_real_estates
 
     def get_real_estates(
         self, dto: GetRealEstatesOnSearchDto

@@ -7,7 +7,7 @@ from real_estate.serializers import (
 )
 
 
-class SetRealEstates:
+class SetRealEstatesService:
     def __init__(self, serializer, key) -> None:
         self.serializer: Union[
             GetRealEstatesOnSearchResponseSerializer,

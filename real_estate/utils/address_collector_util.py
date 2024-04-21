@@ -15,18 +15,20 @@ from real_estate.containers.utils.address_converter_container import (
 
 from real_estate.models import Region
 from real_estate.serializers import RegionSerializer
-from real_estate.utils.address_converter import KakaoAddressConverter
+from real_estate.utils.address_converter_util import KakaoAddressConverterUtil
 
 
-class AddressCollector:
+class AddressCollectorUtil:
     @inject
     def __init__(
         self,
-        address_converter: KakaoAddressConverter = Provide[
+        address_converter_util: KakaoAddressConverterUtil = Provide[
             AddressConverterContainer.address_converter
         ],
     ) -> None:
-        self.address_converter: KakaoAddressConverter = address_converter
+        self.address_converter_util: KakaoAddressConverterUtil = (
+            address_converter_util
+        )
 
     def collect_region(self) -> Union[List[Region], bool]:
         """
@@ -62,11 +64,11 @@ class AddressCollector:
 
             query: str = f"{sido} {sigungu} {ubmyundong} {dongri}".strip()
 
-            if not self.address_converter.convert_address(query=query):
+            if not self.address_converter_util.convert_address(query=query):
                 return False
 
             address_info: Union[dict[str, str], dict, bool] = (
-                self.address_converter.get_address()
+                self.address_converter_util.get_address()
             )
             logger.info(address_info)
 

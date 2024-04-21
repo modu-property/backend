@@ -6,7 +6,7 @@ from real_estate.containers.search_container import SearchContainer
 from real_estate.dto.get_real_estate_dto import GetRealEstatesOnSearchDto
 
 
-class SearchRealEstates:
+class SearchRealEstatesService:
     @inject
     def __init__(
         self,

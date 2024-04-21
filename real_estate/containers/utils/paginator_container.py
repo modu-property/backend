@@ -1,6 +1,6 @@
 from dependency_injector import containers, providers
 
-from real_estate.utils.paginator import PaginatorUtil
+from real_estate.utils.paginator_util import PaginatorUtil
 
 
 class PaginatorContainer(containers.DeclarativeContainer):

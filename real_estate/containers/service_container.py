@@ -4,16 +4,18 @@ from manticore.manticore_client import ManticoreClient
 from real_estate.containers.repository_container import RepositoryContainer
 from real_estate.containers.search_container import SearchContainer
 from real_estate.repository.real_estate_repository import RealEstateRepository
-from real_estate.services.get_real_estates import (
-    GetRealEstates,
-    GetRegions,
+from real_estate.services.get_real_estates_service import (
+    GetRealEstatesService,
+    GetRegionsService,
 )
 from real_estate.serializers import (
     GetRealEstatesOnSearchResponseSerializer,
     GetRegionsOnSearchResponseSerializer,
 )
-from real_estate.services.search_real_estates import SearchRealEstates
-from real_estate.services.set_real_estates import SetRealEstates
+from real_estate.services.search_real_estates_service import (
+    SearchRealEstatesService,
+)
+from real_estate.services.set_real_estates_service import SetRealEstatesService
 
 
 class ServiceContainer(containers.DeclarativeContainer):
@@ -24,17 +26,19 @@ class ServiceContainer(containers.DeclarativeContainer):
     )
 
     get_real_estates = providers.Factory(
-        provides=GetRealEstates, repository=repository
+        provides=GetRealEstatesService, repository=repository
     )
-    get_regions = providers.Factory(provides=GetRegions, repository=repository)
+    get_regions = providers.Factory(
+        provides=GetRegionsService, repository=repository
+    )
 
     set_real_estate_real_estates = providers.Factory(
-        provides=SetRealEstates,
+        provides=SetRealEstatesService,
         serializer=GetRealEstatesOnSearchResponseSerializer,
         key="real_estates",
     )
     set_real_estate_regions = providers.Factory(
-        provides=SetRealEstates,
+        provides=SetRealEstatesService,
         serializer=GetRegionsOnSearchResponseSerializer,
         key="regions",
     )
@@ -43,7 +47,7 @@ class ServiceContainer(containers.DeclarativeContainer):
         SearchContainer.search_client
     )
     search_real_estates = providers.Singleton(
-        provides=SearchRealEstates,
+        provides=SearchRealEstatesService,
         search_client=search_client,
     )
 
