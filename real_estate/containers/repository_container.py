@@ -15,5 +15,6 @@ RepositoryContainer().wire(
         "real_estate.services.collect_region_price_service",
         "real_estate.services.get_deals_service",
         "real_estate.services.get_real_estate_service",
+        "real_estate.services.collect_address_service",
     ]
 )

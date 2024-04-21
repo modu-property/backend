@@ -14,9 +14,6 @@ class TestCollectRegionService:
 
         result: bool = CollectRegionService().collect_region()
 
-        assert result is True
-
-        regions = RealEstateRepository().get_regions()
-        for region in regions:
+        for region in result:
             assert region.latitude is not None
             assert region.longitude is not None

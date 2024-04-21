@@ -292,6 +292,10 @@ container 디렉토리에 container.py 파일에다 provider 만들고 wiring �
 apps.py의 ready() 함수 안에 container import해서 초기화해주기  
 안되면 사용되는 파일의 디렉토리의 `__init__.py`에 넣기  
 
+service에서 repository를 사용하면 service는 repository_container의 provider에 의해 Dependency Injection 당함
+command에서 service를 사용하면 command는 service_container의 provider에 의해 Dependency Injection 당함
+
+
 # TODO
 23.12.05  
 * https://www.notion.so/2-5ddb861b8a5d468eac0b71b1238a41aa  
