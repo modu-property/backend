@@ -2,14 +2,24 @@ import os
 
 from datetime import datetime, timedelta
 from typing import Union
+
+from dependency_injector.wiring import Provide, inject
+
 from modu_property.utils.time import TimeUtil
+from real_estate.containers.repository_container import RepositoryContainer
 from real_estate.models import Deal, RegionPrice
 from real_estate.repository.real_estate_repository import RealEstateRepository
 
 
 class CollectCommandMixin:
-    def __init__(self) -> None:
-        self.real_estate_repository = RealEstateRepository()
+    @inject
+    def __init__(
+        self,
+        real_estate_repository: RealEstateRepository = Provide[
+            RepositoryContainer.repository
+        ],
+    ) -> None:
+        self.real_estate_repository = real_estate_repository
 
     @staticmethod
     def get_collecting_period(
