@@ -12,6 +12,7 @@ from real_estate.serializers import (
     GetRealEstatesOnSearchResponseSerializer,
     GetRegionsOnSearchResponseSerializer,
 )
+from real_estate.services.insert_address_service import InsertRegionsService
 from real_estate.services.search_real_estates_service import (
     SearchRealEstatesService,
 )
@@ -51,10 +52,13 @@ class ServiceContainer(containers.DeclarativeContainer):
         search_client=search_client,
     )
 
+    insert_regions_service = providers.Factory(InsertRegionsService)
+
 
 ServiceContainer().wire(
     modules=[
         "real_estate.services.get_real_estates_on_map_service",
         "real_estate.services.get_real_estates_on_search_service",
+        "real_estate.management.commands.insert_regional_code_command",
     ]
 )
