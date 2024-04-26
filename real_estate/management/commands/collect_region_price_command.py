@@ -1,6 +1,10 @@
 from datetime import datetime
 import threading
+
+from dependency_injector.wiring import Provide
+
 from modu_property.utils.loggers import logger
+from real_estate.containers.repository_container import RepositoryContainer
 from real_estate.dto.collect_region_price_dto import CollectRegionPriceDto
 from real_estate.enum.deal_enum import DealTypesForDBEnum
 from modu_property.utils.time import TimeUtil
@@ -18,13 +22,18 @@ from django.core.management.base import BaseCommand
 class Command(BaseCommand, CollectCommandMixin):
     help = "지역 단위 매매, 전세 가격 정보 수집하는 명령어"
 
-    def __init__(self):
+    def __init__(
+        self,
+        repository: RealEstateRepository = Provide[
+            RepositoryContainer.repository
+        ],
+    ):
         super(BaseCommand, self).__init__()
         super(CollectCommandMixin, self).__init__()
 
         self.service = CollectRegionPriceService()
         self.deal_types = [DealTypesForDBEnum.DEAL.value]
-        self.repository = RealEstateRepository()
+        self.repository: RealEstateRepository = repository
 
     def add_arguments(self, parser):
         parser.add_argument(
