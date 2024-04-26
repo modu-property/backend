@@ -3,7 +3,11 @@ from dependency_injector import containers, providers
 from manticore.manticore_client import ManticoreClient
 from real_estate.containers.repository_container import RepositoryContainer
 from real_estate.containers.search_container import SearchContainer
+from real_estate.containers.utils.address_collector_container import (
+    AddressCollectorContainer,
+)
 from real_estate.repository.real_estate_repository import RealEstateRepository
+from real_estate.services.collect_address_service import CollectRegionService
 from real_estate.services.get_real_estates_service import (
     GetRealEstatesService,
     GetRegionsService,
@@ -54,11 +58,18 @@ class ServiceContainer(containers.DeclarativeContainer):
 
     insert_regions_service = providers.Factory(InsertRegionsService)
 
+    collect_regions_service = providers.Factory(
+        CollectRegionService,
+        address_collector=AddressCollectorContainer.address_collector,
+        repository=repository,
+    )
+
 
 ServiceContainer().wire(
     modules=[
         "real_estate.services.get_real_estates_on_map_service",
         "real_estate.services.get_real_estates_on_search_service",
         "real_estate.management.commands.insert_regional_code_command",
+        "real_estate.management.commands.collect_regional_code_command",
     ]
 )
