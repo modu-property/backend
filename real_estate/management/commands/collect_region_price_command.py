@@ -1,17 +1,13 @@
 from datetime import datetime
-import threading
 
 from dependency_injector.wiring import Provide
 
 from modu_property.utils.loggers import logger
 from real_estate.containers.repository_container import RepositoryContainer
-from real_estate.dto.collect_region_price_dto import CollectRegionPriceDto
-from real_estate.enum.deal_enum import DealTypesForDBEnum
 from modu_property.utils.time import TimeUtil
 from real_estate.management.commands.collect_command_mixin import (
     CollectCommandMixin,
 )
-from real_estate.models import Region
 from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.services.collect_region_price_service import (
     CollectRegionPriceService,
@@ -34,7 +30,6 @@ class Command(BaseCommand, CollectCommandMixin):
         super(CollectCommandMixin, self).__init__()
 
         self.service = CollectRegionPriceService()
-        self.deal_types = [DealTypesForDBEnum.DEAL.value]
         self.repository: RealEstateRepository = repository
 
     def add_arguments(self, parser):
@@ -85,41 +80,11 @@ class Command(BaseCommand, CollectCommandMixin):
             self.create_existing_region_price_dict()
         )
 
-        self.collect(
+        self.service.execute(
             years_and_months=years_and_months,
             regions=regions,
             existing_region_price_dict=existing_region_price_dict,
         )
-
-    def collect(self, years_and_months, regions, existing_region_price_dict):
-        for year_and_month in years_and_months:
-            for region in regions:
-                deal_year, deal_month = TimeUtil.split_year_and_month(
-                    year_and_month=year_and_month
-                )
-
-                if self.skip_existing_region_price(
-                    region=region,
-                    deal_year=deal_year,
-                    deal_month=deal_month,
-                    existing_region_price_dict=existing_region_price_dict,
-                ):
-                    continue
-
-                _region = self.repository.get_region(
-                    sido=region.sido,
-                    sigungu=region.sigungu,
-                    ubmyundong=region.ubmyundong,
-                    dongri=region.dongri,
-                )
-                if not _region:
-                    raise Exception(
-                        f"specific region not found : {region.__dict__}"
-                    )
-
-                self.run_service(
-                    deal_year=deal_year, deal_month=deal_month, _region=_region
-                )
 
     def create_existing_region_price_dict(self) -> dict[str, None]:
         """
@@ -148,43 +113,7 @@ class Command(BaseCommand, CollectCommandMixin):
             region_prices_dict[region_price_key] = None
         return region_prices_dict
 
-    def run_service(
-        self, deal_year: int, deal_month: int, _region: Region
-    ) -> None:
-        dto = None
-        threads = []
-        for deal_type in self.deal_types:
-            dto: CollectRegionPriceDto = CollectRegionPriceDto(
-                region=_region,
-                deal_type=deal_type,
-                deal_year=deal_year,
-                deal_month=deal_month,
-                is_deal_canceled=False,
-            )
-            if self.not_test_env():
-                t = threading.Thread(
-                    target=self.service.collect_region_price, args=(dto,)
-                )
-                t.start()
-                threads.append(t)
-            else:
-                self.service.collect_region_price(dto=dto)
-
-        if self.not_test_env():
-            for _thread in threads:
-                _thread.join()
-
     def create_region_price_key(
         self, region_id: int, deal_year: str, deal_month: str
     ) -> str:
         return f"{region_id}-{deal_year}-{deal_month}"
-
-    def skip_existing_region_price(
-        self, region, deal_year, deal_month, existing_region_price_dict
-    ):
-        region_price_key = self.create_region_price_key(
-            region_id=region.id, deal_year=deal_year, deal_month=deal_month
-        )
-
-        if region_price_key in existing_region_price_dict:
-            return True
