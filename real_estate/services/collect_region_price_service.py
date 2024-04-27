@@ -34,16 +34,10 @@ class CollectRegionPriceService:
                     existing_region_price_dict=existing_region_price_dict,
                 )
 
-                deal_year = year_month_region.get("deal_year")
-                deal_month = year_month_region.get("deal_month")
-                region = year_month_region.get("region")
-
-                logger.info(f"year_month_region : {year_month_region}")
-
                 self.collect_region_price(
-                    deal_year=deal_year,
-                    deal_month=deal_month,
-                    region=region,
+                    deal_year=year_month_region.get("deal_year"),
+                    deal_month=year_month_region.get("deal_month"),
+                    region=year_month_region.get("region"),
                 )
 
     def _get_year_month_region(
