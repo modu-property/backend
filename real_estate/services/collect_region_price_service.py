@@ -27,8 +27,39 @@ class CollectRegionPriceService:
         self.deal_types = [DealTypesForDBEnum.DEAL.value]
 
     def execute(self, sido, start_date, end_date):
+        years_and_months = self._get_years_and_months(end_date, start_date)
 
-        years_and_months = None
+        regions = self.real_estate_repository.get_regions(sido=sido)
+        self._check_region_exist(regions)
+
+        existing_region_price_dict: dict[str, None] = (
+            self.create_existing_region_price_dict()
+        )
+
+        for year_and_month in years_and_months:
+            deal_year, deal_month = TimeUtil.split_year_and_month(
+                year_and_month=year_and_month
+            )
+            for region in regions:
+                if self._skip_alreay_region_price_existing(
+                    region=region,
+                    deal_year=deal_year,
+                    deal_month=deal_month,
+                    existing_region_price_dict=existing_region_price_dict,
+                ):
+                    continue
+
+                self.collect_region_price(
+                    deal_year=deal_year,
+                    deal_month=deal_month,
+                    region=region,
+                )
+
+    def _check_region_exist(self, regions):
+        if not regions:
+            raise Exception("regions not found")
+
+    def _get_years_and_months(self, end_date, start_date):
         if not all([start_date, end_date]):
             last_region_price = (
                 self.real_estate_repository.get_last_region_price()
@@ -45,35 +76,7 @@ class CollectRegionPriceService:
             years_and_months = GetCollectingPeriodUtil.get_collecting_period(
                 start_date=start_date, end_date=end_date
             )
-
-        regions = self.real_estate_repository.get_regions(sido=sido)
-        if not regions:
-            logger.error("regions not found")
-            return
-
-        existing_region_price_dict: dict[str, None] = (
-            self.create_existing_region_price_dict()
-        )
-
-        for year_and_month in years_and_months:
-            for region in regions:
-                deal_year, deal_month = TimeUtil.split_year_and_month(
-                    year_and_month=year_and_month
-                )
-
-                if self._skip_alreay_region_price_existing(
-                    region=region,
-                    deal_year=deal_year,
-                    deal_month=deal_month,
-                    existing_region_price_dict=existing_region_price_dict,
-                ):
-                    continue
-
-                self.collect_region_price(
-                    deal_year=deal_year,
-                    deal_month=deal_month,
-                    region=region,
-                )
+        return years_and_months
 
     def create_existing_region_price_dict(self) -> dict[str, None]:
         """

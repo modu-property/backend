@@ -17,6 +17,5 @@ RepositoryContainer().wire(
         "real_estate.services.get_real_estate_service",
         "real_estate.services.collect_address_service",
         "real_estate.management.commands.collect_command_mixin",
-        "real_estate.management.commands.collect_region_price_command",
     ]
 )

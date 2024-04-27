@@ -1,18 +1,11 @@
-from dependency_injector.wiring import Provide
-
-from modu_property.utils.loggers import logger
-from real_estate.containers.repository_container import RepositoryContainer
 from modu_property.utils.time import TimeUtil
+from django.core.management.base import BaseCommand
 from real_estate.management.commands.collect_command_mixin import (
     CollectCommandMixin,
 )
-from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.services.collect_region_price_service import (
     CollectRegionPriceService,
 )
-from django.core.management.base import BaseCommand
-
-from real_estate.utils.get_collecting_period_util import GetCollectingPeriodUtil
 
 
 class Command(BaseCommand, CollectCommandMixin):
@@ -20,15 +13,11 @@ class Command(BaseCommand, CollectCommandMixin):
 
     def __init__(
         self,
-        repository: RealEstateRepository = Provide[
-            RepositoryContainer.repository
-        ],
     ):
         super(BaseCommand, self).__init__()
         super(CollectCommandMixin, self).__init__()
 
         self.service = CollectRegionPriceService()
-        self.repository: RealEstateRepository = repository
 
     def add_arguments(self, parser):
         parser.add_argument(
