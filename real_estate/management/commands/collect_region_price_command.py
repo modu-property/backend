@@ -18,6 +18,8 @@ from real_estate.services.collect_region_price_service import (
 )
 from django.core.management.base import BaseCommand
 
+from real_estate.utils.get_collecting_period_util import GetCollectingPeriodUtil
+
 
 class Command(BaseCommand, CollectCommandMixin):
     help = "지역 단위 매매, 전세 가격 정보 수집하는 명령어"
@@ -66,11 +68,11 @@ class Command(BaseCommand, CollectCommandMixin):
                     "시작/종료 연월과 region_price 둘 다 없음. 둘 중에 하나는 있어야 함"
                 )
 
-            years_and_months = self.get_collecting_period(
+            years_and_months = GetCollectingPeriodUtil.get_collecting_period(
                 instance=last_region_price
             )
         else:
-            years_and_months = self.get_collecting_period(
+            years_and_months = GetCollectingPeriodUtil.get_collecting_period(
                 start_date=start_date, end_date=end_date
             )
 
