@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from dependency_injector.wiring import Provide
 
 from modu_property.utils.loggers import logger
@@ -53,67 +51,4 @@ class Command(BaseCommand, CollectCommandMixin):
     def handle(self, *args, **options):
         sido, start_date, end_date = self.get_command_params(options)
 
-        years_and_months = None
-        if not all([start_date, end_date]):
-            last_region_price = (
-                self.real_estate_repository.get_last_region_price()
-            )
-            if not last_region_price:
-                raise Exception(
-                    "시작/종료 연월과 region_price 둘 다 없음. 둘 중에 하나는 있어야 함"
-                )
-
-            years_and_months = GetCollectingPeriodUtil.get_collecting_period(
-                instance=last_region_price
-            )
-        else:
-            years_and_months = GetCollectingPeriodUtil.get_collecting_period(
-                start_date=start_date, end_date=end_date
-            )
-
-        regions = self.repository.get_regions(sido=sido)
-        if not regions:
-            logger.error("regions not found")
-            return
-
-        existing_region_price_dict: dict[str, None] = (
-            self.create_existing_region_price_dict()
-        )
-
-        self.service.execute(
-            years_and_months=years_and_months,
-            regions=regions,
-            existing_region_price_dict=existing_region_price_dict,
-        )
-
-    def create_existing_region_price_dict(self) -> dict[str, None]:
-        """
-        region_price에 deal_date, region_id가 있으면 제외
-        key -> region-id-year-month
-        """
-        region_prices_dict = {}
-        region_prices = self.repository.get_region_prices()
-        if not region_prices:
-            logger.error(f"region_prices not found")
-            return region_prices_dict
-
-        region_prices = list(region_prices)
-        for region_price in region_prices:
-            deal_date = datetime.strftime(region_price.deal_date, "%Y%m%d")
-            deal_year, deal_month = TimeUtil.split_year_and_month(
-                year_and_month=deal_date
-            )
-
-            region_price_key = self.create_region_price_key(
-                region_id=region_price.region_id,
-                deal_year=deal_year,
-                deal_month=deal_month,
-            )
-
-            region_prices_dict[region_price_key] = None
-        return region_prices_dict
-
-    def create_region_price_key(
-        self, region_id: int, deal_year: str, deal_month: str
-    ) -> str:
-        return f"{region_id}-{deal_year}-{deal_month}"
+        self.service.execute(sido, start_date, end_date)

@@ -13,6 +13,7 @@ from real_estate.enum.deal_enum import DealTypesForDBEnum
 from real_estate.models import Deal, RealEstate
 from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.utils.env_util import EnvUtil
+from real_estate.utils.get_collecting_period_util import GetCollectingPeriodUtil
 
 
 class CollectRegionPriceService:
@@ -25,62 +26,98 @@ class CollectRegionPriceService:
         self.real_estate_repository = real_estate_repository
         self.deal_types = [DealTypesForDBEnum.DEAL.value]
 
-    def execute(self, years_and_months, regions, existing_region_price_dict):
-        for year_and_month in years_and_months:
-            for region in regions:
-                year_month_region = self._get_year_month_region(
-                    year_and_month=year_and_month,
-                    region=region,
-                    existing_region_price_dict=existing_region_price_dict,
+    def execute(self, sido, start_date, end_date):
+
+        years_and_months = None
+        if not all([start_date, end_date]):
+            last_region_price = (
+                self.real_estate_repository.get_last_region_price()
+            )
+            if not last_region_price:
+                raise Exception(
+                    "시작/종료 연월과 region_price 둘 다 없음. 둘 중에 하나는 있어야 함"
                 )
 
-                self.collect_region_price(
-                    deal_year=year_month_region.get("deal_year"),
-                    deal_month=year_month_region.get("deal_month"),
-                    region=year_month_region.get("region"),
-                )
+            years_and_months = GetCollectingPeriodUtil.get_collecting_period(
+                instance=last_region_price
+            )
+        else:
+            years_and_months = GetCollectingPeriodUtil.get_collecting_period(
+                start_date=start_date, end_date=end_date
+            )
 
-    def _get_year_month_region(
-        self, year_and_month, region, existing_region_price_dict
-    ):
-        deal_year, deal_month = TimeUtil.split_year_and_month(
-            year_and_month=year_and_month
-        )
-
-        if self.skip_existing_region_price(
-            region=region,
-            deal_year=deal_year,
-            deal_month=deal_month,
-            existing_region_price_dict=existing_region_price_dict,
-        ):
+        regions = self.real_estate_repository.get_regions(sido=sido)
+        if not regions:
+            logger.error("regions not found")
             return
 
-        _region = self.real_estate_repository.get_region(
-            sido=region.sido,
-            sigungu=region.sigungu,
-            ubmyundong=region.ubmyundong,
-            dongri=region.dongri,
+        existing_region_price_dict: dict[str, None] = (
+            self.create_existing_region_price_dict()
         )
-        if not _region:
-            raise Exception(f"specific region not found : {_region.__dict__}")
 
-        return {
-            "deal_year": deal_year,
-            "deal_month": deal_month,
-            "region": _region,
-        }
+        for year_and_month in years_and_months:
+            for region in regions:
+                deal_year, deal_month = TimeUtil.split_year_and_month(
+                    year_and_month=year_and_month
+                )
 
-    def skip_existing_region_price(
+                if self._skip_alreay_region_price_existing(
+                    region=region,
+                    deal_year=deal_year,
+                    deal_month=deal_month,
+                    existing_region_price_dict=existing_region_price_dict,
+                ):
+                    continue
+
+                self.collect_region_price(
+                    deal_year=deal_year,
+                    deal_month=deal_month,
+                    region=region,
+                )
+
+    def create_existing_region_price_dict(self) -> dict[str, None]:
+        """
+        region_price에 deal_date, region_id가 있으면 제외
+        key -> region-id-year-month
+        """
+        region_prices_dict = {}
+        region_prices = self.real_estate_repository.get_region_prices()
+        if not region_prices:
+            logger.error(f"region_prices not found")
+            return region_prices_dict
+
+        region_prices = list(region_prices)
+        for region_price in region_prices:
+            deal_date = datetime.strftime(region_price.deal_date, "%Y%m%d")
+            deal_year, deal_month = TimeUtil.split_year_and_month(
+                year_and_month=deal_date
+            )
+
+            region_price_key = self.create_region_price_key(
+                region_id=region_price.region_id,
+                deal_year=deal_year,
+                deal_month=deal_month,
+            )
+
+            region_prices_dict[region_price_key] = None
+        return region_prices_dict
+
+    def create_region_price_key(
+        self, region_id: int, deal_year: str, deal_month: str
+    ) -> str:
+        return f"{region_id}-{deal_year}-{deal_month}"
+
+    def _skip_alreay_region_price_existing(
         self, region, deal_year, deal_month, existing_region_price_dict
     ):
-        region_price_key = self.create_region_price_key(
+        region_price_key = self._create_region_price_key(
             region_id=region.id, deal_year=deal_year, deal_month=deal_month
         )
 
         if region_price_key in existing_region_price_dict:
             return True
 
-    def create_region_price_key(
+    def _create_region_price_key(
         self, region_id: int, deal_year: str, deal_month: str
     ) -> str:
         return f"{region_id}-{deal_year}-{deal_month}"
