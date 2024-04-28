@@ -9,7 +9,7 @@ from modu_property.utils.time import TimeUtil
 from real_estate.containers.repository_container import RepositoryContainer
 from real_estate.dto.collect_region_price_dto import CollectRegionPriceDto
 from real_estate.enum.deal_enum import DealTypesForDBEnum
-from real_estate.models import Deal, RealEstate
+from real_estate.models import Deal, Region
 from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.utils.env_util import EnvUtil
 from real_estate.utils.get_collecting_period_util import GetCollectingPeriodUtil
@@ -29,12 +29,10 @@ class CollectRegionPriceService:
         regions = self.real_estate_repository.get_regions(sido=sido)
         self._check_region_exist(regions)
 
-        existing_region_price_dict: dict[str, None] = (
-            self.create_existing_region_price_dict()
-        )
         years_and_months = self._get_years_and_months(end_date, start_date)
         self.collect_region_price(
-            years_and_months, regions, existing_region_price_dict
+            years_and_months,
+            regions,
         )
 
     def _check_region_exist(self, regions):
@@ -60,7 +58,64 @@ class CollectRegionPriceService:
             )
         return years_and_months
 
-    def create_existing_region_price_dict(self) -> dict[str, None]:
+    def collect_region_price(
+        self,
+        years_and_months,
+        regions,
+    ) -> bool:
+        """
+        real_estate.address에 시~리 있는거 가져오기
+        real_estate.deals에서 deal 연월에 해당하는거 가져오기
+        개수 세기
+        매매 총 거래액, 총 평당가
+        전세 총 거래액, 총 평당가
+        """
+        for year_and_month in years_and_months:
+            deal_year, deal_month = TimeUtil.split_year_and_month(
+                year_and_month=year_and_month
+            )
+            for region in regions:
+                self._collect_region_price_with_region(
+                    region=region,
+                    deal_year=deal_year,
+                    deal_month=deal_month,
+                )
+
+    def _collect_region_price_with_region(
+        self,
+        region,
+        deal_year,
+        deal_month,
+    ):
+        existing_region_price_dict: dict[str, None] = (
+            self._create_existing_region_price_dict()
+        )
+        if self._skip_already_region_price_existing(
+            region=region,
+            deal_year=deal_year,
+            deal_month=deal_month,
+            existing_region_price_dict=existing_region_price_dict,
+        ):
+            return
+
+        if EnvUtil.not_test_env():
+            threads = self._create_calc_region_price_threads(
+                region=region, deal_year=deal_year, deal_month=deal_month
+            )
+            self._start_threads(threads)
+        else:
+            for deal_type in self.deal_types:
+                dto: CollectRegionPriceDto = CollectRegionPriceDto(
+                    region=region,
+                    deal_type=deal_type,
+                    deal_year=deal_year,
+                    deal_month=deal_month,
+                    is_deal_canceled=False,
+                )
+
+                self._calc_region_price(dto=dto)
+
+    def _create_existing_region_price_dict(self) -> dict[str, None]:
         """
         region_price에 deal_date, region_id가 있으면 제외
         key -> region-id-year-month
@@ -78,7 +133,7 @@ class CollectRegionPriceService:
                 year_and_month=deal_date
             )
 
-            region_price_key = self.create_region_price_key(
+            region_price_key = self._create_region_price_key(
                 region_id=region_price.region_id,
                 deal_year=deal_year,
                 deal_month=deal_month,
@@ -87,12 +142,7 @@ class CollectRegionPriceService:
             region_prices_dict[region_price_key] = None
         return region_prices_dict
 
-    def create_region_price_key(
-        self, region_id: int, deal_year: str, deal_month: str
-    ) -> str:
-        return f"{region_id}-{deal_year}-{deal_month}"
-
-    def _skip_alreay_region_price_existing(
+    def _skip_already_region_price_existing(
         self, region, deal_year, deal_month, existing_region_price_dict
     ):
         region_price_key = self._create_region_price_key(
@@ -107,52 +157,30 @@ class CollectRegionPriceService:
     ) -> str:
         return f"{region_id}-{deal_year}-{deal_month}"
 
-    def collect_region_price(
-        self, years_and_months, regions, existing_region_price_dict
-    ) -> bool:
-        """
-        real_estate.address에 시~리 있는거 가져오기
-        real_estate.deals에서 deal 연월에 해당하는거 가져오기
-        개수 세기
-        매매 총 거래액, 총 평당가
-        전세 총 거래액, 총 평당가
-        """
-        for year_and_month in years_and_months:
-            deal_year, deal_month = TimeUtil.split_year_and_month(
-                year_and_month=year_and_month
+    def _create_calc_region_price_threads(
+        self, region: Region, deal_year: str, deal_month: str
+    ):
+        threads = []
+        for deal_type in self.deal_types:
+            dto: CollectRegionPriceDto = CollectRegionPriceDto(
+                region=region,
+                deal_type=deal_type,
+                deal_year=deal_year,
+                deal_month=deal_month,
+                is_deal_canceled=False,
             )
-            for region in regions:
-                if self._skip_alreay_region_price_existing(
-                    region=region,
-                    deal_year=deal_year,
-                    deal_month=deal_month,
-                    existing_region_price_dict=existing_region_price_dict,
-                ):
-                    continue
 
-                threads = []
-                for deal_type in self.deal_types:
-                    dto: CollectRegionPriceDto = CollectRegionPriceDto(
-                        region=region,
-                        deal_type=deal_type,
-                        deal_year=deal_year,
-                        deal_month=deal_month,
-                        is_deal_canceled=False,
-                    )
-                    if EnvUtil.not_test_env():
-                        t = threading.Thread(
-                            target=self._collect_region_price, args=(dto,)
-                        )
-                        t.start()
-                        threads.append(t)
-                    else:
-                        self._collect_region_price(dto=dto)
+            t = threading.Thread(target=self._calc_region_price, args=(dto,))
+            t.start()
+            threads.append(t)
+        return threads
 
-                if EnvUtil.not_test_env():
-                    for _thread in threads:
-                        _thread.join()
+    def _start_threads(self, threads):
+        if EnvUtil.not_test_env():
+            for _thread in threads:
+                _thread.join()
 
-    def _collect_region_price(self, dto):
+    def _calc_region_price(self, dto):
         self._set_target_region(dto=dto)
         real_estates = self._get_real_estates(dto=dto)
         if not real_estates:
