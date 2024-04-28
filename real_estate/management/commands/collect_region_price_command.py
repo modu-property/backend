@@ -1,5 +1,6 @@
 from modu_property.utils.time import TimeUtil
 from django.core.management.base import BaseCommand
+
 from real_estate.management.commands.collect_command_mixin import (
     CollectCommandMixin,
 )

@@ -1,7 +1,6 @@
 import threading
 from datetime import datetime
 from decimal import ROUND_UP, Decimal
-from typing import List
 
 from dependency_injector.wiring import Provide
 
@@ -27,33 +26,16 @@ class CollectRegionPriceService:
         self.deal_types = [DealTypesForDBEnum.DEAL.value]
 
     def execute(self, sido, start_date, end_date):
-        years_and_months = self._get_years_and_months(end_date, start_date)
-
         regions = self.real_estate_repository.get_regions(sido=sido)
         self._check_region_exist(regions)
 
         existing_region_price_dict: dict[str, None] = (
             self.create_existing_region_price_dict()
         )
-
-        for year_and_month in years_and_months:
-            deal_year, deal_month = TimeUtil.split_year_and_month(
-                year_and_month=year_and_month
-            )
-            for region in regions:
-                if self._skip_alreay_region_price_existing(
-                    region=region,
-                    deal_year=deal_year,
-                    deal_month=deal_month,
-                    existing_region_price_dict=existing_region_price_dict,
-                ):
-                    continue
-
-                self.collect_region_price(
-                    deal_year=deal_year,
-                    deal_month=deal_month,
-                    region=region,
-                )
+        years_and_months = self._get_years_and_months(end_date, start_date)
+        self.collect_region_price(
+            years_and_months, regions, existing_region_price_dict
+        )
 
     def _check_region_exist(self, regions):
         if not regions:
@@ -125,7 +107,9 @@ class CollectRegionPriceService:
     ) -> str:
         return f"{region_id}-{deal_year}-{deal_month}"
 
-    def collect_region_price(self, deal_year, deal_month, region) -> bool:
+    def collect_region_price(
+        self, years_and_months, regions, existing_region_price_dict
+    ) -> bool:
         """
         real_estate.address에 시~리 있는거 가져오기
         real_estate.deals에서 deal 연월에 해당하는거 가져오기
@@ -133,38 +117,52 @@ class CollectRegionPriceService:
         매매 총 거래액, 총 평당가
         전세 총 거래액, 총 평당가
         """
-        threads = []
-        for deal_type in self.deal_types:
-            dto: CollectRegionPriceDto = CollectRegionPriceDto(
-                region=region,
-                deal_type=deal_type,
-                deal_year=deal_year,
-                deal_month=deal_month,
-                is_deal_canceled=False,
+        for year_and_month in years_and_months:
+            deal_year, deal_month = TimeUtil.split_year_and_month(
+                year_and_month=year_and_month
             )
-            if EnvUtil.not_test_env():
-                t = threading.Thread(
-                    target=self._collect_region_price, args=(dto,)
-                )
-                t.start()
-                threads.append(t)
-            else:
-                self._collect_region_price(dto=dto)
+            for region in regions:
+                if self._skip_alreay_region_price_existing(
+                    region=region,
+                    deal_year=deal_year,
+                    deal_month=deal_month,
+                    existing_region_price_dict=existing_region_price_dict,
+                ):
+                    continue
 
-        if EnvUtil.not_test_env():
-            for _thread in threads:
-                _thread.join()
+                threads = []
+                for deal_type in self.deal_types:
+                    dto: CollectRegionPriceDto = CollectRegionPriceDto(
+                        region=region,
+                        deal_type=deal_type,
+                        deal_year=deal_year,
+                        deal_month=deal_month,
+                        is_deal_canceled=False,
+                    )
+                    if EnvUtil.not_test_env():
+                        t = threading.Thread(
+                            target=self._collect_region_price, args=(dto,)
+                        )
+                        t.start()
+                        threads.append(t)
+                    else:
+                        self._collect_region_price(dto=dto)
+
+                if EnvUtil.not_test_env():
+                    for _thread in threads:
+                        _thread.join()
 
     def _collect_region_price(self, dto):
-        self.set_target_region(dto=dto)
-        real_estates: List[RealEstate] = list(
-            self.real_estate_repository.get_real_estates(dto=dto)
-        )
+        self._set_target_region(dto=dto)
+        real_estates = self._get_real_estates(dto=dto)
         if not real_estates:
             return False
-        self.set_deal_date(dto)
+
+        dto.deal_date = TimeUtil.get_deal_date(
+            deal_year=dto.deal_year, deal_month=dto.deal_month
+        )
         self.calc_prices(dto, real_estates)
-        self.to_string(dto)
+        self._convert_decimal_to_str(dto)
         self.calc_average_deal_price(dto)
         self.calc_average_jeonse_price(dto)
         self.calc_average_deal_price_per_pyung(dto)
@@ -172,13 +170,8 @@ class CollectRegionPriceService:
         region_price = self.real_estate_repository.create_region_price(dto=dto)
         return region_price
 
-    def set_deal_date(self, dto: CollectRegionPriceDto):
-        dto.deal_date = datetime.strftime(
-            datetime.strptime(
-                f"{dto.deal_year}-{dto.deal_month}-01", "%Y-%m-%d"
-            ),
-            "%Y-%m-%d",
-        )
+    def _get_real_estates(self, dto):
+        return list(self.real_estate_repository.get_real_estates(dto=dto))
 
     def calc_jeonse_price_per_pyung(self, dto: CollectRegionPriceDto):
         dto.average_jeonse_price_per_pyung = str(
@@ -217,7 +210,7 @@ class CollectRegionPriceService:
             else Decimal(0)
         )
 
-    def to_string(self, dto: CollectRegionPriceDto):
+    def _convert_decimal_to_str(self, dto: CollectRegionPriceDto):
         dto.total_deal_price_per_pyung = str(dto.total_deal_price_per_pyung)
         dto.total_jeonse_price_per_pyung = str(dto.total_jeonse_price_per_pyung)
 
@@ -241,7 +234,7 @@ class CollectRegionPriceService:
 
                     dto.jeonse_count += 1
 
-    def set_target_region(self, dto: CollectRegionPriceDto):
+    def _set_target_region(self, dto: CollectRegionPriceDto):
         if dto.region.sido:
             self.filter_sido(dto=dto)
         if dto.region.dongri:

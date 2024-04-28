@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Union
+from typing import Union, List
 
 from modu_property.utils.time import TimeUtil
 from real_estate.models import RegionPrice, Deal
@@ -12,7 +12,7 @@ class GetCollectingPeriodUtil:
         instance: Union[RegionPrice, Deal, None] = None,
         start_date: str = "",
         end_date: str = "",
-    ):
+    ) -> List[str]:
         start_year, start_month, end_year, end_month = 0, 0, 0, 0
         if instance:
             end_month, end_year, start_month, start_year = (
