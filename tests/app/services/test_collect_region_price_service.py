@@ -11,6 +11,8 @@ from real_estate.services.collect_region_price_service import (
 )
 from django.contrib.gis.geos import Point
 
+from real_estate.utils.get_collecting_period_util import GetCollectingPeriodUtil
+
 
 @pytest.mark.django_db
 class TestCollectRegionPriceService:
@@ -81,25 +83,22 @@ class TestCollectRegionPriceService:
 
         create_region()
 
-        region = repository.get_region(sido="서울특별시")
-
-        dto: CollectRegionPriceDto = CollectRegionPriceDto(
-            region=region,
-            deal_type=DealTypesForDBEnum.DEAL.value,
-            deal_year=deal.deal_year,
-            deal_month=deal.deal_month,
-            is_deal_canceled=False,
+        regions = repository.get_regions(sido="서울특별시")
+        years_and_months = GetCollectingPeriodUtil.get_collecting_period(
+            start_date="200601",
+            end_date="200601",
         )
 
-        region_price = CollectRegionPriceService().collect_region_price(dto=dto)
-
-        assert isinstance(region_price, RegionPrice)
+        region_price = CollectRegionPriceService().collect_region_price(
+            years_and_months,
+            regions,
+        )
 
         region_prices = repository.get_region_prices()
         region_prices = list(region_prices)
 
         for region_price in list(region_prices):
-            assert region_price.region_id == region.id
+            assert region_price.region_id == regions[0].id
             assert (
                 region_price.deal_date
                 == datetime.strptime("2006-01-01", "%Y-%m-%d").date()
@@ -224,17 +223,15 @@ class TestCollectRegionPriceService:
             ubmyundong=region.ubmyundong,
         )
 
-        dto: CollectRegionPriceDto = CollectRegionPriceDto(
-            region=region,
-            deal_type=DealTypesForDBEnum.DEAL.value,
-            deal_year=deal.deal_year,
-            deal_month=deal.deal_month,
-            is_deal_canceled=False,
+        regions = repository.get_regions(sido="서울특별시")
+        years_and_months = GetCollectingPeriodUtil.get_collecting_period(
+            start_date="200601",
+            end_date="200601",
         )
 
-        region_price = CollectRegionPriceService().collect_region_price(dto=dto)
-
-        assert isinstance(region_price, RegionPrice)
+        region_price = CollectRegionPriceService().collect_region_price(
+            regions=regions, years_and_months=years_and_months
+        )
 
         region_prices = repository.get_region_prices()
         region_prices = list(region_prices)
