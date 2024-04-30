@@ -1,6 +1,5 @@
 import threading
 from datetime import datetime
-from decimal import ROUND_UP, Decimal
 
 from dependency_injector.wiring import Provide
 
@@ -9,8 +8,11 @@ from modu_property.utils.time import TimeUtil
 from real_estate.containers.repository_container import RepositoryContainer
 from real_estate.dto.collect_region_price_dto import CollectRegionPriceDto
 from real_estate.enum.deal_enum import DealTypesForDBEnum
-from real_estate.models import Deal, Region
+from real_estate.models import Region
 from real_estate.repository.real_estate_repository import RealEstateRepository
+from real_estate.services.calc_region_price_service import (
+    CalcRegionPriceService,
+)
 from real_estate.utils.env_util import EnvUtil
 from real_estate.utils.get_collecting_period_util import GetCollectingPeriodUtil
 
@@ -113,7 +115,7 @@ class CollectRegionPriceService:
                     is_deal_canceled=False,
                 )
 
-                self._calc_region_price(dto=dto)
+                CalcRegionPriceService().calc_region_price(dto=dto)
 
     def _create_existing_region_price_dict(self) -> dict[str, None]:
         """
@@ -170,7 +172,9 @@ class CollectRegionPriceService:
                 is_deal_canceled=False,
             )
 
-            t = threading.Thread(target=self._calc_region_price, args=(dto,))
+            t = threading.Thread(
+                target=CalcRegionPriceService().calc_region_price, args=(dto,)
+            )
             t.start()
             threads.append(t)
         return threads
@@ -179,110 +183,3 @@ class CollectRegionPriceService:
         if EnvUtil.not_test_env():
             for _thread in threads:
                 _thread.join()
-
-    def _calc_region_price(self, dto):
-        self._set_target_region(dto=dto)
-        real_estates = self._get_real_estates(dto=dto)
-        if not real_estates:
-            return False
-
-        dto.deal_date = TimeUtil.get_deal_date(
-            deal_year=dto.deal_year, deal_month=dto.deal_month
-        )
-        self.calc_prices(dto, real_estates)
-        self._convert_decimal_to_str(dto)
-        self.calc_average_deal_price(dto)
-        self.calc_average_jeonse_price(dto)
-        self.calc_average_deal_price_per_pyung(dto)
-        self.calc_jeonse_price_per_pyung(dto)
-        region_price = self.real_estate_repository.create_region_price(dto=dto)
-        return region_price
-
-    def _get_real_estates(self, dto):
-        return list(self.real_estate_repository.get_real_estates(dto=dto))
-
-    def calc_jeonse_price_per_pyung(self, dto: CollectRegionPriceDto):
-        dto.average_jeonse_price_per_pyung = str(
-            Decimal(
-                Decimal(str(dto.total_jeonse_price_per_pyung))
-                / dto.jeonse_count
-            ).quantize(Decimal(".00"), rounding=ROUND_UP)
-            if dto.jeonse_count
-            else Decimal(0)
-        )
-
-    def calc_average_deal_price_per_pyung(self, dto: CollectRegionPriceDto):
-        dto.average_deal_price_per_pyung = str(
-            Decimal(
-                Decimal(str(dto.total_deal_price_per_pyung)) / dto.deal_count
-            ).quantize(Decimal(".00"), rounding=ROUND_UP)
-            if dto.deal_count
-            else Decimal(0)
-        )
-
-    def calc_average_jeonse_price(self, dto: CollectRegionPriceDto):
-        dto.average_jeonse_price = str(
-            Decimal(
-                Decimal(str(dto.total_jeonse_price)) / dto.jeonse_count
-            ).quantize(Decimal(".00"), rounding=ROUND_UP)
-            if dto.jeonse_count
-            else Decimal(0)
-        )
-
-    def calc_average_deal_price(self, dto: CollectRegionPriceDto):
-        dto.average_deal_price = str(
-            Decimal(
-                Decimal(str(dto.total_deal_price)) / dto.deal_count
-            ).quantize(Decimal(".00"), rounding=ROUND_UP)
-            if dto.deal_count
-            else Decimal(0)
-        )
-
-    def _convert_decimal_to_str(self, dto: CollectRegionPriceDto):
-        dto.total_deal_price_per_pyung = str(dto.total_deal_price_per_pyung)
-        dto.total_jeonse_price_per_pyung = str(dto.total_jeonse_price_per_pyung)
-
-    def calc_prices(self, dto: CollectRegionPriceDto, real_estates):
-        for real_estate in real_estates:
-            deals: list[Deal] = list(real_estate.deals.all())
-            for deal in deals:
-                if deal.deal_type == DealTypesForDBEnum.DEAL.value:
-                    dto.total_deal_price += deal.deal_price
-                    dto.total_deal_price_per_pyung += Decimal(
-                        str(deal.area_for_exclusive_use_price_per_pyung)
-                    )
-
-                    dto.deal_count += 1
-
-                elif deal.deal_type == DealTypesForDBEnum.JEONSE.value:
-                    dto.total_jeonse_price += deal.deal_price
-                    dto.total_jeonse_price_per_pyung += Decimal(
-                        str(deal.area_for_exclusive_use_price_per_pyung)
-                    )
-
-                    dto.jeonse_count += 1
-
-    def _set_target_region(self, dto: CollectRegionPriceDto):
-        if dto.region.sido:
-            self.filter_sido(dto=dto)
-        if dto.region.dongri:
-            dto.target_region = f"{dto.region.sido} {dto.region.sigungu} {dto.region.ubmyundong} {dto.region.dongri}"
-        elif dto.region.ubmyundong:
-            dto.target_region = f"{dto.region.sido} {dto.region.sigungu} {dto.region.ubmyundong}"
-        elif dto.region.sigungu:
-            dto.target_region = f"{dto.region.sido} {dto.region.sigungu}"
-        elif dto.region.sido:
-            dto.target_region = dto.region.sido
-
-    def filter_sido(self, dto: CollectRegionPriceDto):
-        sido: str = dto.region.sido
-        if "특별시" in sido:
-            dto.region.sido = "서울"
-        elif "광역시" in sido:
-            dto.region.sido = sido[2:]
-        elif "남도" in sido or "북도" in sido:
-            dto.region.sido = sido[0] + sido[2]
-        elif "경기도" in sido:
-            dto.region.sido = "경기"
-        elif "특별" in sido:
-            pass
