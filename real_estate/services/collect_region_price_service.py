@@ -27,17 +27,18 @@ class CollectRegionPriceService:
         self.real_estate_repository = real_estate_repository
         self.deal_types = [DealTypesForDBEnum.DEAL.value]
 
-    def execute(self, sido, start_date, end_date):
+    def collect_region_price_within_period(self, sido, start_date, end_date):
         regions = self.real_estate_repository.get_regions(sido=sido)
         self._check_region_exist(regions)
 
         years_and_months = self._get_years_and_months(end_date, start_date)
-        self.collect_region_price(
+        self._collect_region_price_by_date_and_region(
             years_and_months,
             regions,
         )
 
-    def _check_region_exist(self, regions):
+    @staticmethod
+    def _check_region_exist(regions):
         if not regions:
             raise Exception("regions not found")
 
@@ -60,7 +61,7 @@ class CollectRegionPriceService:
             )
         return years_and_months
 
-    def collect_region_price(
+    def _collect_region_price_by_date_and_region(
         self,
         years_and_months,
         regions,
@@ -77,13 +78,13 @@ class CollectRegionPriceService:
                 year_and_month=year_and_month
             )
             for region in regions:
-                self._collect_region_price_with_region(
+                self._collect_region_price(
                     region=region,
                     deal_year=deal_year,
                     deal_month=deal_month,
                 )
 
-    def _collect_region_price_with_region(
+    def _collect_region_price(
         self,
         region,
         deal_year,

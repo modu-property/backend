@@ -89,7 +89,7 @@ class TestCollectRegionPriceService:
             end_date="200601",
         )
 
-        region_price = CollectRegionPriceService().collect_region_price(
+        region_price = CollectRegionPriceService()._collect_region_price_by_date_and_region(
             years_and_months,
             regions,
         )
@@ -229,7 +229,7 @@ class TestCollectRegionPriceService:
             end_date="200601",
         )
 
-        region_price = CollectRegionPriceService().collect_region_price(
+        region_price = CollectRegionPriceService()._collect_region_price_by_date_and_region(
             regions=regions, years_and_months=years_and_months
         )
 

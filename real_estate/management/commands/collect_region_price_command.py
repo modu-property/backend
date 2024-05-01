@@ -41,4 +41,6 @@ class Command(BaseCommand, CollectCommandMixin):
     def handle(self, *args, **options):
         sido, start_date, end_date = self.get_command_params(options)
 
-        self.service.execute(sido, start_date, end_date)
+        self.service.collect_region_price_within_period(
+            sido, start_date, end_date
+        )
