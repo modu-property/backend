@@ -92,13 +92,12 @@ jobs:
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
             cd ~/backend
-            mkdir env
             touch env/.env.development
             git pull origin development
             ls -al
             cat docker-compose.development.yml
             
-            scp ./env/.env.development ec2-user@${{ secrets.SSH_AWS_SERVER_IP_DEV }}:~/backend/env/
+            scp ./env/.env.development ec2-user@${{ secrets.SSH_AWS_SERVER_IP_DEV }}:~/backend/env/.env.development
 
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
             docker pull gidlemyeon/modu_property_platform_development:django
