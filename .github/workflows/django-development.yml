@@ -93,7 +93,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.AWS_SSH_KEY }}
           source: env/.env.development
-          target: /home/ec2-user/backend/env/.env.development
+          target: /home/ec2-user/backend/env/
 
       - name: Deploying
         uses: appleboy/ssh-action@master
