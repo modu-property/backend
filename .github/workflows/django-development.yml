@@ -38,7 +38,7 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set env
         run: |
@@ -84,6 +84,14 @@ jobs:
         run: |
           aws ec2 authorize-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
 
+      - name: copy file via ssh password
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          username: ec2-user
+          key: ${{ secrets.AWS_SSH_KEY }}
+          source: "env/.env.development"
+          target: "~/backend/env/.env.development"
+
       - name: Deploying
         uses: appleboy/ssh-action@master
         with:
@@ -92,12 +100,9 @@ jobs:
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
             cd ~/backend
-            touch env/.env.development
             git pull origin development
             ls -al
             cat docker-compose.development.yml
-            
-            scp ./env/.env.development ec2-user@${{ secrets.SSH_AWS_SERVER_IP_DEV }}:~/backend/env/.env.development
 
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
             docker pull gidlemyeon/modu_property_platform_development:django
