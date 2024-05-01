@@ -96,7 +96,7 @@ jobs:
             ls -al
             cat docker-compose.development.yml
             
-            scp ./env/.env.development ec2-user@${{ secrets.SSH_AWS_SERVER_IP_DEV }}:~/backend/env
+            scp ./env/.env.development ec2-user@${{ secrets.SSH_AWS_SERVER_IP_DEV }}:~/backend/env/
 
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
             docker pull gidlemyeon/modu_property_platform_development:django
