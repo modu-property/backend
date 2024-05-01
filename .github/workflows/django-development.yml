@@ -92,6 +92,8 @@ jobs:
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
             cd ~/backend
+            mkdir env
+            touch env/.env.development
             git pull origin development
             ls -al
             cat docker-compose.development.yml
