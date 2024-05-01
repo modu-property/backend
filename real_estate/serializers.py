@@ -1,6 +1,7 @@
 from decimal import Decimal
 from rest_framework import serializers
 from real_estate.enum.deal_enum import DEAL_TYPES
+from real_estate.enum.real_estate_enum import RealEstateTypesForQueryEnum
 from real_estate.models import Deal, RealEstate, Region, RegionPrice
 
 
@@ -116,6 +117,22 @@ class GetRealEstatesOnMapRequestSerializer(serializers.Serializer):
 
 class GetRealEstatesOnMapResponseSerializer(serializers.Serializer):
     id = serializers.IntegerField()
+    name = serializers.CharField(
+        max_length=30, allow_blank=True, allow_null=True
+    )
+    lot_number = serializers.CharField(
+        max_length=50, allow_blank=False, allow_null=False
+    )
+    address = serializers.CharField(
+        max_length=50, allow_blank=True, allow_null=True
+    )
+    road_name_address = serializers.CharField(
+        max_length=50, allow_blank=True, allow_null=True
+    )
+    real_estate_type = serializers.ChoiceField(
+        choices=RealEstateTypesForQueryEnum
+    )
+    build_year = serializers.IntegerField()
     latitude = serializers.CharField(max_length=20)
     longitude = serializers.CharField(max_length=20)
     deal_price = serializers.IntegerField()

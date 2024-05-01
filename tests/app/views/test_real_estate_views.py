@@ -175,6 +175,14 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
     data = response.json()
     real_estates = data.get("data")
     for real_estate in real_estates:
+        assert "name" in real_estate
+        assert "lot_number" in real_estate
+        assert "address" in real_estate
+        assert "road_name_address" in real_estate
+        assert "build_year" in real_estate
+        assert "deal_price" in real_estate
+        assert "deal_date" in real_estate
+        assert "real_estate_type" in real_estate
         assert "latitude" in real_estate
         assert "longitude" in real_estate
         assert "area_for_exclusive_use_pyung" in real_estate
