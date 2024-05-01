@@ -87,6 +87,7 @@ jobs:
       - name: copy file via ssh password
         uses: appleboy/scp-action@v0.1.7
         with:
+          host: ${{ secrets.SSH_AWS_SERVER_IP_DEV }}
           username: ec2-user
           key: ${{ secrets.AWS_SSH_KEY }}
           source: "env/.env.development"
