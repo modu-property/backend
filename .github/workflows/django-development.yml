@@ -98,7 +98,7 @@ jobs:
 
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
             docker pull gidlemyeon/modu_property_platform_development:django
-            docker-compose -f docker-compose.development.yml up -d
+            docker-compose -f docker-compose.development.yml up -d --build
             docker system prune --volumes -af
 
       - name: Remove Github Actions IP From Security Group
