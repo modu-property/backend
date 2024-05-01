@@ -43,23 +43,23 @@ jobs:
       - name: Set env
         run: |
           mkdir env
-          echo "SERVER_ENV=$SERVER_ENV" >> "env/.env.development"
-          echo "DEBUG=$DEBUG" >> "env/.env.development"
-          echo "SECRET_KEY=$SECRET_KEY" >> "env/.env.development"
-          echo "DB_ENGINE=$DB_ENGINE" >> "env/.env.development"
-          echo "DB_NAME=$DB_NAME" >> "env/.env.development"
-          echo "DB_USER=$DB_USER" >> "env/.env.development"
-          echo "DB_PASSWORD=$DB_PASSWORD" >> "env/.env.development"
-          echo "DB_HOST=$DB_HOST" >> "env/.env.development"
-          echo "DB_PORT=$DB_PORT" >> "env/.env.development"
-          echo "CELERY_BROKER_URL=$CELERY_BROKER_URL" >> "env/.env.development"
-          echo "CELERY_BACKEND=$CELERY_BACKEND" >> "env/.env.development"
-          echo "LOG_LEVEL=$LOG_LEVEL" >> "env/.env.development"
-          echo "DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS" >> "env/.env.development"
-          echo "SERVICE_KEY=$SERVICE_KEY" >> "env/.env.development"
-          echo "KAKAO_API_KEY=$KAKAO_API_KEY" >> "env/.env.development"
-          echo "FLOWER_PORT=$FLOWER_PORT" >> "env/.env.development"
-          echo "DB_HOST_FOR_MANTICORE=$DB_HOST_FOR_MANTICORE" >> "env/.env.development"
+          echo "SERVER_ENV=$SERVER_ENV" >> env/.env.development
+          echo "DEBUG=$DEBUG" >> env/.env.development
+          echo "SECRET_KEY=$SECRET_KEY" >> env/.env.development
+          echo "DB_ENGINE=$DB_ENGINE" >> env/.env.development
+          echo "DB_NAME=$DB_NAME" >> env/.env.development
+          echo "DB_USER=$DB_USER" >> env/.env.development
+          echo "DB_PASSWORD=$DB_PASSWORD" >> env/.env.development
+          echo "DB_HOST=$DB_HOST" >> env/.env.development
+          echo "DB_PORT=$DB_PORT" >> env/.env.development
+          echo "CELERY_BROKER_URL=$CELERY_BROKER_URL" >> env/.env.development
+          echo "CELERY_BACKEND=$CELERY_BACKEND" >> env/.env.development
+          echo "LOG_LEVEL=$LOG_LEVEL" >> env/.env.development
+          echo "DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS" >> env/.env.development
+          echo "SERVICE_KEY=$SERVICE_KEY" >> env/.env.development
+          echo "KAKAO_API_KEY=$KAKAO_API_KEY" >> env/.env.development
+          echo "FLOWER_PORT=$FLOWER_PORT" >> env/.env.development
+          echo "DB_HOST_FOR_MANTICORE=$DB_HOST_FOR_MANTICORE" >> env/.env.development
           
           cat env/.env.development
 
@@ -92,8 +92,8 @@ jobs:
           host: ${{ secrets.SSH_AWS_SERVER_IP_DEV }}
           username: ec2-user
           key: ${{ secrets.AWS_SSH_KEY }}
-          source: "env/.env.development"
-          target: "/home/ec2-user/backend/env/.env.development"
+          source: env/.env.development
+          target: /home/ec2-user/backend/env/.env.development
 
       - name: Deploying
         uses: appleboy/ssh-action@master
