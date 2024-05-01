@@ -61,3 +61,10 @@ class TimeUtil:
             return result
 
         return timer_wrapper
+
+    @staticmethod
+    def get_deal_date(deal_year: str, deal_month: str):
+        return datetime.strftime(
+            datetime.strptime(f"{deal_year}-{deal_month}-01", "%Y-%m-%d"),
+            "%Y-%m-%d",
+        )

@@ -12,28 +12,23 @@ from modu_property.utils.validator import validate_data
 from real_estate.containers.utils.address_converter_container import (
     AddressConverterContainer,
 )
-from real_estate.containers.repository_container import RepositoryContainer
+
 from real_estate.models import Region
-from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.serializers import RegionSerializer
-from real_estate.utils.address_converter import KakaoAddressConverter
+from real_estate.utils.address_converter_util import KakaoAddressConverterUtil
 
 
-class AddressCollector:
+class AddressCollectorUtil:
     @inject
     def __init__(
         self,
-        real_estate_repository: RealEstateRepository = Provide[
-            RepositoryContainer.repository
-        ],
-        address_converter: KakaoAddressConverter = Provide[
+        address_converter_util: KakaoAddressConverterUtil = Provide[
             AddressConverterContainer.address_converter
         ],
     ) -> None:
-        self.real_estate_repository: RealEstateRepository = (
-            real_estate_repository
+        self.address_converter_util: KakaoAddressConverterUtil = (
+            address_converter_util
         )
-        self.address_converter: KakaoAddressConverter = address_converter
 
     def collect_region(self) -> Union[List[Region], bool]:
         """
@@ -55,13 +50,7 @@ class AddressCollector:
         if not is_validated:
             return False
 
-        result: Union[List[Region], bool] = (
-            self.real_estate_repository.bulk_create_regions(
-                region_models=region_models
-            )
-        )
-
-        return result
+        return region_models
 
     def get_region_models(self, row: Series, region_models: List[Region]):
         if not row.get("말소일자"):
@@ -75,11 +64,11 @@ class AddressCollector:
 
             query: str = f"{sido} {sigungu} {ubmyundong} {dongri}".strip()
 
-            if not self.address_converter.convert_address(query=query):
+            if not self.address_converter_util.convert_address(query=query):
                 return False
 
             address_info: Union[dict[str, str], dict, bool] = (
-                self.address_converter.get_address()
+                self.address_converter_util.get_address()
             )
             logger.info(address_info)
 

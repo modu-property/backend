@@ -8,9 +8,9 @@ from real_estate.enum.real_estate_enum import (
 
 from dependency_injector.wiring import inject, Provide
 from real_estate.containers.service_container import ServiceContainer
-from real_estate.services.get_real_estates import (
-    GetRealEstates,
-    GetRegions,
+from real_estate.services.get_real_estates_service import (
+    GetRealEstatesService,
+    GetRegionsService,
 )
 
 
@@ -18,10 +18,10 @@ class GetPropertiesOnMapService:
     @inject
     def __init__(
         self,
-        get_real_estates: GetRealEstates = Provide[
+        get_real_estates: GetRealEstatesService = Provide[
             ServiceContainer.get_real_estates
         ],
-        get_regions: GetRegions = Provide[ServiceContainer.get_regions],
+        get_regions: GetRegionsService = Provide[ServiceContainer.get_regions],
     ) -> None:
         self.get_real_estates = get_real_estates
         self.get_regions = get_regions

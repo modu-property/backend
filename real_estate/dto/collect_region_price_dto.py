@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from datetime import datetime
 from decimal import Decimal
 
 from real_estate.models import Region
@@ -7,11 +6,11 @@ from real_estate.models import Region
 
 @dataclass
 class CollectRegionPriceDto:
-    region: Region
-    deal_type: str
-    deal_year: int
-    deal_month: int
-    is_deal_canceled: bool
+    region: Region = None
+    deal_year: int = None
+    deal_month: int = None
+    deal_type: str = None
+    is_deal_canceled: bool = None
 
     total_deal_price: int = 0
     total_deal_price_per_pyung: Decimal = Decimal()

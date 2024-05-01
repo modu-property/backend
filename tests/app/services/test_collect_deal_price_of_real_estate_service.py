@@ -28,7 +28,7 @@ class TestCollectDealPriceOfRealEstateService:
         풍림팍사이드빌라가 이미 DB에 있어서 제외하고 2개 빌라 저장함
         """
         mocker.patch(
-            "real_estate.utils.real_estate_collector.RealEstateCollector.collect_deal_price_of_real_estate",
+            "real_estate.utils.real_estate_collector_util.RealEstateCollectorUtil.collect_deal_price_of_real_estate",
             return_value=mock_collect_deal_price_of_real_estate,
         )
 

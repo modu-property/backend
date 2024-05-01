@@ -1,5 +1,7 @@
+from dependency_injector.wiring import inject, Provide
 from django.core.management.base import BaseCommand
 from modu_property.utils.loggers import logger
+from real_estate.containers.service_container import ServiceContainer
 
 from real_estate.services.insert_address_service import InsertRegionsService
 
@@ -7,8 +9,14 @@ from real_estate.services.insert_address_service import InsertRegionsService
 class Command(BaseCommand):
     help = ".sql 지역 코드 파일 실행하는 명령어"
 
-    def __init__(self):
-        self.service = InsertRegionsService()
+    @inject
+    def __init__(
+        self,
+        service: InsertRegionsService = Provide[
+            ServiceContainer.insert_regions_service
+        ],
+    ):
+        self.service = service
 
     def handle(self, *args, **options):
         result = self.service.insert_regions()

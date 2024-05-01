@@ -13,7 +13,7 @@ from real_estate.serializers import (
     DealSerializer,
     GetDealsResponseSerializer,
 )
-from real_estate.utils.paginator import PaginatorUtil
+from real_estate.utils.paginator_util import PaginatorUtil
 
 
 class GetDealsService:

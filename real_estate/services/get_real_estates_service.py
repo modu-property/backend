@@ -20,7 +20,7 @@ class GetRealEstatesInterface(ABC):
         pass
 
 
-class GetRealEstates(GetRealEstatesInterface):
+class GetRealEstatesService(GetRealEstatesInterface):
     def __init__(self, repository: RealEstateRepository) -> None:
         self.repository = repository
 
@@ -53,7 +53,7 @@ class GetRealEstates(GetRealEstatesInterface):
         )
 
 
-class GetRegions(GetRealEstatesInterface):
+class GetRegionsService(GetRealEstatesInterface):
     def __init__(self, repository: RealEstateRepository) -> None:
         self.repository = repository
 

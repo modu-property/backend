@@ -1,6 +1,3 @@
-from real_estate.containers.repository_container import (
-    RepositoryContainer,
-)  # noqa
 from real_estate.containers.utils.third_party_container import (
     ThirdPartyContainer,
 )  # noqa

@@ -12,7 +12,7 @@ from real_estate.containers.utils.third_party_container import (
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
 
 
-class RealEstateCollector:
+class RealEstateCollectorUtil:
     def __init__(
         self,
         transaction_price: TransactionPrice = Provide[

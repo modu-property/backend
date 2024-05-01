@@ -1,5 +1,4 @@
 import pytest
-from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.services.collect_address_service import CollectRegionService
 
 
@@ -14,9 +13,6 @@ class TestCollectRegionService:
 
         result: bool = CollectRegionService().collect_region()
 
-        assert result is True
-
-        regions = RealEstateRepository().get_regions()
-        for region in regions:
+        for region in result:
             assert region.latitude is not None
             assert region.longitude is not None
