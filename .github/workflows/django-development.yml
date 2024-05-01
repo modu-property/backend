@@ -38,7 +38,7 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
       - name: Set env
         run: |
@@ -60,6 +60,8 @@ jobs:
           echo "KAKAO_API_KEY=$KAKAO_API_KEY" >> "env/.env.development"
           echo "FLOWER_PORT=$FLOWER_PORT" >> "env/.env.development"
           echo "DB_HOST_FOR_MANTICORE=$DB_HOST_FOR_MANTICORE" >> "env/.env.development"
+          
+          cat env/.env.development
 
       - name: Docker build & push to docker repo
         run: |
@@ -91,7 +93,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.AWS_SSH_KEY }}
           source: "env/.env.development"
-          target: "~/backend/env/.env.development"
+          target: "/home/ec2-user/backend/env/.env.development"
 
       - name: Deploying
         uses: appleboy/ssh-action@master
