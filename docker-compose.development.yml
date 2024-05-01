@@ -18,7 +18,7 @@ services:
     volumes:
       - .:/modu_property
       - static_volume:/modu_property/static
-       - /var/run/docker.sock:/var/run/docker.sock  # django container에서 manticore container에 indexer 실행하기 위해 설정함
+      - /var/run/docker.sock:/var/run/docker.sock  # django container에서 manticore container에 indexer 실행하기 위해 설정함
     network_mode: "host"
     extra_hosts:
       - "nginx:127.0.0.1"
