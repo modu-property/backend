@@ -24,6 +24,10 @@ from real_estate.serializers import RegionPriceSerializer
 
 class RealEstateRepository:
     @staticmethod
+    def get_real_estate_all():
+        return RealEstate.objects.all()
+
+    @staticmethod
     def get_real_estate(real_estate_id: int) -> Optional[QuerySet[RealEstate]]:
         try:
             return RealEstate.objects.filter(id=real_estate_id).get()

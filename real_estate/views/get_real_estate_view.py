@@ -1,47 +1,31 @@
-from typing import Any
-
-from django.http import JsonResponse
+from rest_framework.generics import RetrieveAPIView
+from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
 from rest_framework.request import Request
-from rest_framework.views import APIView
-from modu_property.utils.loggers import logger
-from modu_property.utils.validator import validate_data
-from real_estate.dto.get_real_estate_dto import GetRealEstateDto
-from real_estate.dto.service_result_dto import ServiceResultDto
-
+from rest_framework.response import Response
+from rest_framework.utils.serializer_helpers import ReturnDict
+from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.schema.real_estate_view_schema import (
     get_real_estate_view_get_decorator,
 )
-from real_estate.serializers import GetRealEstateRequestSerializer
-from real_estate.services.get_real_estate_service import GetRealEstateService
+from real_estate.serializers import (
+    GetRealEstateResponseSerializer,
+)
 
 
-class GetRealEstateView(APIView):
+class GetRealEstateView(RetrieveAPIView):
+    queryset = RealEstateRepository.get_real_estate_all()
+    serializer_class = GetRealEstateResponseSerializer
+    lookup_field = "id"
+
     @get_real_estate_view_get_decorator
-    def get(
-        self,
-        request: Request,
-        *args,
-        **kwargs,
-    ) -> JsonResponse:
-        logger.info(request)
-        id = int(kwargs["id"]) if kwargs.get("id") else 0
+    def retrieve(self, request: Request, *args, **kwargs) -> Response:
+        response: Response = super().retrieve(request, *args, **kwargs)
 
-        request_data: dict = {"id": id}
-
-        data: Any = validate_data(
-            data=request_data,
-            serializer=GetRealEstateRequestSerializer,
-        )
-        if not data:
-            return JsonResponse(data={}, status=400)
-
-        dto = GetRealEstateDto(**data)
-        result: ServiceResultDto = GetRealEstateService().get_real_estate(
-            dto=dto
-        )
-
-        return JsonResponse(
-            data=result.data,
-            status=result.status_code,
-            safe=False,
-        )
+        if isinstance(
+            request.accepted_renderer, (JSONRenderer, BrowsableAPIRenderer)
+        ):
+            response.data = ReturnDict(
+                {"data": response.data},
+                serializer=response.data.serializer,
+            )
+        return response

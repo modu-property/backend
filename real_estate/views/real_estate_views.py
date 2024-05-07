@@ -7,7 +7,6 @@ from accounts.util.authenticator import jwt_authenticator
 from modu_property.utils.validator import validate_data
 from real_estate.dto.get_real_estate_dto import (
     GetDealsDto,
-    GetRealEstateDto,
     GetRealEstatesOnMapDto,
     GetRealEstatesOnSearchDto,
 )
