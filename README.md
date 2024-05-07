@@ -295,6 +295,9 @@ apps.py의 ready() 함수 안에 container import해서 초기화해주기
 service에서 repository를 사용하면 service는 repository_container의 provider에 의해 Dependency Injection 당함
 command에서 service를 사용하면 command는 service_container의 provider에 의해 Dependency Injection 당함
 
+# debug toolbar
+swagger에서 호출하고 api 복사해서 브라우저에서 실행
+view에서 from rest_framework.response import Response를 반환해야 함
 
 # TODO
 23.12.05  

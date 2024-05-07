@@ -1,9 +1,11 @@
 import os
 import datetime
+import socket
+
 from celery.schedules import crontab
 
 from modu_property.utils.file import FileUtil
-from modu_property.utils.loggers import logger
+from modu_property.utils.loggers import logger, file_logger
 
 LOG_LEVEL = os.getenv("LOG_LEVEL")
 
@@ -103,6 +105,7 @@ DB_USER = os.getenv("DB_USER", default="")
 # Application definition
 
 INSTALLED_APPS = [
+    "debug_toolbar",
     "drf_spectacular",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -131,6 +134,7 @@ REST_FRAMEWORK = {
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # django debug toolbar css 해결 용
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -138,6 +142,11 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+if DEBUG:
+    MIDDLEWARE = [
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
+    ] + MIDDLEWARE
 
 ROOT_URLCONF = "modu_property.urls"
 
@@ -261,19 +270,10 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:8000",
-#     "http://127.0.0.1:8000",
-#     "http://localhost:80",
-#     "http://127.0.0.1:80",
-#     "http://localhost:3000",
-#     "http://127.0.0.1:3000",
-#     "http://host.docker.internal:8000",
-# ]
 
-# CORS_ORIGIN_ALLOW_ALL = True
-
-# CORS_ALLOW_METHODS = [
-#     "GET",
-#     "POST",
-# ]
+if DEBUG:
+    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    INTERNAL_IPS = [ip[:-1] + "1" for ip in ips]
+print(f"INTERNAL_IPS : {INTERNAL_IPS}")
+file_logger.info(f"INTERNAL_IPS : {INTERNAL_IPS}")
+logger.info(f"INTERNAL_IPS : {INTERNAL_IPS}")
