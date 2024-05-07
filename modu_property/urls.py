@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from real_estate.views import real_estate_views as app_views
+from real_estate.views import get_real_estate_view
 from real_estate.views import manticore_view as maticore_views
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -29,7 +30,7 @@ urlpatterns = [
     path("admin", admin.site.urls, name="admin"),
     path(
         "real-estate/<int:id>",
-        app_views.GetRealEstateView.as_view(),
+        get_real_estate_view.GetRealEstateView.as_view(),
         name="get-real-estate",
     ),
     path(
