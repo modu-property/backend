@@ -16,6 +16,6 @@ class GetRealEstateView(RetrieveAPIView):
     lookup_field = "id"
 
     @get_real_estate_view_get_decorator
-    def retrieve(self, request: Request, *args, **kwargs) -> Response:
+    def get(self, request: Request, *args, **kwargs) -> Response:
         response: Response = super().retrieve(request, *args, **kwargs)
         return response
