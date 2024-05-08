@@ -273,7 +273,4 @@ SPECTACULAR_SETTINGS = {
 
 if DEBUG:
     hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
-    INTERNAL_IPS = [ip[:-1] + "1" for ip in ips]
-print(f"INTERNAL_IPS : {INTERNAL_IPS}")
-file_logger.info(f"INTERNAL_IPS : {INTERNAL_IPS}")
-logger.info(f"INTERNAL_IPS : {INTERNAL_IPS}")
+    INTERNAL_IPS = [".".join(ip.split(".")[:-1]) + ".1" for ip in ips]
