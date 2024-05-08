@@ -7,7 +7,6 @@ from accounts.util.authenticator import jwt_authenticator
 from modu_property.utils.validator import validate_data
 from real_estate.dto.get_real_estate_dto import (
     GetDealsDto,
-    GetRealEstateDto,
     GetRealEstatesOnMapDto,
     GetRealEstatesOnSearchDto,
 )
@@ -15,7 +14,6 @@ from real_estate.dto.service_result_dto import ServiceResultDto
 from real_estate.enum.real_estate_enum import RealEstateZoomLevelEnum
 from real_estate.serializers import (
     GetDealsRequestSerializer,
-    GetRealEstateRequestSerializer,
     GetRealEstatesOnMapRequestSerializer,
     GetRealEstatesOnSearchRequestSerializer,
 )
@@ -23,51 +21,15 @@ from real_estate.services.get_real_estates_on_search_service import (
     GetRealEstatesOnSearchService,
 )
 
-from modu_property.utils.loggers import logger
-from rest_framework.views import APIView
 from real_estate.services.get_deals_service import GetDealsService
-from real_estate.services.get_real_estate_service import GetRealEstateService
 from real_estate.services.get_real_estates_on_map_service import (
     GetPropertiesOnMapService,
 )
 from real_estate.schema.real_estate_view_schema import (
     get_deals_view_get_decorator,
-    get_real_estate_view_get_decorator,
     get_real_estates_on_map_view_get_decorator,
     get_real_estates_on_search_view_get_decorator,
 )
-
-
-class GetRealEstateView(APIView):
-    @get_real_estate_view_get_decorator
-    def get(
-        self,
-        request: Request,
-        *args,
-        **kwargs,
-    ) -> JsonResponse:
-        logger.info(request)
-        id = int(kwargs["id"]) if kwargs.get("id") else 0
-
-        request_data: dict = {"id": id}
-
-        data: Any = validate_data(
-            data=request_data,
-            serializer=GetRealEstateRequestSerializer,
-        )
-        if not data:
-            return JsonResponse(data={}, status=400)
-
-        dto = GetRealEstateDto(**data)
-        result: ServiceResultDto = GetRealEstateService().get_real_estate(
-            dto=dto
-        )
-
-        return JsonResponse(
-            data=result.data,
-            status=result.status_code,
-            safe=False,
-        )
 
 
 class GetRealEstatesOnSearchView(ListAPIView):

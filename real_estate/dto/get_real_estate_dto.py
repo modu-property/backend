@@ -2,11 +2,6 @@ from dataclasses import dataclass
 
 
 @dataclass
-class GetRealEstateDto:
-    id: int
-
-
-@dataclass
 class GetRealEstatesOnSearchDto:
     deal_type: str
     keyword: str
