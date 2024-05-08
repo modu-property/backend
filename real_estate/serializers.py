@@ -231,6 +231,9 @@ class DealDictSerializer(serializers.Serializer):
 
 
 class GetDealsResponseSerializer(serializers.Serializer):
-    deals = serializers.ListField(child=DealDictSerializer())
     current_page = serializers.IntegerField(required=True)
+    count = serializers.IntegerField(required=True)
     total_pages = serializers.IntegerField(required=True)
+    next = serializers.CharField(required=False)
+    previous = serializers.CharField(required=False)
+    results = serializers.ListField(child=DealDictSerializer())
