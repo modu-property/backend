@@ -25,7 +25,7 @@ class GetRealEstateView(RetrieveAPIView):
             request.accepted_renderer, (JSONRenderer, BrowsableAPIRenderer)
         ):
             response.data = ReturnDict(
-                {"data": response.data},
+                response.data,
                 serializer=response.data.serializer,
             )
         return response

@@ -64,8 +64,7 @@ def test_get_real_estate(client, get_jwt, create_real_estate, create_deal):
     response = client.get(url, **headers)
     assert response.status_code == 200
 
-    data = response.json()
-    real_estate = data.get("data")
+    real_estate = response.json()
     assert real_estate["id"] == real_estate1.id
     assert real_estate["name"] == real_estate1.name
     assert real_estate["build_year"] == real_estate1.build_year
