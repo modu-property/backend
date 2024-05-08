@@ -29,6 +29,7 @@ from drf_spectacular.views import (
 
 from django.conf import settings
 
+from real_estate.views.get_deals_view import GetDealsView
 
 urlpatterns = [
     path("admin", admin.site.urls, name="admin"),
@@ -39,7 +40,7 @@ urlpatterns = [
     ),
     path(
         "real-estate/<int:id>/<str:deal_type>/deals",
-        app_views.GetDealsView.as_view(),
+        GetDealsView.as_view(),
         name="get-deals",
     ),
     path(
