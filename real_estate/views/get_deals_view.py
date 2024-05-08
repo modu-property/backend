@@ -26,7 +26,7 @@ class GetDealsView(ListAPIView):
 
     @get_deals_view_get_decorator
     # @jwt_authenticator
-    def list(
+    def get(
         self,
         request: Request,
         *args,
