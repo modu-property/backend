@@ -30,6 +30,13 @@ def get_real_estate_view_get_decorator(view_function):
                 location=OpenApiParameter.PATH,
                 description="real_estate_id",
                 required=True,
+                examples=[
+                    OpenApiExample(
+                        name="real_estate_id",
+                        description="real_estate_id",
+                        value="30000",
+                    ),
+                ],
             )
         ],
         request=GetRealEstateRequestSerializer,
