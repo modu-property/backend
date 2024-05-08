@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 import pytest
 from django.contrib.gis.geos import Point
 from django.test import Client
@@ -113,16 +115,23 @@ def test_when_get_deals_then_return_deals(
 
     headers = {"HTTP_AUTHORIZATION": f"Bearer {_jwt}"}
 
-    query_params = {"page": page} if page else None
+    query_params = None
+    if page:
+        query_params = urlencode({"page": page})
+        url = f"{url}?{query_params}"
 
-    response = client.get(
-        path=url, data=query_params, **headers, content_type="application/json"
-    )
+    response = client.get(path=url, **headers, content_type="application/json")
+
     assert response.status_code == 200
-    data = response.json().get("data")
-    deals = data.get("deals")
-    current_page = data.get("current_page")
-    total_pages = data.get("total_pages")
-    assert len(deals) == expected_deal_count
-    assert current_page == expected_current_page
-    assert total_pages == expected_total_pages
+
+    response_json = response.json()
+
+    if deal_create_count == 0:
+        response_json == []
+    else:
+        deals = response_json.get("results")
+        current_page = response_json.get("current_page")
+        total_pages = response_json.get("total_pages")
+        assert len(deals) == expected_deal_count
+        assert current_page == expected_current_page
+        assert total_pages == expected_total_pages

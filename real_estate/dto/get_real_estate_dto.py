@@ -21,5 +21,4 @@ class GetRealEstatesOnMapDto:
 @dataclass
 class GetDealsDto:
     real_estate_id: int
-    page: int
     deal_type: str
