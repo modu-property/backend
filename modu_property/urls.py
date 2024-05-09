@@ -30,6 +30,9 @@ from drf_spectacular.views import (
 from django.conf import settings
 
 from real_estate.views.get_deals_view import GetDealsView
+from real_estate.views.get_real_estates_on_search_view import (
+    GetRealEstatesOnSearchView,
+)
 
 urlpatterns = [
     path("admin", admin.site.urls, name="admin"),
@@ -45,7 +48,7 @@ urlpatterns = [
     ),
     path(
         "real-estates/<str:deal_type>/keyword",
-        app_views.GetRealEstatesOnSearchView.as_view(),
+        GetRealEstatesOnSearchView.as_view(),
         name="get-real-estates-on-search",
     ),
     path(

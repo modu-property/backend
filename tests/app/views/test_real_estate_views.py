@@ -171,8 +171,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
     response: JsonResponse = client.get(url, data=query_params, **headers)
     assert response.status_code == 200
 
-    data = response.json()
-    real_estates = data.get("data")
+    real_estates = response.json()
     for real_estate in real_estates:
         assert "name" in real_estate
         assert "lot_number" in real_estate
@@ -348,8 +347,7 @@ def test_get_real_estates_on_map_view(
     response: JsonResponse = client.get(url, data=query_params, **headers)
     assert response.status_code == 200
 
-    data = response.json()
-    real_estates = data.get("data")
+    real_estates = response.json()
     for real_estate in real_estates:
         assert "latitude" in real_estate
         assert "longitude" in real_estate
@@ -511,8 +509,7 @@ def test_get_region_prices_on_map_view(
     response: JsonResponse = client.get(url, data=query_params, **headers)
     assert response.status_code == 200
 
-    data = response.json()
-    region_prices = data.get("data")
+    region_prices = response.json()
     for region_price in region_prices:
         assert "total_deal_price" in region_price
         assert "total_jeonse_price" in region_price
@@ -551,26 +548,3 @@ def test_get_region_prices_on_map_view(
 
         assert "latitude" in region
         assert "longitude" in region
-
-
-@pytest.mark.django_db(transaction=True, reset_sequences=True)
-# @pytest.mark.skip()
-def test_get_real_estates_with_keyword_view(client, get_jwt):
-    """
-    !!로컬 데이터 사라지므로 주의!!
-    터미널에서 아래 명령어 실행
-    SERVER_ENV=local python manage.py insert_real_estates_for_searching_command
-    manticore container에서 indexing
-    indexer --config /etc/manticoresearch/manticore.conf --all --rotate
-    """
-    url = reverse("get-real-estates-on-search", kwargs={"deal_type": "deal"})
-
-    _jwt = get_jwt
-
-    headers = {"HTTP_AUTHORIZATION": f"Bearer {_jwt}"}
-    query_params = {
-        "keyword": "강남",
-    }
-
-    response = client.get(url, data=query_params, **headers)
-    assert response.status_code == 200

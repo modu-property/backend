@@ -15,16 +15,14 @@ class SetRealEstatesService:
         ] = serializer
         self.key = key
 
-    def set(
+    def update_result_with_data(
         self,
         result: Dict,
         data: list,
     ) -> Optional[bool]:
-        if data == []:
-            return None
-
         if not data:
-            return False
+            result[self.key] = []
+            return True
 
         _data: Any = validate_data(
             data=list(data),
