@@ -21,6 +21,7 @@ from real_estate.utils.paginator_util import CustomPagination
 class GetDealsView(ListAPIView):
     serializer_class = DealDictSerializer
     pagination_class = CustomPagination
+    dto = None
 
     @get_deals_view_get_decorator
     # @jwt_authenticator
@@ -30,9 +31,9 @@ class GetDealsView(ListAPIView):
         *args,
         **kwargs,
     ) -> Response:
-        dto = self.get_dto(kwargs, request)
+        self.dto = self.get_dto(kwargs, request)
 
-        queryset = self.get_queryset(dto)
+        queryset = self.get_queryset()
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -45,12 +46,18 @@ class GetDealsView(ListAPIView):
     def get_dto(kwargs, request):
         request_data = {
             "real_estate_id": kwargs.get("id"),
-            "deal_type": kwargs.get("deal_type", DealTypesForDBEnum.DEAL.value),
+            "deal_type": kwargs.get(
+                "deal_type", DealTypesForDBEnum.DEAL.value
+            ).upper(),
             "page": request.query_params.get("page", 1),
         }
         request_serializer = GetDealsRequestSerializer(data=request_data)
         request_serializer.is_valid(raise_exception=True)
         return GetDealsDto(**request_serializer.validated_data)
 
-    def get_queryset(self, dto) -> QuerySet[Deal]:
-        return GetDealsService().get_deals(dto=dto)
+    def get_queryset(self) -> QuerySet[Deal]:
+        """
+        dto를 parameter로 넘기면 브라우저에서 debug toolbar를 사용할 수 없음
+        GetDealsView.get_queryset() missing 1 required positional argument: 'dto'
+        """
+        return GetDealsService().get_deals(dto=self.dto)

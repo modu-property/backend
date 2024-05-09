@@ -129,7 +129,7 @@ REST_FRAMEWORK = {
         # "rest_framework_simplejwt.authentication.JWTAuthentication"
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "DEFAULT_PAGINATION_CLASS": "real_estate.utils.paginator_util.CustomPagination",
     "PAGE_SIZE": 10,
 }
 
