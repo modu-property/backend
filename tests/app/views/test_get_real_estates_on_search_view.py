@@ -23,3 +23,6 @@ def test_get_real_estates_with_keyword_view(client, get_jwt):
 
     response = client.get(url, data=query_params, **headers)
     assert response.status_code == 200
+    data = response.data
+    assert "regions" in data
+    assert "real_estates" in data

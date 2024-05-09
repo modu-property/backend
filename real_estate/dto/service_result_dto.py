@@ -8,8 +8,6 @@ class ServiceResultDto:
         message: str = "OK",
         status_code: int = 200,
     ) -> None:
-        self.data: dict = {
-            "data": data,
-            "message": message,
-        }
+        self.data = data
+        self.message = message
         self.status_code: int = status_code

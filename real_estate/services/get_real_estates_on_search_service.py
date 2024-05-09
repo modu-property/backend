@@ -41,10 +41,10 @@ class GetRealEstatesOnSearchService:
 
         regions = self.search_real_estates.search(dto=dto, index="region_index")
 
-        is_regions_set: Optional[bool] = self.set_region.set(
-            result=result, data=regions
+        is_regions_updated: Optional[bool] = (
+            self.set_region.update_result_with_data(result=result, data=regions)
         )
-        if is_regions_set is False:
+        if is_regions_updated is False:
             return ServiceResultDto(
                 message="GetRegionsOnSearchResponseSerializer 에러",
                 status_code=400,
@@ -54,11 +54,13 @@ class GetRealEstatesOnSearchService:
             dto=dto, index="real_estates"
         )
 
-        is_real_estates_set: Optional[bool] = self.set_real_estate.set(
-            result=result,
-            data=real_estates,
+        is_real_estates_updated: Optional[bool] = (
+            self.set_real_estate.update_result_with_data(
+                result=result,
+                data=real_estates,
+            )
         )
-        if is_real_estates_set is False:
+        if is_real_estates_updated is False:
             return ServiceResultDto(
                 message="GetRealEstatesOnSearchResponseSerializer 에러",
                 status_code=400,

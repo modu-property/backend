@@ -171,8 +171,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
     response: JsonResponse = client.get(url, data=query_params, **headers)
     assert response.status_code == 200
 
-    data = response.json()
-    real_estates = data.get("data")
+    real_estates = response.json()
     for real_estate in real_estates:
         assert "name" in real_estate
         assert "lot_number" in real_estate
@@ -348,8 +347,7 @@ def test_get_real_estates_on_map_view(
     response: JsonResponse = client.get(url, data=query_params, **headers)
     assert response.status_code == 200
 
-    data = response.json()
-    real_estates = data.get("data")
+    real_estates = response.json()
     for real_estate in real_estates:
         assert "latitude" in real_estate
         assert "longitude" in real_estate
@@ -511,8 +509,7 @@ def test_get_region_prices_on_map_view(
     response: JsonResponse = client.get(url, data=query_params, **headers)
     assert response.status_code == 200
 
-    data = response.json()
-    region_prices = data.get("data")
+    region_prices = response.json()
     for region_price in region_prices:
         assert "total_deal_price" in region_price
         assert "total_jeonse_price" in region_price
