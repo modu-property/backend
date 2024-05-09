@@ -22,3 +22,4 @@ class GetRealEstatesOnMapDto:
 class GetDealsDto:
     real_estate_id: int
     deal_type: str
+    page: int

@@ -14,7 +14,6 @@ from real_estate.services.get_real_estates_on_search_service import (
 
 
 class GetRealEstatesOnSearchView(ListAPIView):
-
     serializer_class = GetRealEstatesOnSearchRequestSerializer
 
     @get_real_estates_on_search_view_get_decorator
@@ -25,17 +24,7 @@ class GetRealEstatesOnSearchView(ListAPIView):
         *args,
         **kwargs,
     ) -> Response:
-        request_data = {
-            "deal_type": str(kwargs["deal_type"]).upper(),
-            "keyword": request.query_params.get("keyword", ""),
-            "limit": request.query_params.get("limit", 10),
-        }
-        serializer = self.get_serializer(
-            data=request_data,
-        )
-        serializer.is_valid(raise_exception=True)
-
-        dto = GetRealEstatesOnSearchDto(**serializer.validated_data)
+        dto = self.get_dto(kwargs, request)
         result: ServiceResultDto = (
             GetRealEstatesOnSearchService().get_real_estates(dto=dto)
         )
@@ -44,3 +33,16 @@ class GetRealEstatesOnSearchView(ListAPIView):
             data=result.data,
             status=result.status_code,
         )
+
+    def get_dto(self, kwargs, request):
+        request_data = {
+            "deal_type": kwargs["deal_type"],
+            "keyword": request.query_params.get("keyword", ""),
+            "limit": request.query_params.get("limit", 10),
+        }
+        serializer = self.get_serializer(
+            data=request_data,
+        )
+        serializer.is_valid(raise_exception=True)
+        dto = GetRealEstatesOnSearchDto(**serializer.validated_data)
+        return dto

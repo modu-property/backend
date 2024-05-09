@@ -152,7 +152,10 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         deal_type=DealTypesForDBEnum.DEAL.value,
     )
 
-    url = reverse("get-real-estates-on-map", kwargs={"deal_type": "deal"})
+    url = reverse(
+        "get-real-estates-on-map",
+        kwargs={"deal_type": DealTypesForDBEnum.DEAL.value},
+    )
 
     _jwt = get_jwt
 
