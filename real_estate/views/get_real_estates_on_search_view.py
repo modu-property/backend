@@ -1,10 +1,7 @@
-from typing import Any
-
-from django.http import JsonResponse
 from rest_framework.generics import ListAPIView
 from rest_framework.request import Request
+from rest_framework.response import Response
 
-from modu_property.utils.validator import validate_data
 from real_estate.dto.get_real_estate_dto import GetRealEstatesOnSearchDto
 from real_estate.dto.service_result_dto import ServiceResultDto
 from real_estate.schema.real_estate_view_schema import (
@@ -17,6 +14,9 @@ from real_estate.services.get_real_estates_on_search_service import (
 
 
 class GetRealEstatesOnSearchView(ListAPIView):
+
+    serializer_class = GetRealEstatesOnSearchRequestSerializer
+
     @get_real_estates_on_search_view_get_decorator
     # @jwt_authenticator
     def get(
@@ -24,27 +24,23 @@ class GetRealEstatesOnSearchView(ListAPIView):
         request: Request,
         *args,
         **kwargs,
-    ) -> JsonResponse:
+    ) -> Response:
         request_data = {
             "deal_type": str(kwargs["deal_type"]).upper(),
             "keyword": request.query_params.get("keyword", ""),
             "limit": request.query_params.get("limit", 10),
         }
-
-        data: Any = validate_data(
+        serializer = self.get_serializer(
             data=request_data,
-            serializer=GetRealEstatesOnSearchRequestSerializer,
         )
-        if not data:
-            return JsonResponse(data={}, status=400)
+        serializer.is_valid(raise_exception=True)
 
-        dto = GetRealEstatesOnSearchDto(**data)
+        dto = GetRealEstatesOnSearchDto(**serializer.validated_data)
         result: ServiceResultDto = (
             GetRealEstatesOnSearchService().get_real_estates(dto=dto)
         )
 
-        return JsonResponse(
+        return Response(
             data=result.data,
             status=result.status_code,
-            safe=False,
         )
