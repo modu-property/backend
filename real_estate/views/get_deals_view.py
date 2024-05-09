@@ -1,4 +1,5 @@
 from django.db.models import QuerySet
+from rest_framework import status
 from rest_framework.generics import ListAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -47,7 +48,7 @@ class GetDealsView(ListAPIView):
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def get_queryset(self) -> QuerySet[Deal]:
         return GetDealsService().get_deals(dto=self.dto)
