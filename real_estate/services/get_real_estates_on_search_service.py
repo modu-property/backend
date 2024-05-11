@@ -1,16 +1,11 @@
 from typing import Optional
 from rest_framework import status
 
-from modu_property.utils.validator import validate_data
-
 from real_estate.containers.service_container import (
     ServiceContainer,
 )
 from real_estate.dto.get_real_estate_dto import GetRealEstatesOnSearchDto
 from real_estate.dto.service_result_dto import ServiceResultDto
-from real_estate.serializers import (
-    GetRealEstatesAndRegionsOnSearchResponseSerializer,
-)
 from dependency_injector.wiring import inject, Provide
 
 from real_estate.services.search_real_estates_service import (
