@@ -24,7 +24,7 @@ def test_when_search_and_update_regions_fail_then_get_real_estates_raises_except
 
     assert (
         exception_info.value.args[0]
-        == "_search_and_update_real_estates region failed"
+        == "_search_and_update_real_estates regions failed"
     )
 
 

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict
 from rest_framework import status
 
 from real_estate.containers.service_container import (
@@ -8,6 +8,10 @@ from real_estate.dto.get_real_estate_dto import GetRealEstatesOnSearchDto
 from real_estate.dto.service_result_dto import ServiceResultDto
 from dependency_injector.wiring import inject, Provide
 
+from real_estate.exceptions import (
+    SearchAndUpdateRealEstatesException,
+    NotFoundException,
+)
 from real_estate.services.search_real_estates_service import (
     SearchRealEstatesService,
 )
@@ -30,10 +34,8 @@ class GetRealEstatesOnSearchService:
         self.set_region: SetRealEstatesService = set_region
         self.search_real_estates: SearchRealEstatesService = search_real_estates
 
-    def get_real_estates(
-        self, dto: GetRealEstatesOnSearchDto
-    ) -> ServiceResultDto:
-        result: dict[str, list] = {}
+    def get_real_estates(self, dto: GetRealEstatesOnSearchDto) -> Dict:
+        result: Dict[str, list] = {}
 
         is_regions_updated = self._search_and_update_real_estates(
             dto,
@@ -42,7 +44,10 @@ class GetRealEstatesOnSearchService:
             index="region_index",
         )
         if is_regions_updated is False:
-            raise Exception("_search_and_update_real_estates region failed")
+            raise SearchAndUpdateRealEstatesException(
+                message="_search_and_update_real_estates regions failed",
+                status_code=status.HTTP_400_BAD_REQUEST,
+            )
 
         is_real_estates_updated = self._search_and_update_real_estates(
             dto,
@@ -51,14 +56,15 @@ class GetRealEstatesOnSearchService:
             index="real_estate",
         )
         if is_real_estates_updated is False:
-            raise Exception(
-                "_search_and_update_real_estates real_estates failed"
+            raise SearchAndUpdateRealEstatesException(
+                message="_search_and_update_real_estates real_estates failed",
+                status_code=status.HTTP_400_BAD_REQUEST,
             )
 
         if not result:
-            raise Exception("not found")
+            raise NotFoundException("not found")
 
-        return ServiceResultDto(data=result)
+        return result
 
     def _search_and_update_real_estates(
         self, dto, result, update_method, index: str
