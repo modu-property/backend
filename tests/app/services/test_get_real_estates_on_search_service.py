@@ -7,7 +7,9 @@ from real_estate.services.get_real_estates_on_search_service import (
 )
 
 
-def test_get_real_estates_on_search_service(mocker):
+def test_when_search_and_update_regions_fail_then_get_real_estates_raises_exception(
+    mocker,
+):
     mocker.patch(
         "real_estate.services.get_real_estates_on_search_service.GetRealEstatesOnSearchService._search_and_update_real_estates",
         return_value=False,
