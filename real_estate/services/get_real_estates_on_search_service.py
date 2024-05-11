@@ -51,15 +51,12 @@ class GetRealEstatesOnSearchService:
             index="real_estate",
         )
         if is_real_estates_updated is False:
-            return ServiceResultDto(
-                message="GetRealEstatesOnSearchResponseSerializer 에러",
-                status_code=status.HTTP_400_BAD_REQUEST,
+            raise Exception(
+                "_search_and_update_real_estates real_estates failed"
             )
 
         if not result:
-            return ServiceResultDto(
-                message="not found", status_code=status.HTTP_404_NOT_FOUND
-            )
+            raise Exception("not found")
 
         return ServiceResultDto(data=result)
 
