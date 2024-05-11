@@ -35,27 +35,21 @@ class GetRealEstatesOnSearchService:
     def get_real_estates(self, dto: GetRealEstatesOnSearchDto) -> Dict:
         result: Dict[str, list] = {}
 
-        is_regions_updated = self._search_and_update_real_estates(
+        self._search_and_update_real_estates(
             dto,
+            "region_index",
+            "_search_and_update_real_estates regions failed",
             result,
-            update_method=self.set_region.update_result_with_data,
-            index="region_index",
+            self.set_region.update_result_with_data,
         )
-        if is_regions_updated is False:
-            raise SearchAndUpdateRealEstatesException(
-                message="_search_and_update_real_estates regions failed",
-            )
 
-        is_real_estates_updated = self._search_and_update_real_estates(
+        self._search_and_update_real_estates(
             dto,
+            "real_estate",
+            "_search_and_update_real_estates real_estates failed",
             result,
-            update_method=self.set_real_estate.update_result_with_data,
-            index="real_estate",
+            self.set_real_estate.update_result_with_data,
         )
-        if is_real_estates_updated is False:
-            raise SearchAndUpdateRealEstatesException(
-                message="_search_and_update_real_estates real_estates failed",
-            )
 
         if not result:
             raise NotFoundException(message="not found")
@@ -63,6 +57,18 @@ class GetRealEstatesOnSearchService:
         return result
 
     def _search_and_update_real_estates(
+        self, dto, index, message, result, update_method
+    ):
+        is_updated = self._search_and_update(
+            dto,
+            result,
+            update_method,
+            index,
+        )
+        if is_updated is False:
+            raise SearchAndUpdateRealEstatesException(message=message)
+
+    def _search_and_update(
         self, dto, result, update_method, index: str
     ) -> bool:
         real_estates = self.search_real_estates.search(dto=dto, index=index)

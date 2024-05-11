@@ -39,7 +39,7 @@ def test_get_real_estates_with_keyword_view(client, get_jwt):
 @pytest.mark.django_db(transaction=True, reset_sequences=True)
 def test_get_real_estates_with_keyword_view(client, get_jwt, mocker):
     mocker.patch(
-        "real_estate.services.get_real_estates_on_search_service.GetRealEstatesOnSearchService._search_and_update_real_estates",
+        "real_estate.services.get_real_estates_on_search_service.GetRealEstatesOnSearchService._search_and_update",
         return_value=False,
     )
     url = reverse(
@@ -55,4 +55,4 @@ def test_get_real_estates_with_keyword_view(client, get_jwt, mocker):
     }
 
     response = client.get(url, data=query_params, **headers)
-    response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
