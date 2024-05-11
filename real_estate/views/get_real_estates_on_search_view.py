@@ -15,6 +15,7 @@ from real_estate.services.get_real_estates_on_search_service import (
 
 class GetRealEstatesOnSearchView(ListAPIView):
     serializer_class = GetRealEstatesOnSearchRequestSerializer
+    pagination_class = None
 
     @get_real_estates_on_search_view_get_decorator
     # @jwt_authenticator

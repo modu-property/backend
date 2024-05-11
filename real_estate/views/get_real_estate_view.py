@@ -14,6 +14,7 @@ class GetRealEstateView(RetrieveAPIView):
     queryset = RealEstateRepository.get_real_estate_all()
     serializer_class = GetRealEstateResponseSerializer
     lookup_field = "id"
+    pagination_class = None
 
     @get_real_estate_view_get_decorator
     def get(self, request: Request, *args, **kwargs) -> Response:
