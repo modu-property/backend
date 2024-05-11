@@ -56,7 +56,7 @@ class GetRealEstatesOnSearchService:
             dto,
             result,
             update_method=self.set_real_estate.update_result_with_data,
-            index="real_estates",
+            index="real_estate",
         )
         if is_real_estates_updated is False:
             return ServiceResultDto(

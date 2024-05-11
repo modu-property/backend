@@ -31,3 +31,5 @@ def test_get_real_estates_with_keyword_view(client, get_jwt):
     data = response.data
     assert "regions" in data
     assert "real_estates" in data
+    assert data["regions"] != []
+    assert data["real_estates"] != []
