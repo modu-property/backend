@@ -1,4 +1,5 @@
 from typing import Optional
+from rest_framework import status
 
 from modu_property.utils.validator import validate_data
 
@@ -39,43 +40,42 @@ class GetRealEstatesOnSearchService:
     ) -> ServiceResultDto:
         result: dict[str, list] = {}
 
-        regions = self.search_real_estates.search(dto=dto, index="region_index")
-
-        is_regions_updated: Optional[bool] = (
-            self.set_region.update_result_with_data(result=result, data=regions)
+        is_regions_updated = self._search_and_update_real_estates(
+            dto,
+            result,
+            update_method=self.set_region.update_result_with_data,
+            index="region_index",
         )
         if is_regions_updated is False:
             return ServiceResultDto(
                 message="GetRegionsOnSearchResponseSerializer 에러",
-                status_code=400,
+                status_code=status.HTTP_400_BAD_REQUEST,
             )
 
-        real_estates: list = self.search_real_estates.search(
-            dto=dto, index="real_estates"
-        )
-
-        is_real_estates_updated: Optional[bool] = (
-            self.set_real_estate.update_result_with_data(
-                result=result,
-                data=real_estates,
-            )
+        is_real_estates_updated = self._search_and_update_real_estates(
+            dto,
+            result,
+            update_method=self.set_real_estate.update_result_with_data,
+            index="real_estates",
         )
         if is_real_estates_updated is False:
             return ServiceResultDto(
                 message="GetRealEstatesOnSearchResponseSerializer 에러",
-                status_code=400,
+                status_code=status.HTTP_400_BAD_REQUEST,
             )
 
-        if real_estates or regions:
-            data = validate_data(
-                data=result,
-                serializer=GetRealEstatesAndRegionsOnSearchResponseSerializer,
+        if not result:
+            return ServiceResultDto(
+                message="not found", status_code=status.HTTP_404_NOT_FOUND
             )
-            if not data:
-                return ServiceResultDto(
-                    message="GetRealEstatesAndRegionsOnSearchResponseSerializer 에러",
-                    status_code=400,
-                )
 
-            return ServiceResultDto(data=result)
-        return ServiceResultDto(status_code=404)
+        return ServiceResultDto(data=result)
+
+    def _search_and_update_real_estates(
+        self, dto, result, update_method, index: str
+    ) -> bool:
+        real_estates = self.search_real_estates.search(dto=dto, index=index)
+        is_updated: Optional[bool] = update_method(
+            result=result, data=real_estates
+        )
+        return is_updated
