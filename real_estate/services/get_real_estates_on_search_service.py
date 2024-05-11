@@ -1,5 +1,4 @@
 from typing import Optional, Dict
-from rest_framework import status
 
 from real_estate.containers.service_container import (
     ServiceContainer,
