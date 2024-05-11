@@ -1,3 +1,5 @@
+from typing import List
+
 from django.db.models import QuerySet
 from rest_framework import status
 from rest_framework.generics import ListAPIView
@@ -34,7 +36,7 @@ class GetDealsView(ListAPIView):
         self.dto = self.get_dto(kwargs, request)
 
         queryset = self.get_queryset()
-        page = self.paginate_queryset(queryset)
+        page: List[Deal] = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
@@ -43,7 +45,7 @@ class GetDealsView(ListAPIView):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @staticmethod
-    def get_dto(kwargs, request):
+    def get_dto(kwargs, request) -> GetDealsDto:
         request_data = {
             "real_estate_id": kwargs.get("id"),
             "deal_type": kwargs.get(
