@@ -42,10 +42,7 @@ class GetRealEstatesOnSearchService:
             index="region_index",
         )
         if is_regions_updated is False:
-            return ServiceResultDto(
-                message="GetRegionsOnSearchResponseSerializer 에러",
-                status_code=status.HTTP_400_BAD_REQUEST,
-            )
+            raise Exception("_search_and_update_real_estates region failed")
 
         is_real_estates_updated = self._search_and_update_real_estates(
             dto,
