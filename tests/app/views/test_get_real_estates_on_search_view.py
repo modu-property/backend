@@ -1,6 +1,8 @@
 import pytest
 from django.urls import reverse
 
+from real_estate.enum.deal_enum import DealTypesForDBEnum
+
 
 @pytest.mark.django_db(transaction=True, reset_sequences=True)
 # @pytest.mark.skip()
@@ -12,7 +14,10 @@ def test_get_real_estates_with_keyword_view(client, get_jwt):
     manticore container에서 indexing
     indexer --config /etc/manticoresearch/manticore.conf --all --rotate
     """
-    url = reverse("get-real-estates-on-search", kwargs={"deal_type": "deal"})
+    url = reverse(
+        "get-real-estates-on-search",
+        kwargs={"deal_type": DealTypesForDBEnum.DEAL.value},
+    )
 
     _jwt = get_jwt
 

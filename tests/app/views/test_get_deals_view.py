@@ -135,3 +135,6 @@ def test_when_get_deals_then_return_deals(
         assert len(deals) == expected_deal_count
         assert current_page == expected_current_page
         assert total_pages == expected_total_pages
+
+        assert "next" in response_json
+        assert "previous" in response_json

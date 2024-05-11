@@ -6,9 +6,9 @@ from drf_spectacular.utils import (
     OpenApiExample,
 )
 
+from real_estate.enum.deal_enum import DealTypesForDBEnum
 from real_estate.serializers import (
     GetDealsRequestSerializer,
-    GetDealsResponseSerializer,
     GetRealEstateResponseSerializer,
     GetRealEstateRequestSerializer,
     GetRealEstatesAndRegionsOnSearchResponseSerializer,
@@ -16,6 +16,7 @@ from real_estate.serializers import (
     GetRealEstatesOnMapResponseSerializer,
     GetRealEstatesOnSearchRequestSerializer,
     GetRegionsOnMapResponseSerializer,
+    DealDictSerializer,
 )
 
 
@@ -71,17 +72,17 @@ def get_real_estates_on_search_view_get_decorator(view_function):
                     OpenApiExample(
                         name="매매",
                         description="매매 타입",
-                        value="deal",
+                        value=DealTypesForDBEnum.DEAL.value,
                     ),
                     OpenApiExample(
                         name="전세",
                         description="전세 타입",
-                        value="jeonse",
+                        value="JEONSE",
                     ),
                     OpenApiExample(
                         name="월세",
                         description="월세 타입",
-                        value="monthly_rent",
+                        value="MONTHLY_RENT",
                     ),
                 ],
             ),
@@ -319,7 +320,7 @@ def get_deals_view_get_decorator(view_function):
                     OpenApiExample(
                         name="deal_type",
                         description="deal_type",
-                        value="deal",
+                        value=DealTypesForDBEnum.DEAL.value,
                     ),
                 ],
             ),
@@ -342,7 +343,7 @@ def get_deals_view_get_decorator(view_function):
         responses={
             200: PolymorphicProxySerializer(
                 component_name="Deals",
-                serializers=[GetDealsResponseSerializer],
+                serializers=[DealDictSerializer],
                 resource_type_field_name=None,
             ),
             400: OpenApiResponse(description="bad request"),

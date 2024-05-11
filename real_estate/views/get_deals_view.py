@@ -1,3 +1,5 @@
+from typing import List
+
 from django.db.models import QuerySet
 from rest_framework import status
 from rest_framework.generics import ListAPIView
@@ -12,6 +14,7 @@ from real_estate.schema.real_estate_view_schema import (
 )
 from real_estate.serializers import (
     DealDictSerializer,
+    GetDealsRequestSerializer,
 )
 from real_estate.services.get_deals_service import GetDealsService
 from real_estate.utils.paginator_util import CustomPagination
@@ -20,10 +23,7 @@ from real_estate.utils.paginator_util import CustomPagination
 class GetDealsView(ListAPIView):
     serializer_class = DealDictSerializer
     pagination_class = CustomPagination
-
-    def __init__(self):
-        super().__init__()
-        self.dto = None
+    dto = None
 
     @get_deals_view_get_decorator
     # @jwt_authenticator
@@ -33,16 +33,10 @@ class GetDealsView(ListAPIView):
         *args,
         **kwargs,
     ) -> Response:
-        dto: GetDealsDto = GetDealsDto(
-            real_estate_id=int(kwargs.get("id", 0)),
-            deal_type=str(
-                kwargs.get("deal_type", DealTypesForDBEnum.DEAL.value),
-            ).upper(),
-        )
-        self.dto = dto
+        self.dto = self.get_dto(kwargs, request)
 
         queryset = self.get_queryset()
-        page = self.paginate_queryset(queryset)
+        page: List[Deal] = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
@@ -50,5 +44,22 @@ class GetDealsView(ListAPIView):
         serializer = self.get_serializer(queryset, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
+    @staticmethod
+    def get_dto(kwargs, request) -> GetDealsDto:
+        request_data = {
+            "real_estate_id": kwargs.get("id"),
+            "deal_type": kwargs.get(
+                "deal_type", DealTypesForDBEnum.DEAL.value
+            ).upper(),
+            "page": request.query_params.get("page", 1),
+        }
+        request_serializer = GetDealsRequestSerializer(data=request_data)
+        request_serializer.is_valid(raise_exception=True)
+        return GetDealsDto(**request_serializer.validated_data)
+
     def get_queryset(self) -> QuerySet[Deal]:
+        """
+        dto를 parameter로 넘기면 브라우저에서 debug toolbar를 사용할 수 없음
+        GetDealsView.get_queryset() missing 1 required positional argument: 'dto'
+        """
         return GetDealsService().get_deals(dto=self.dto)

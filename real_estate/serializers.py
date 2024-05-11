@@ -228,12 +228,3 @@ class DealDictSerializer(serializers.Serializer):
     )
     deal_type = serializers.CharField()
     real_estate_id = serializers.IntegerField()
-
-
-class GetDealsResponseSerializer(serializers.Serializer):
-    current_page = serializers.IntegerField(required=True)
-    count = serializers.IntegerField(required=True)
-    total_pages = serializers.IntegerField(required=True)
-    next = serializers.CharField(required=False)
-    previous = serializers.CharField(required=False)
-    results = serializers.ListField(child=DealDictSerializer())
