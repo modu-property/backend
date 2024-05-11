@@ -45,7 +45,6 @@ class GetRealEstatesOnSearchService:
         if is_regions_updated is False:
             raise SearchAndUpdateRealEstatesException(
                 message="_search_and_update_real_estates regions failed",
-                status_code=status.HTTP_400_BAD_REQUEST,
             )
 
         is_real_estates_updated = self._search_and_update_real_estates(
@@ -57,11 +56,10 @@ class GetRealEstatesOnSearchService:
         if is_real_estates_updated is False:
             raise SearchAndUpdateRealEstatesException(
                 message="_search_and_update_real_estates real_estates failed",
-                status_code=status.HTTP_400_BAD_REQUEST,
             )
 
         if not result:
-            raise NotFoundException("not found")
+            raise NotFoundException(message="not found")
 
         return result
 

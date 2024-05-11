@@ -1,4 +1,5 @@
 import pytest
+from rest_framework import status
 
 from real_estate.dto.get_real_estate_dto import GetRealEstatesOnSearchDto
 from real_estate.enum.deal_enum import DealTypesForDBEnum
@@ -26,6 +27,7 @@ def test_when_search_and_update_regions_fail_then_get_real_estates_raises_except
         exception_info.value.args[0]
         == "_search_and_update_real_estates regions failed"
     )
+    assert exception_info.value.status_code == status.HTTP_400_BAD_REQUEST
 
 
 def test_when_search_and_update_real_estates_fail_then_get_real_estates_raises_exception(
@@ -47,6 +49,7 @@ def test_when_search_and_update_real_estates_fail_then_get_real_estates_raises_e
         exception_info.value.args[0]
         == "_search_and_update_real_estates real_estates failed"
     )
+    assert exception_info.value.status_code == status.HTTP_400_BAD_REQUEST
 
 
 def test_when_no_result_then_raises_exception(
@@ -65,3 +68,4 @@ def test_when_no_result_then_raises_exception(
         GetRealEstatesOnSearchService().get_real_estates(dto=dto)
 
     assert exception_info.value.args[0] == "not found"
+    assert exception_info.value.status_code == status.HTTP_404_NOT_FOUND
