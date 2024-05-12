@@ -1,9 +1,7 @@
-from typing import Any
-from django.http import JsonResponse
 from rest_framework.request import Request
 from rest_framework.generics import ListAPIView
+from rest_framework.response import Response
 
-from modu_property.utils.validator import validate_data
 from real_estate.dto.get_real_estate_dto import (
     GetRealEstatesOnMapDto,
 )
@@ -22,6 +20,7 @@ from real_estate.schema.real_estate_view_schema import (
 
 
 class GetRealEstatesOnMapView(ListAPIView):
+    serializer_class = GetRealEstatesOnMapRequestSerializer
     pagination_class = None
 
     @get_real_estates_on_map_view_get_decorator
@@ -31,7 +30,18 @@ class GetRealEstatesOnMapView(ListAPIView):
         request: Request,
         *args,
         **kwargs,
-    ) -> JsonResponse:
+    ) -> Response:
+        dto = self._get_dto(kwargs, request)
+        result: ServiceResultDto = GetPropertiesOnMapService().get_properties(
+            dto=dto
+        )
+
+        return Response(
+            data=result.data,
+            status=result.status_code,
+        )
+
+    def _get_dto(self, kwargs, request):
         request_data: dict = {
             "deal_type": str(kwargs["deal_type"]).upper(),
             "sw_lat": request.query_params.get("sw_lat"),
@@ -42,21 +52,7 @@ class GetRealEstatesOnMapView(ListAPIView):
                 "zoom_level", default=RealEstateZoomLevelEnum.DEFAULT.value
             ),
         }
-
-        data: Any = validate_data(
-            data=request_data,
-            serializer=GetRealEstatesOnMapRequestSerializer,
-        )
-        if not data:
-            return JsonResponse(data={}, status=400)
-
-        dto = GetRealEstatesOnMapDto(**data)
-        result: ServiceResultDto = GetPropertiesOnMapService().get_properties(
-            dto=dto
-        )
-
-        return JsonResponse(
-            data=result.data,
-            status=result.status_code,
-            safe=False,
-        )
+        serializer = self.get_serializer(data=request_data)
+        serializer.is_valid(raise_exception=True)
+        dto = GetRealEstatesOnMapDto(**serializer.validated_data)
+        return dto
