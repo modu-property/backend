@@ -1,9 +1,15 @@
+from typing import Dict
+
 from rest_framework.generics import ListAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 
+from modu_property.utils.loggers import logger
 from real_estate.dto.get_real_estate_dto import GetRealEstatesOnSearchDto
-from real_estate.dto.service_result_dto import ServiceResultDto
+from real_estate.exceptions import (
+    SearchAndUpdateRealEstatesException,
+    NotFoundException,
+)
 from real_estate.schema.real_estate_view_schema import (
     get_real_estates_on_search_view_get_decorator,
 )
@@ -15,6 +21,7 @@ from real_estate.services.get_real_estates_on_search_service import (
 
 class GetRealEstatesOnSearchView(ListAPIView):
     serializer_class = GetRealEstatesOnSearchRequestSerializer
+    pagination_class = None
 
     @get_real_estates_on_search_view_get_decorator
     # @jwt_authenticator
@@ -25,14 +32,17 @@ class GetRealEstatesOnSearchView(ListAPIView):
         **kwargs,
     ) -> Response:
         dto = self.get_dto(kwargs, request)
-        result: ServiceResultDto = (
-            GetRealEstatesOnSearchService().get_real_estates(dto=dto)
-        )
-
-        return Response(
-            data=result.data,
-            status=result.status_code,
-        )
+        try:
+            result: Dict = GetRealEstatesOnSearchService().get_real_estates(
+                dto=dto
+            )
+            return Response(data=result)
+        except NotFoundException as e:
+            logger.exception(msg="")
+            return Response(status=e.status_code)
+        except SearchAndUpdateRealEstatesException as e:
+            logger.exception(msg="")
+            return Response(status=e.status_code)
 
     def get_dto(self, kwargs, request):
         request_data = {

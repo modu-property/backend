@@ -22,6 +22,8 @@ from real_estate.schema.real_estate_view_schema import (
 
 
 class GetRealEstatesOnMapView(ListAPIView):
+    pagination_class = None
+
     @get_real_estates_on_map_view_get_decorator
     # @jwt_authenticator
     def get(

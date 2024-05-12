@@ -1,5 +1,6 @@
 import pytest
 from django.urls import reverse
+from rest_framework import status
 
 from real_estate.enum.deal_enum import DealTypesForDBEnum
 
@@ -31,3 +32,27 @@ def test_get_real_estates_with_keyword_view(client, get_jwt):
     data = response.data
     assert "regions" in data
     assert "real_estates" in data
+    assert data["regions"] != []
+    assert data["real_estates"] != []
+
+
+@pytest.mark.django_db(transaction=True, reset_sequences=True)
+def test_get_real_estates_with_keyword_view(client, get_jwt, mocker):
+    mocker.patch(
+        "real_estate.services.get_real_estates_on_search_service.GetRealEstatesOnSearchService._update_result",
+        return_value=False,
+    )
+    url = reverse(
+        "get-real-estates-on-search",
+        kwargs={"deal_type": DealTypesForDBEnum.DEAL.value},
+    )
+
+    _jwt = get_jwt
+
+    headers = {"HTTP_AUTHORIZATION": f"Bearer {_jwt}"}
+    query_params = {
+        "keyword": "강남",
+    }
+
+    response = client.get(url, data=query_params, **headers)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST

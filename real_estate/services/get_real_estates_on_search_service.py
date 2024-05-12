@@ -1,17 +1,15 @@
-from typing import Optional
-
-from modu_property.utils.validator import validate_data
+from typing import Dict
 
 from real_estate.containers.service_container import (
     ServiceContainer,
 )
 from real_estate.dto.get_real_estate_dto import GetRealEstatesOnSearchDto
-from real_estate.dto.service_result_dto import ServiceResultDto
-from real_estate.serializers import (
-    GetRealEstatesAndRegionsOnSearchResponseSerializer,
-)
 from dependency_injector.wiring import inject, Provide
 
+from real_estate.exceptions import (
+    SearchAndUpdateRealEstatesException,
+    NotFoundException,
+)
 from real_estate.services.search_real_estates_service import (
     SearchRealEstatesService,
 )
@@ -34,48 +32,46 @@ class GetRealEstatesOnSearchService:
         self.set_region: SetRealEstatesService = set_region
         self.search_real_estates: SearchRealEstatesService = search_real_estates
 
-    def get_real_estates(
-        self, dto: GetRealEstatesOnSearchDto
-    ) -> ServiceResultDto:
-        result: dict[str, list] = {}
+    def get_real_estates(self, dto: GetRealEstatesOnSearchDto) -> Dict:
+        result: Dict[str, list] = {}
 
-        regions = self.search_real_estates.search(dto=dto, index="region_index")
-
-        is_regions_updated: Optional[bool] = (
-            self.set_region.update_result_with_data(result=result, data=regions)
-        )
-        if is_regions_updated is False:
-            return ServiceResultDto(
-                message="GetRegionsOnSearchResponseSerializer 에러",
-                status_code=400,
-            )
-
-        real_estates: list = self.search_real_estates.search(
-            dto=dto, index="real_estates"
+        self._process_search_and_update(
+            dto,
+            result,
+            index="region_index",
+            update_method=self.set_region.update_result_with_data,
         )
 
-        is_real_estates_updated: Optional[bool] = (
-            self.set_real_estate.update_result_with_data(
-                result=result,
-                data=real_estates,
-            )
+        self._process_search_and_update(
+            dto,
+            result,
+            index="real_estate",
+            update_method=self.set_real_estate.update_result_with_data,
         )
-        if is_real_estates_updated is False:
-            return ServiceResultDto(
-                message="GetRealEstatesOnSearchResponseSerializer 에러",
-                status_code=400,
+
+        if not result:
+            raise NotFoundException(message="not found")
+
+        return result
+
+    def _process_search_and_update(self, dto, result, index, update_method):
+        regions = self._search(
+            dto=dto,
+            index=index,
+        )
+        is_updated = self._update_result(
+            result=result,
+            real_estates=regions,
+            update_method=update_method,
+        )
+        if is_updated is False:
+            raise SearchAndUpdateRealEstatesException(
+                message="_update_result failed"
             )
 
-        if real_estates or regions:
-            data = validate_data(
-                data=result,
-                serializer=GetRealEstatesAndRegionsOnSearchResponseSerializer,
-            )
-            if not data:
-                return ServiceResultDto(
-                    message="GetRealEstatesAndRegionsOnSearchResponseSerializer 에러",
-                    status_code=400,
-                )
+    def _search(self, dto, index):
+        return self.search_real_estates.search(dto=dto, index=index)
 
-            return ServiceResultDto(data=result)
-        return ServiceResultDto(status_code=404)
+    @staticmethod
+    def _update_result(result, real_estates, update_method) -> bool:
+        return update_method(result=result, data=real_estates)
