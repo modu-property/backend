@@ -1,4 +1,4 @@
-from typing import Optional, Dict
+from typing import Dict
 
 from real_estate.containers.service_container import (
     ServiceContainer,
@@ -35,20 +35,18 @@ class GetRealEstatesOnSearchService:
     def get_real_estates(self, dto: GetRealEstatesOnSearchDto) -> Dict:
         result: Dict[str, list] = {}
 
-        self._search_and_update_real_estates(
+        self._process_search_and_update(
             dto,
-            "region_index",
-            "_search_and_update_real_estates regions failed",
             result,
-            self.set_region.update_result_with_data,
+            index="region_index",
+            update_method=self.set_region.update_result_with_data,
         )
 
-        self._search_and_update_real_estates(
+        self._process_search_and_update(
             dto,
-            "real_estate",
-            "_search_and_update_real_estates real_estates failed",
             result,
-            self.set_real_estate.update_result_with_data,
+            index="real_estate",
+            update_method=self.set_real_estate.update_result_with_data,
         )
 
         if not result:
@@ -56,23 +54,24 @@ class GetRealEstatesOnSearchService:
 
         return result
 
-    def _search_and_update_real_estates(
-        self, dto, index, message, result, update_method
-    ):
-        is_updated = self._search_and_update(
-            dto,
-            result,
-            update_method,
-            index,
+    def _process_search_and_update(self, dto, result, index, update_method):
+        regions = self._search(
+            dto=dto,
+            index=index,
+        )
+        is_updated = self._update_result(
+            result=result,
+            real_estates=regions,
+            update_method=update_method,
         )
         if is_updated is False:
-            raise SearchAndUpdateRealEstatesException(message=message)
+            raise SearchAndUpdateRealEstatesException(
+                message="_update_result failed"
+            )
 
-    def _search_and_update(
-        self, dto, result, update_method, index: str
-    ) -> bool:
-        real_estates = self.search_real_estates.search(dto=dto, index=index)
-        is_updated: Optional[bool] = update_method(
-            result=result, data=real_estates
-        )
-        return is_updated
+    def _search(self, dto, index):
+        return self.search_real_estates.search(dto=dto, index=index)
+
+    @staticmethod
+    def _update_result(result, real_estates, update_method) -> bool:
+        return update_method(result=result, data=real_estates)

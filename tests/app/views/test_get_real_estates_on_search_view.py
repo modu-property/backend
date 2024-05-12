@@ -39,7 +39,7 @@ def test_get_real_estates_with_keyword_view(client, get_jwt):
 @pytest.mark.django_db(transaction=True, reset_sequences=True)
 def test_get_real_estates_with_keyword_view(client, get_jwt, mocker):
     mocker.patch(
-        "real_estate.services.get_real_estates_on_search_service.GetRealEstatesOnSearchService._search_and_update",
+        "real_estate.services.get_real_estates_on_search_service.GetRealEstatesOnSearchService._update_result",
         return_value=False,
     )
     url = reverse(
