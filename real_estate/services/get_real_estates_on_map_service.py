@@ -28,25 +28,22 @@ class GetRealEstatesOnMapService:
 
     def get(self, dto: GetRealEstatesOnMapDto) -> ServiceResultDto:
         if self._is_real_estates_zoom_level(dto=dto):
-            real_estates: Union[
-                List[OrderedDict[str, Union[int, str]]], ServiceResultDto, bool
-            ] = self.get_real_estates.get_real_estates(dto=dto)
-
-            if real_estates is None:
-                return ServiceResultDto(status_code=404)
-
-            return self._return_result(properties=real_estates)
+            return self._get_real_estates(
+                dto, method=self.get_real_estates.get_real_estates
+            )
         elif self._is_regions_zoom_level(dto=dto):
-            regions: Union[
-                List[OrderedDict[str, Union[int, str]]], ServiceResultDto, bool
-            ] = self.get_regions.get_real_estates(dto=dto)
-
-            if regions is None:
-                return ServiceResultDto(status_code=404)
-
-            return self._return_result(properties=regions)
-
+            return self._get_real_estates(
+                dto, method=self.get_regions.get_real_estates
+            )
         return ServiceResultDto(status_code=404)
+
+    def _get_real_estates(self, dto, method):
+        real_estates: Union[
+            List[OrderedDict[str, Union[int, str]]], ServiceResultDto, bool
+        ] = method(dto=dto)
+        if real_estates is None:
+            return ServiceResultDto(status_code=404)
+        return self._return_result(properties=real_estates)
 
     @staticmethod
     def _return_result(
