@@ -12,7 +12,7 @@ from real_estate.serializers import (
 )
 
 from real_estate.services.get_real_estates_on_map_service import (
-    GetPropertiesOnMapService,
+    GetRealEstatesOnMapService,
 )
 from real_estate.schema.real_estate_view_schema import (
     get_real_estates_on_map_view_get_decorator,
@@ -32,7 +32,7 @@ class GetRealEstatesOnMapView(ListAPIView):
         **kwargs,
     ) -> Response:
         dto = self._get_dto(kwargs, request)
-        result: ServiceResultDto = GetPropertiesOnMapService().get_properties(
+        result: ServiceResultDto = GetRealEstatesOnMapService().get_properties(
             dto=dto
         )
 

@@ -14,7 +14,7 @@ from real_estate.services.get_real_estates_service import (
 )
 
 
-class GetPropertiesOnMapService:
+class GetRealEstatesOnMapService:
     @inject
     def __init__(
         self,
