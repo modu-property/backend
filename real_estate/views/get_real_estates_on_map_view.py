@@ -32,9 +32,7 @@ class GetRealEstatesOnMapView(ListAPIView):
         **kwargs,
     ) -> Response:
         dto = self._get_dto(kwargs, request)
-        result: ServiceResultDto = GetRealEstatesOnMapService().get_properties(
-            dto=dto
-        )
+        result: ServiceResultDto = GetRealEstatesOnMapService().get(dto=dto)
 
         return Response(
             data=result.data,

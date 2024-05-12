@@ -26,7 +26,7 @@ class GetRealEstatesOnMapService:
         self.get_real_estates = get_real_estates
         self.get_regions = get_regions
 
-    def get_properties(self, dto: GetRealEstatesOnMapDto) -> ServiceResultDto:
+    def get(self, dto: GetRealEstatesOnMapDto) -> ServiceResultDto:
         if self._is_real_estates_zoom_level(dto=dto):
             real_estates: Union[
                 List[OrderedDict[str, Union[int, str]]], ServiceResultDto, bool
