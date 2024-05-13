@@ -27,12 +27,12 @@ class Command(BaseCommand, CollectCommandMixin):
             help="서울특별시, 세종특별자치시, ...",
         )
         parser.add_argument(
-            "start_date",
+            "--start_date",
             type=str,
             help="200601",
         )
         parser.add_argument(
-            "end_date",
+            "--end_date",
             type=str,
             help="200612",
         )
