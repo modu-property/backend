@@ -8,6 +8,7 @@ from real_estate.enum.real_estate_enum import (
 
 from dependency_injector.wiring import inject, Provide
 from real_estate.containers.service_container import ServiceContainer
+from real_estate.exceptions import NotFoundException
 from real_estate.services.get_real_estates_service import (
     GetRealEstatesService,
     GetRegionsService,
@@ -35,27 +36,16 @@ class GetRealEstatesOnMapService:
             return self._get_real_estates(
                 dto, method=self.get_regions.get_real_estates
             )
-        return ServiceResultDto(status_code=404)
+        raise NotFoundException()
 
-    def _get_real_estates(self, dto, method):
+    @staticmethod
+    def _get_real_estates(dto, method):
         real_estates: Union[
             List[OrderedDict[str, Union[int, str]]], ServiceResultDto, bool
         ] = method(dto=dto)
         if real_estates is None:
-            return ServiceResultDto(status_code=404)
-        return self._return_result(properties=real_estates)
-
-    @staticmethod
-    def _return_result(
-        properties: Union[
-            List[OrderedDict[str, Union[int, str]]], ServiceResultDto, bool
-        ],
-    ) -> ServiceResultDto:
-        if not properties:
-            return ServiceResultDto(status_code=400)
-        if isinstance(properties, ServiceResultDto):
-            return properties
-        return ServiceResultDto(data=properties)
+            raise NotFoundException()
+        return real_estates
 
     @staticmethod
     def _is_real_estates_zoom_level(dto):
