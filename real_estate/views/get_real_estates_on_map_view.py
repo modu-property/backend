@@ -2,11 +2,13 @@ from rest_framework.request import Request
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 
+from modu_property.utils.loggers import logger
 from real_estate.dto.get_real_estate_dto import (
     GetRealEstatesOnMapDto,
 )
 from real_estate.dto.service_result_dto import ServiceResultDto
 from real_estate.enum.real_estate_enum import RealEstateZoomLevelEnum
+from real_estate.exceptions import NotFoundException
 from real_estate.serializers import (
     GetRealEstatesOnMapRequestSerializer,
 )
@@ -32,12 +34,16 @@ class GetRealEstatesOnMapView(ListAPIView):
         **kwargs,
     ) -> Response:
         dto = self._get_dto(kwargs, request)
-        result: ServiceResultDto = GetRealEstatesOnMapService().get(dto=dto)
 
-        return Response(
-            data=result.data,
-            status=result.status_code,
-        )
+        try:
+            result: ServiceResultDto = GetRealEstatesOnMapService().get(dto=dto)
+            return Response(
+                data=result.data,
+                status=result.status_code,
+            )
+        except NotFoundException as e:
+            logger.exception(msg="")
+            return Response(status=e.status_code)
 
     def _get_dto(self, kwargs, request):
         request_data: dict = {
