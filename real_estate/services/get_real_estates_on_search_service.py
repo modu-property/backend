@@ -6,6 +6,7 @@ from real_estate.containers.service_container import (
 from real_estate.dto.get_real_estate_dto import GetRealEstatesOnSearchDto
 from dependency_injector.wiring import inject, Provide
 
+from real_estate.enum.real_estate_enum import SearchLimitEnum
 from real_estate.exceptions import (
     SearchAndUpdateRealEstatesException,
     NotFoundException,
@@ -35,6 +36,7 @@ class GetRealEstatesOnSearchService:
     def get_real_estates(self, dto: GetRealEstatesOnSearchDto) -> Dict:
         result: Dict[str, list] = {}
 
+        dto.limit = SearchLimitEnum.REGION.value
         self._process_search_and_update(
             dto,
             result,
@@ -42,6 +44,11 @@ class GetRealEstatesOnSearchService:
             update_method=self.set_region.update_result_with_data,
         )
 
+        dto.limit = (
+            dto.real_estate_search_limit
+            if dto.real_estate_search_limit
+            else SearchLimitEnum.REAL_ESTATES.value
+        )
         self._process_search_and_update(
             dto,
             result,
@@ -55,18 +62,18 @@ class GetRealEstatesOnSearchService:
         return result
 
     def _process_search_and_update(self, dto, result, index, update_method):
-        regions = self._search(
+        real_estates = self._search(
             dto=dto,
             index=index,
         )
         is_updated = self._update_result(
             result=result,
-            real_estates=regions,
+            real_estates=real_estates,
             update_method=update_method,
         )
         if is_updated is False:
             raise SearchAndUpdateRealEstatesException(
-                message="_update_result failed"
+                message=f"_update_result failed dto : {dto}, result : {result}, index : {index}, update_method : {update_method}"
             )
 
     def _search(self, dto, index):

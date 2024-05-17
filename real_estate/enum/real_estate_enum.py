@@ -48,3 +48,8 @@ class RegionZoomLevelEnum(Enum):
 
 class RegionCodeEnum(Enum):
     SEJONG = "36110"
+
+
+class SearchLimitEnum(Enum):
+    REGION = 3
+    REAL_ESTATES = 15

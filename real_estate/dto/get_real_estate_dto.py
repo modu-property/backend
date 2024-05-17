@@ -5,7 +5,8 @@ from dataclasses import dataclass
 class GetRealEstatesOnSearchDto:
     deal_type: str
     keyword: str
-    limit: int
+    limit: int = None
+    real_estate_search_limit: int = None
 
 
 @dataclass
