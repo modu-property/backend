@@ -29,11 +29,15 @@ class CollectCommandMixin:
     ):
         start_year, start_month, end_year, end_month = 0, 0, 0, 0
         if instance:
+            deal_date = datetime.strptime(
+                f"{instance.deal_year}-{instance.deal_month}-{instance.deal_day}",
+                "%Y-%m-%d",
+            )
             start_year, start_month = TimeUtil.split_year_and_month(
-                year_and_month=datetime.strftime(instance.deal_date, "%Y%m%d")
+                year_and_month=datetime.strftime(deal_date, "%Y%m%d")
             )
             end_date = datetime.strftime(
-                instance.deal_date + timedelta(weeks=52 * 2), "%Y%m%d"
+                deal_date + timedelta(weeks=52 * 2), "%Y%m%d"
             )
             end_year, end_month = TimeUtil.split_year_and_month(
                 year_and_month=end_date

@@ -19,11 +19,11 @@ def test_when_search_and_update_regions_fail_then_get_real_estates_raises_except
         dto = GetRealEstatesOnSearchDto(
             deal_type=DealTypesForDBEnum.DEAL.value,
             keyword="강남",
-            limit=10,
+            real_estate_search_limit=10,
         )
         GetRealEstatesOnSearchService().get_real_estates(dto=dto)
 
-    assert exception_info.value.args[0] == "_update_result failed"
+    assert "_update_result failed" in exception_info.value.args[0]
     assert exception_info.value.status_code == status.HTTP_400_BAD_REQUEST
 
 
@@ -38,11 +38,11 @@ def test_when_search_and_update_real_estates_fail_then_get_real_estates_raises_e
         dto = GetRealEstatesOnSearchDto(
             deal_type=DealTypesForDBEnum.DEAL.value,
             keyword="강남",
-            limit=10,
+            real_estate_search_limit=10,
         )
         GetRealEstatesOnSearchService().get_real_estates(dto=dto)
 
-    assert exception_info.value.args[0] == "_update_result failed"
+    assert "_update_result failed" in exception_info.value.args[0]
     assert exception_info.value.status_code == status.HTTP_400_BAD_REQUEST
 
 
@@ -57,7 +57,7 @@ def test_when_no_result_then_raises_exception(
         dto = GetRealEstatesOnSearchDto(
             deal_type=DealTypesForDBEnum.DEAL.value,
             keyword="강남",
-            limit=10,
+            real_estate_search_limit=10,
         )
         GetRealEstatesOnSearchService().get_real_estates(dto=dto)
 

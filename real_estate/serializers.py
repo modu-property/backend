@@ -92,7 +92,9 @@ class GetRealEstateResponseSerializer(serializers.ModelSerializer):
 class GetRealEstatesOnSearchRequestSerializer(serializers.Serializer):
     deal_type = serializers.ChoiceField(choices=DEAL_TYPES)
     keyword = serializers.CharField()
-    limit = serializers.IntegerField(min_value=1, max_value=300)
+    real_estate_search_limit = serializers.IntegerField(
+        min_value=15, max_value=50
+    )
 
 
 class GetRealEstatesOnSearchResponseSerializer(serializers.Serializer):

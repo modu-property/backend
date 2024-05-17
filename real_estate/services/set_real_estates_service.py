@@ -1,5 +1,6 @@
 from typing import Any, Dict, Optional, Union
 
+from modu_property.utils.loggers import logger
 from modu_property.utils.validator import validate_data
 from real_estate.serializers import (
     GetRealEstatesOnSearchResponseSerializer,
@@ -30,6 +31,9 @@ class SetRealEstatesService:
             many=True,
         )
         if not _data:
+            logger.error(
+                f"update_result_with_data result : {result} _data : {data}"
+            )
             return False
 
         result[self.key] = list(data)

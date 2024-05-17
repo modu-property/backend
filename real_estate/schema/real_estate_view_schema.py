@@ -111,22 +111,22 @@ def get_real_estates_on_search_view_get_decorator(view_function):
                 ],
             ),
             OpenApiParameter(
-                name="limit",
+                name="real_estate_search_limit",
                 type=int,
                 location=OpenApiParameter.QUERY,
                 description="몇 개 보여줄 지 결정, regions는 3개로 고정",
                 required=False,
-                default=10,
+                default=15,
                 examples=[
                     OpenApiExample(
                         name="최소 limit",
                         description="최소 limit",
-                        value="10",
+                        value="15",
                     ),
                     OpenApiExample(
                         name="최대 limit",
                         description="최대 limit",
-                        value="30",
+                        value="50",
                     ),
                 ],
             ),

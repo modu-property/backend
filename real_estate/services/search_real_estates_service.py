@@ -20,8 +20,6 @@ class SearchRealEstatesService:
         real_estates = []
         query = {"query_string": f"@* *{dto.keyword}*"}
 
-        self._set_region_count_limit(dto=dto)
-
         hits = self.search_client.search(
             index=index, query=query, limit=dto.limit
         )
@@ -33,7 +31,3 @@ class SearchRealEstatesService:
             real_estates.append(real_estate_info)
 
         return real_estates
-
-    @staticmethod
-    def _set_region_count_limit(dto: GetRealEstatesOnSearchDto) -> None:
-        dto.limit = 3

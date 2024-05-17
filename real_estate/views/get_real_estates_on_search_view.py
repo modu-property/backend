@@ -6,6 +6,7 @@ from rest_framework.response import Response
 
 from modu_property.utils.loggers import logger
 from real_estate.dto.get_real_estate_dto import GetRealEstatesOnSearchDto
+from real_estate.enum.real_estate_enum import SearchLimitEnum
 from real_estate.exceptions import (
     SearchAndUpdateRealEstatesException,
     NotFoundException,
@@ -48,7 +49,9 @@ class GetRealEstatesOnSearchView(ListAPIView):
         request_data = {
             "deal_type": kwargs["deal_type"],
             "keyword": request.query_params.get("keyword", ""),
-            "limit": request.query_params.get("limit", 10),
+            "real_estate_search_limit": request.query_params.get(
+                "real_estate_search_limit"
+            ),
         }
         serializer = self.get_serializer(
             data=request_data,
