@@ -50,6 +50,7 @@ class CollectDealPriceOfRealEstateService:
         self.create_real_estate = CreateRealEstate(
             address_converter_util=self.address_converter_util
         )
+        self.create_deal = CreateDeal()
 
     def collect_deal_price_of_real_estate(
         self, dto: CollectDealPriceOfRealEstateDto
@@ -86,12 +87,12 @@ class CollectDealPriceOfRealEstateService:
         ) = result
 
         inserted_real_estate_models_dict = (
-            self.create_inserted_real_estate_models_dict(
+            self.create_deal.create_inserted_real_estate_models_dict(
                 inserted_real_estate_models
             )
         )
 
-        deal_models = self.create_deal_models(
+        deal_models = self.create_deal.create_deal_models(
             dto,
             deal_price_of_real_estate_list,
             inserted_real_estate_models_dict,
@@ -104,88 +105,6 @@ class CollectDealPriceOfRealEstateService:
         except Exception as e:
             logger.error(f"deal bulk_create e : {e}")
         return False
-
-    @staticmethod
-    def create_inserted_real_estate_models_dict(inserted_real_estate_models):
-        inserted_real_estate_models_dict = {}
-        for inserted_real_estate_model in inserted_real_estate_models:
-            regional_code = inserted_real_estate_model.regional_code
-            lot_number = inserted_real_estate_model.lot_number
-            unique_key = f"{regional_code}{lot_number}"
-            inserted_real_estate_models_dict[unique_key] = (
-                inserted_real_estate_model
-            )
-        return inserted_real_estate_models_dict
-
-    def create_deal_models(
-        self,
-        dto: CollectDealPriceOfRealEstateDto,
-        deal_price_of_real_estate_list,
-        inserted_real_estate_models_dict,
-    ):
-        deal_models = []
-        for deal_price_of_real_estate in deal_price_of_real_estate_list:
-            regional_code = deal_price_of_real_estate["지역코드"]
-            lot_number = deal_price_of_real_estate["지번"]
-            unique_key = f"{regional_code}{lot_number}"
-
-            validated_deal: ReturnDict = self.create_validated_deal_model(
-                deal_price_of_real_estate,
-                inserted_real_estate_models_dict[unique_key],
-                dto.deal_type,
-            )
-            if not validated_deal:
-                return False
-
-            deal_models.append(Deal(**dict(validated_deal)))
-        return deal_models
-
-    def create_validated_deal_model(
-        self, deal_price_of_real_estate, inserted_real_estate_model, deal_type
-    ):
-        deal_model = self.create_deal_model(
-            deal_price_of_real_estate, inserted_real_estate_model, deal_type
-        )
-
-        deal_dict = model_to_dict(deal_model)
-
-        validated_deal_model = validate_data(
-            model=deal_model,
-            data=deal_dict,
-            serializer=DealSerializer,
-        )
-
-        return validated_deal_model
-
-    @staticmethod
-    def create_deal_model(
-        deal_price_of_real_estate, inserted_real_estate_model, deal_type
-    ) -> Deal:
-        brokerage_type = deal_price_of_real_estate["거래유형"]
-        _deal_type = DealTypesForDBEnum.DEAL.value
-        # if deal_type == "전세":
-        #     _deal_type = DealTypesForDBEnum.JEONSE.value
-        # elif deal_type == "월세":
-        #     _deal_type = DealTypesForDBEnum.MONTHLY_RENT.value
-
-        return Deal(
-            deal_price=deal_price_of_real_estate["거래금액"],
-            brokerage_type=(
-                BrokerageTypesEnum.BROKERAGE.value
-                if brokerage_type == "중개거래"
-                else BrokerageTypesEnum.DIRECT.value
-            ),
-            deal_year=deal_price_of_real_estate["년"],
-            land_area=deal_price_of_real_estate["대지권면적"],
-            deal_month=deal_price_of_real_estate["월"],
-            deal_day=deal_price_of_real_estate["일"],
-            area_for_exclusive_use=deal_price_of_real_estate["전용면적"],
-            floor=deal_price_of_real_estate["층"],
-            is_deal_canceled=deal_price_of_real_estate["해제여부"],
-            deal_canceled_date=deal_price_of_real_estate["해제사유발생일"],
-            deal_type=_deal_type,
-            real_estate_id=inserted_real_estate_model.id,
-        )
 
 
 class CreateRealEstate:
@@ -323,6 +242,91 @@ class CreateRealEstate:
         ):
             return RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value
         return ""
+
+
+class CreateDeal:
+
+    @staticmethod
+    def create_inserted_real_estate_models_dict(inserted_real_estate_models):
+        inserted_real_estate_models_dict = {}
+        for inserted_real_estate_model in inserted_real_estate_models:
+            regional_code = inserted_real_estate_model.regional_code
+            lot_number = inserted_real_estate_model.lot_number
+            unique_key = f"{regional_code}{lot_number}"
+            inserted_real_estate_models_dict[unique_key] = (
+                inserted_real_estate_model
+            )
+        return inserted_real_estate_models_dict
+
+    def create_deal_models(
+        self,
+        dto: CollectDealPriceOfRealEstateDto,
+        deal_price_of_real_estate_list,
+        inserted_real_estate_models_dict,
+    ):
+        deal_models = []
+        for deal_price_of_real_estate in deal_price_of_real_estate_list:
+            regional_code = deal_price_of_real_estate["지역코드"]
+            lot_number = deal_price_of_real_estate["지번"]
+            unique_key = f"{regional_code}{lot_number}"
+
+            validated_deal: ReturnDict = self.create_validated_deal_model(
+                deal_price_of_real_estate,
+                inserted_real_estate_models_dict[unique_key],
+                dto.deal_type,
+            )
+            if not validated_deal:
+                return False
+
+            deal_models.append(Deal(**dict(validated_deal)))
+        return deal_models
+
+    def create_validated_deal_model(
+        self, deal_price_of_real_estate, inserted_real_estate_model, deal_type
+    ):
+        deal_model = self.create_deal_model(
+            deal_price_of_real_estate, inserted_real_estate_model, deal_type
+        )
+
+        deal_dict = model_to_dict(deal_model)
+
+        validated_deal_model = validate_data(
+            model=deal_model,
+            data=deal_dict,
+            serializer=DealSerializer,
+        )
+
+        return validated_deal_model
+
+    @staticmethod
+    def create_deal_model(
+        deal_price_of_real_estate, inserted_real_estate_model, deal_type
+    ) -> Deal:
+        brokerage_type = deal_price_of_real_estate["거래유형"]
+        _deal_type = DealTypesForDBEnum.DEAL.value
+        # if deal_type == "전세":
+        #     _deal_type = DealTypesForDBEnum.JEONSE.value
+        # elif deal_type == "월세":
+        #     _deal_type = DealTypesForDBEnum.MONTHLY_RENT.value
+
+        return Deal(
+            deal_price=deal_price_of_real_estate["거래금액"],
+            brokerage_type=(
+                BrokerageTypesEnum.BROKERAGE.value
+                if brokerage_type == "중개거래"
+                else BrokerageTypesEnum.DIRECT.value
+            ),
+            deal_year=deal_price_of_real_estate["년"],
+            land_area=deal_price_of_real_estate["대지권면적"],
+            deal_month=deal_price_of_real_estate["월"],
+            deal_day=deal_price_of_real_estate["일"],
+            area_for_exclusive_use=deal_price_of_real_estate["전용면적"],
+            floor=deal_price_of_real_estate["층"],
+            is_deal_canceled=deal_price_of_real_estate["해제여부"],
+            deal_canceled_date=deal_price_of_real_estate["해제사유발생일"],
+            deal_type=_deal_type,
+            real_estate_id=inserted_real_estate_model.id,
+        )
 
 
 class Delete:
