@@ -46,6 +46,7 @@ class CollectDealPriceOfRealEstateService:
         self.address_converter_util: KakaoAddressConverterUtil = (
             address_converter_util
         )
+        self.delete = Delete()
 
     def collect_deal_price_of_real_estate(
         self, dto: CollectDealPriceOfRealEstateDto
@@ -62,7 +63,7 @@ class CollectDealPriceOfRealEstateService:
         ):
             return
 
-        deal_prices_of_real_estate = self.delete_duplication(
+        deal_prices_of_real_estate = self.delete.delete_duplication(
             dto, deal_prices_of_real_estate
         )
 
@@ -100,48 +101,6 @@ class CollectDealPriceOfRealEstateService:
         except Exception as e:
             logger.error(f"deal bulk_create e : {e}")
         return False
-
-    def delete_duplication(
-        self, dto: CollectDealPriceOfRealEstateDto, deal_prices_of_real_estate
-    ):
-        file_logger.info("delete_duplication")
-        unique_keys_in_db = self.create_unique_keys_in_db(dto=dto)
-
-        indexes_to_drop = self.create_indexes_to_drop(
-            deal_prices_of_real_estate, unique_keys_in_db
-        )
-
-        deal_prices_of_real_estate = deal_prices_of_real_estate.drop(
-            indexes_to_drop
-        )
-
-        return deal_prices_of_real_estate
-
-    @staticmethod
-    def create_indexes_to_drop(deal_prices_of_real_estate, unique_keys_in_db):
-        indexes_to_drop = []
-        for (
-            index,
-            deal_price_of_real_estate,
-        ) in deal_prices_of_real_estate.iterrows():
-            regional_code = deal_price_of_real_estate["지역코드"]
-            lot_number = deal_price_of_real_estate["지번"]
-            unique_key = f"{regional_code}{lot_number}"
-
-            if unique_key in unique_keys_in_db:
-                indexes_to_drop.append(deal_prices_of_real_estate.index[index])
-        return indexes_to_drop
-
-    def create_unique_keys_in_db(self, dto: CollectDealPriceOfRealEstateDto):
-        unique_keys_in_db = {}
-        data_in_db = self.get_data_in_db(dto)
-        for data in data_in_db:
-            regional_code = data.regional_code
-            lot_number = data.lot_number
-            unique_key = f"{regional_code}{lot_number}"
-
-            unique_keys_in_db[unique_key] = True
-        return unique_keys_in_db
 
     @staticmethod
     def create_inserted_real_estate_models_dict(inserted_real_estate_models):
@@ -356,6 +315,50 @@ class CollectDealPriceOfRealEstateService:
             deal_type=_deal_type,
             real_estate_id=inserted_real_estate_model.id,
         )
+
+
+class Delete:
+    def delete_duplication(
+        self, dto: CollectDealPriceOfRealEstateDto, deal_prices_of_real_estate
+    ):
+        file_logger.info("delete_duplication")
+        unique_keys_in_db = self.create_unique_keys_in_db(dto=dto)
+
+        indexes_to_drop = self.create_indexes_to_drop(
+            deal_prices_of_real_estate, unique_keys_in_db
+        )
+
+        deal_prices_of_real_estate = deal_prices_of_real_estate.drop(
+            indexes_to_drop
+        )
+
+        return deal_prices_of_real_estate
+
+    @staticmethod
+    def create_indexes_to_drop(deal_prices_of_real_estate, unique_keys_in_db):
+        indexes_to_drop = []
+        for (
+            index,
+            deal_price_of_real_estate,
+        ) in deal_prices_of_real_estate.iterrows():
+            regional_code = deal_price_of_real_estate["지역코드"]
+            lot_number = deal_price_of_real_estate["지번"]
+            unique_key = f"{regional_code}{lot_number}"
+
+            if unique_key in unique_keys_in_db:
+                indexes_to_drop.append(deal_prices_of_real_estate.index[index])
+        return indexes_to_drop
+
+    def create_unique_keys_in_db(self, dto: CollectDealPriceOfRealEstateDto):
+        unique_keys_in_db = {}
+        data_in_db = self.get_data_in_db(dto)
+        for data in data_in_db:
+            regional_code = data.regional_code
+            lot_number = data.lot_number
+            unique_key = f"{regional_code}{lot_number}"
+
+            unique_keys_in_db[unique_key] = True
+        return unique_keys_in_db
 
     @staticmethod
     def get_data_in_db(dto: CollectDealPriceOfRealEstateDto):
