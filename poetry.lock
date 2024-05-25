@@ -618,6 +618,20 @@ django = ">=3.0"
 pytz = "*"
 
 [[package]]
+name = "djangorestframework-gis"
+version = "1.0"
+description = "Geographic add-ons for Django Rest Framework"
+optional = false
+python-versions = "*"
+files = [
+    {file = "djangorestframework-gis-1.0.tar.gz", hash = "sha256:921c5adbc9a7c0502c905957a6695b67f55d7bf6582e1ab837888b55a1fce5a6"},
+    {file = "djangorestframework_gis-1.0-py2.py3-none-any.whl", hash = "sha256:bb715f05a111c02b9acc4021b17566e40c0b90dd833c583bac3d67f92be9667d"},
+]
+
+[package.dependencies]
+djangorestframework = "*"
+
+[[package]]
 name = "djangorestframework-simplejwt"
 version = "5.3.1"
 description = "A minimal JSON Web Token authentication plugin for Django REST Framework"
@@ -1966,4 +1980,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "3.10.14"
-content-hash = "92f77d82211c0fc8f0cd6595ea5d84df2cb7132586f2aa735d201a40f1e1ea11"
+content-hash = "dd8a5e5ecc0264b3a859c18f7b6210c9ee569e584e299a15c0d368b0fdab1f54"
