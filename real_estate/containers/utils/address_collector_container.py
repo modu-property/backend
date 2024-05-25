@@ -23,6 +23,6 @@ class AddressCollectorContainer(containers.DeclarativeContainer):
 AddressCollectorContainer().wire(
     modules=[
         "real_estate.utils.address_collector_util",
-        "real_estate.services.collect_address_service",
+        "real_estate.services.collect_region_service",
     ]
 )
