@@ -2,7 +2,11 @@ from decimal import Decimal
 
 from django.contrib.gis.geos import Point
 from rest_framework import serializers
-from real_estate.enum.deal_enum import DEAL_TYPES
+from real_estate.enum.deal_enum import (
+    DEAL_TYPES,
+    DealTypesForDBEnum,
+    BrokerageTypesEnum,
+)
 from real_estate.enum.real_estate_enum import RealEstateTypesForQueryEnum
 from real_estate.models import Deal, RealEstate, Region, RegionPrice
 
@@ -41,7 +45,6 @@ class RealEstateSerializer(serializers.ModelSerializer):
             "point",
         )
 
-    # def get_organized_data(self, deal_price_of_real_estates):
     def get_organized_data(self, deal_price_of_real_estates):
         result = []
         for (
@@ -104,20 +107,19 @@ class RealEstateSerializer(serializers.ModelSerializer):
 
 
 class DealSerializer(serializers.ModelSerializer):
-    area_for_exclusive_use_pyung = serializers.SerializerMethodField(
-        "convert_square_meter_to_pyung"
+    거래금액 = serializers.IntegerField(source="deal_price")
+    중개유형 = serializers.CharField(source="brokerage_type")
+    년 = serializers.IntegerField(source="deal_year")
+    대지권면적 = serializers.CharField(source="land_area")
+    월 = serializers.IntegerField(source="deal_month")
+    일 = serializers.IntegerField(source="deal_day")
+    전용면적 = serializers.CharField(source="area_for_exclusive_use")
+    층 = serializers.CharField(source="floor")
+    해제여부 = serializers.BooleanField(source="is_deal_canceled")
+    해제사유발생일 = serializers.DateField(
+        source="deal_canceled_date", allow_null=True
     )
-    area_for_exclusive_use_price_per_pyung = serializers.SerializerMethodField(
-        "calc_price_per_pyung"
-    )
-    is_deal_canceled = serializers.SerializerMethodField(
-        "calc_is_deal_canceled"
-    )
-    floor = serializers.SerializerMethodField("stringify_floor")
-
-    # TODO : 해제사유 등은 Deal 모델에 넣어야 함
-    # is_deal_canceled = serializers.BooleanField()
-    # deal_canceled_date = serializers.DateField(allow_null=True)
+    real_estate_id = serializers.IntegerField()
 
     def __init__(self, instance=None, data=..., **kwargs):
         super().__init__(instance, data, **kwargs)
@@ -128,61 +130,79 @@ class DealSerializer(serializers.ModelSerializer):
         model = Deal
         fields = (
             "id",
-            "deal_price",
-            "brokerage_type",
-            "deal_year",
-            "land_area",
-            "deal_month",
-            "deal_day",
-            "area_for_exclusive_use",
-            "floor",
-            "is_deal_canceled",
-            "deal_canceled_date",
-            # "해제여부",
-            # "해제사유발생일",
+            "거래금액",
+            "중개유형",
+            "deal_type",
+            "년",
+            "대지권면적",
+            "월",
+            "일",
+            "전용면적",
+            "층",
+            "해제여부",
+            "해제사유발생일",
             "area_for_exclusive_use_pyung",
             "area_for_exclusive_use_price_per_pyung",
             "deal_type",
             "real_estate_id",
         )
 
-    def convert_square_meter_to_pyung(self, instance) -> Decimal:
-        self.pyung = round(
-            Decimal(instance.area_for_exclusive_use) / Decimal(3.305785), 2
-        )
-        return self.pyung
+    def get_organized_data(
+        self, inserted_real_estate_models_dict, deal_price_of_real_estate_list
+    ):
+        for deal_price_of_real_estate in deal_price_of_real_estate_list:
+            deal_price_of_real_estate["거래유형"] = (
+                BrokerageTypesEnum.BROKERAGE.value
+                if deal_price_of_real_estate["거래유형"] == "중개거래"
+                else BrokerageTypesEnum.DIRECT.value
+            )
+            deal_price_of_real_estate["deal_type"] = (
+                DealTypesForDBEnum.DEAL.value
+            )
 
-    def calc_price_per_pyung(self, instance) -> Decimal:
-        return round(instance.deal_price / self.pyung, 2)
+            self.convert_square_meter_to_pyung(deal_price_of_real_estate)
+
+            self.calc_price_per_pyung(deal_price_of_real_estate)
+
+            self.calc_is_deal_canceled(deal_price_of_real_estate)
+
+            self.stringify_floor(deal_price_of_real_estate)
+
+            self.set_deal_type(deal_price_of_real_estate)
+
+            self.set_real_estate_id(
+                deal_price_of_real_estate, inserted_real_estate_models_dict
+            )
+
+    def convert_square_meter_to_pyung(self, instance):
+        area = instance["전용면적"]
+
+        self.pyung = round(Decimal(area) / Decimal(3.305785), 2)
+        instance["area_for_exclusive_use_pyung"] = str(self.pyung)
+
+    def calc_price_per_pyung(self, instance):
+        price = instance["거래금액"]
+        instance["area_for_exclusive_use_price_per_pyung"] = str(
+            round(price / self.pyung, 2)
+        )
 
     @staticmethod
-    def calc_is_deal_canceled(instance) -> bool:
-        if instance.is_deal_canceled == "O":
-            return True
-        return False
+    def calc_is_deal_canceled(instance):
+        result = instance["해제여부"]
+        if result == "O":
+            instance["해제여부"] = True
+        instance["해제여부"] = False
 
-    def stringify_floor(self, instance) -> str:
-        self.floor = str(instance.floor)
-        return self.floor
+    def stringify_floor(self, instance):
+        self.floor = str(instance["층"])
 
-    # self._set_deal_canceled_date(deal_price_of_real_estate)
-    #
-    # self._set_is_deal_canceled(deal_price_of_real_estate)
+    def set_deal_type(self, instance):
+        instance["중개유형"] = instance["deal_type"]
 
-    # def _set_is_deal_canceled(self, instance):
-    #     if not instance.get("해제여부"):
-    #         instance["is_deal_canceled"] = False
-
-    # def _set_deal_canceled_date(self, instance):
-    #     if instance.get("해제사유발생일"):
-    #         deal_canceled_date = instance.get("해제사유발생일")
-    #         y, m, d = deal_canceled_date.split(".")
-    #         y = f"20{y}"
-    #
-    #         instance.pop("해제사유발생일")
-    #         instance["deal_canceled_date"] = f"{y}-{m}-{d}"
-    #     else:
-    #         instance["deal_canceled_date"] = None
+    def set_real_estate_id(self, instance, inserted_real_estate_models_dict):
+        unique_key = f"{instance['지역코드']}{instance['지번']}"
+        real_estate = inserted_real_estate_models_dict[unique_key]
+        instance["real_estate_id"] = real_estate.id
 
 
 class GetRealEstateRequestSerializer(serializers.Serializer):
