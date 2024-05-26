@@ -22,7 +22,10 @@ class RealEstate(gis_models.Model):
         help_text="건축년도", null=False, blank=False
     )
     regional_code = models.CharField(
-        help_text="지역코드", null=False, blank=False, max_length=6
+        help_text="지역코드",
+        null=False,
+        blank=False,
+        max_length=6,
     )
     lot_number = models.CharField(
         help_text="지번(구획마다 부여된 땅 번호, 서울특별시 서초구 반포동 1-1)",

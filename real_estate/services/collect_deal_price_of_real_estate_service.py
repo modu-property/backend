@@ -1,6 +1,5 @@
 from dependency_injector.wiring import Provide, inject
 from django.forms import model_to_dict
-from django.contrib.gis.geos import Point
 from pandas import DataFrame
 from rest_framework.utils.serializer_helpers import ReturnDict
 
@@ -118,7 +117,6 @@ class CreateRealEstate:
     ):
         deal_price_of_real_estate_list = []
         unique_keys = {}
-        real_estate_models = []
 
         real_estate_type = self.convert_real_estate_type(dto)
         if not real_estate_type:
@@ -127,35 +125,26 @@ class CreateRealEstate:
             )
             return False
 
-        for (
-            _,
-            deal_price_of_real_estate,
-        ) in deal_prices_of_real_estate.iterrows():
-            regional_code = deal_price_of_real_estate["지역코드"]
-            lot_number = deal_price_of_real_estate["지번"]
-            unique_key = f"{regional_code}{lot_number}"
+        serializer = RealEstateSerializer(
+            context={
+                "address_converter_util": self.address_converter_util,
+                "real_estate_type": real_estate_type,
+                "unique_keys": unique_keys,
+            },
+        )
 
-            validated_real_estate = self.create_validated_real_estate(
-                deal_price_of_real_estate=deal_price_of_real_estate,
-                real_estate_type=real_estate_type,
-            )
-            if not validated_real_estate:
-                return False
+        deal_price_of_real_estates = serializer.get_organized_data(
+            deal_price_of_real_estates=deal_prices_of_real_estate
+        )
 
-            self.set_remove_reason_date(
-                deal_price_of_real_estate=deal_price_of_real_estate
-            )
+        serializer = RealEstateSerializer(
+            data=deal_price_of_real_estates, many=True
+        )
+        serializer.is_valid(raise_exception=True)
 
-            self.set_remove_or_not(deal_price_of_real_estate)
-
-            deal_price_of_real_estate_list.append(deal_price_of_real_estate)
-
-            self.append_real_estate(
-                unique_keys,
-                real_estate_models,
-                unique_key,
-                validated_real_estate,
-            )
+        real_estate_models = [
+            RealEstate(**data) for data in serializer.validated_data
+        ]
 
         inserted_real_estate_models = []
         try:
@@ -169,70 +158,6 @@ class CreateRealEstate:
                 f"real_estate bulk_create e : {e} inserted_real_estate_models : {inserted_real_estate_models}"
             )
             return False
-
-    @staticmethod
-    def append_real_estate(
-        unique_keys, real_estate_models, unique_key, validated_real_estate
-    ):
-        if unique_key not in unique_keys:
-            real_estate_models.append(RealEstate(**validated_real_estate))
-            unique_keys[unique_key] = ""
-
-    @staticmethod
-    def set_remove_or_not(deal_price_of_real_estate):
-        if not deal_price_of_real_estate.get("해제여부"):
-            deal_price_of_real_estate["해제여부"] = False
-
-    @staticmethod
-    def set_remove_reason_date(deal_price_of_real_estate):
-        if deal_price_of_real_estate.get("해제사유발생일"):
-            canceled_date = deal_price_of_real_estate.get("해제사유발생일")
-            y, m, d = canceled_date.split(".")
-            y = f"20{y}"
-
-            deal_price_of_real_estate["해제사유발생일"] = f"{y}-{m}-{d}"
-
-    @staticmethod
-    def create_real_estate_model(
-        deal_price_of_real_estate, address_info, real_estate_type: str
-    ) -> RealEstate:
-        return RealEstate(
-            name=deal_price_of_real_estate["연립다세대"],
-            build_year=deal_price_of_real_estate["건축년도"],
-            regional_code=deal_price_of_real_estate["지역코드"],
-            lot_number=deal_price_of_real_estate["지번"],
-            road_name_address=address_info["road_name_address"],
-            address=address_info["address"],
-            real_estate_type=real_estate_type,
-            latitude=address_info["latitude"],
-            longitude=address_info["longitude"],
-            point=Point(
-                float(address_info["latitude"]),
-                float(address_info["longitude"]),
-            ),
-        )
-
-    def create_validated_real_estate(
-        self, deal_price_of_real_estate, real_estate_type: str
-    ):
-        dong = deal_price_of_real_estate["법정동"]
-        lot_number = deal_price_of_real_estate["지번"]
-        query: str = f"{dong} {lot_number}"
-
-        if not self.address_converter_util.convert_address(query=query):
-            return False
-
-        address_info = self.address_converter_util.get_address()
-
-        real_estate_model: RealEstate = self.create_real_estate_model(
-            deal_price_of_real_estate=deal_price_of_real_estate,
-            address_info=address_info,
-            real_estate_type=real_estate_type,
-        )
-
-        return validate_data(
-            serializer=RealEstateSerializer, model=real_estate_model
-        )
 
     @staticmethod
     def convert_real_estate_type(dto: CollectDealPriceOfRealEstateDto) -> str:

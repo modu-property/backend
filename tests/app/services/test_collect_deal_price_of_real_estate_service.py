@@ -73,7 +73,7 @@ class TestCollectDealPriceOfRealEstateService:
             dto=dto
         )
 
-        assert result == True
+        assert result is True
 
         real_estates = RealEstateRepository().get_real_estates()
 
