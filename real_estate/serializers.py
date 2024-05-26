@@ -132,7 +132,6 @@ class DealSerializer(serializers.ModelSerializer):
             "id",
             "거래금액",
             "중개유형",
-            "deal_type",
             "년",
             "대지권면적",
             "월",
@@ -164,7 +163,7 @@ class DealSerializer(serializers.ModelSerializer):
 
             self.calc_price_per_pyung(deal_price_of_real_estate)
 
-            self.calc_is_deal_canceled(deal_price_of_real_estate)
+            self.set_is_deal_canceled(deal_price_of_real_estate)
 
             self.stringify_floor(deal_price_of_real_estate)
 
@@ -187,14 +186,11 @@ class DealSerializer(serializers.ModelSerializer):
         )
 
     @staticmethod
-    def calc_is_deal_canceled(instance):
-        result = instance["해제여부"]
-        if result == "O":
-            instance["해제여부"] = True
-        instance["해제여부"] = False
+    def set_is_deal_canceled(instance):
+        instance["해제여부"] = instance["해제여부"] == "O"
 
     def stringify_floor(self, instance):
-        self.floor = str(instance["층"])
+        instance["층"] = str(instance["층"])
 
     def set_deal_type(self, instance):
         instance["중개유형"] = instance["deal_type"]

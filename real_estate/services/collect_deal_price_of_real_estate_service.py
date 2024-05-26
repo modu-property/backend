@@ -76,7 +76,7 @@ class CollectDealPriceOfRealEstateService:
         if not result:
             return
 
-        return self.create_deal.create_deals(dto, result)
+        return self.create_deal.create_deals(result)
 
 
 class CreateRealEstate:
@@ -142,7 +142,7 @@ class CreateRealEstate:
 
 
 class CreateDeal:
-    def create_deals(self, dto, result):
+    def create_deals(self, result):
         (
             inserted_real_estate_models,
             deal_price_of_real_estate_list,
