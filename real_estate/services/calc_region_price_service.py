@@ -38,7 +38,9 @@ class CalcRegionPriceService:
         self._calc_average_jeonse_price(dto)
         self._calc_average_deal_price_per_pyung(dto)
         self._calc_jeonse_price_per_pyung(dto)
+
         region_price = self.real_estate_repository.create_region_price(dto=dto)
+
         return region_price
 
     def _get_real_estates(self, dto):

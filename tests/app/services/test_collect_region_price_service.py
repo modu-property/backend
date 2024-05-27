@@ -1,9 +1,7 @@
 from datetime import datetime
 import pytest
-from real_estate.dto.collect_region_price_dto import CollectRegionPriceDto
 from real_estate.enum.deal_enum import DealTypesForDBEnum
 from real_estate.enum.real_estate_enum import RealEstateTypesForDBEnum
-from real_estate.models import RegionPrice
 from real_estate.repository.real_estate_repository import RealEstateRepository
 
 from real_estate.services.collect_region_price_service import (
