@@ -1,16 +1,11 @@
 from dependency_injector.wiring import Provide, inject
-from django.forms import model_to_dict
-from django.contrib.gis.geos import Point
 from pandas import DataFrame
-from rest_framework.utils.serializer_helpers import ReturnDict
 
 from modu_property.utils.loggers import logger, file_logger
-from modu_property.utils.validator import validate_data
 from real_estate.containers.utils.address_converter_container import (
     AddressConverterContainer,
 )
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
-from real_estate.enum.deal_enum import BrokerageTypesEnum, DealTypesForDBEnum
 from real_estate.enum.real_estate_enum import (
     RealEstateTypesForDBEnum,
     RealEstateTypesForQueryEnum,
@@ -46,6 +41,11 @@ class CollectDealPriceOfRealEstateService:
         self.address_converter_util: KakaoAddressConverterUtil = (
             address_converter_util
         )
+        self.delete = Delete()
+        self.create_real_estate = CreateRealEstate(
+            address_converter_util=self.address_converter_util
+        )
+        self.create_deal = CreateDeal()
 
     def collect_deal_price_of_real_estate(
         self, dto: CollectDealPriceOfRealEstateDto
@@ -62,36 +62,107 @@ class CollectDealPriceOfRealEstateService:
         ):
             return
 
-        deal_prices_of_real_estate = self.delete_duplication(
+        deal_prices_of_real_estate = self.delete.delete_duplication(
             dto, deal_prices_of_real_estate
         )
 
         if deal_prices_of_real_estate.empty:
             return
 
-        result = self.create_real_estates(
+        result = self.create_real_estate.create_real_estates(
             deal_prices_of_real_estate=deal_prices_of_real_estate, dto=dto
         )
 
         if not result:
             return
 
+        return self.create_deal.create_deals(result)
+
+
+class CreateRealEstate:
+    def __init__(self, address_converter_util: KakaoAddressConverterUtil):
+        self.address_converter_util = address_converter_util
+
+    def create_real_estates(
+        self,
+        deal_prices_of_real_estate: DataFrame,
+        dto: CollectDealPriceOfRealEstateDto,
+    ):
+        unique_keys = {}
+
+        real_estate_type = self.convert_real_estate_type(dto)
+        if not real_estate_type:
+            logger.error(
+                f"right real_estate_type not exist : {real_estate_type}"
+            )
+            return False
+
+        serializer = RealEstateSerializer(
+            context={
+                "address_converter_util": self.address_converter_util,
+                "real_estate_type": real_estate_type,
+                "unique_keys": unique_keys,
+            },
+        )
+
+        deal_price_of_real_estates = serializer.get_organized_data(
+            deal_price_of_real_estates=deal_prices_of_real_estate
+        )
+
+        serializer = RealEstateSerializer(
+            data=deal_price_of_real_estates, many=True
+        )
+        serializer.is_valid(raise_exception=True)
+
+        real_estate_models = [
+            RealEstate(**data) for data in serializer.validated_data
+        ]
+
+        inserted_real_estate_models = []
+        try:
+            if real_estate_models:
+                inserted_real_estate_models = RealEstate.objects.bulk_create(
+                    real_estate_models
+                )
+            return inserted_real_estate_models, deal_price_of_real_estates
+        except Exception as e:
+            logger.error(
+                f"real_estate bulk_create e : {e} inserted_real_estate_models : {inserted_real_estate_models}"
+            )
+            return False
+
+    @staticmethod
+    def convert_real_estate_type(dto: CollectDealPriceOfRealEstateDto) -> str:
+        if (
+            dto.real_estate_type
+            == RealEstateTypesForQueryEnum.MULTI_UNIT_HOUSE.value
+        ):
+            return RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value
+        return ""
+
+
+class CreateDeal:
+    def create_deals(self, result):
         (
             inserted_real_estate_models,
             deal_price_of_real_estate_list,
         ) = result
-
         inserted_real_estate_models_dict = (
             self.create_inserted_real_estate_models_dict(
                 inserted_real_estate_models
             )
         )
 
-        deal_models = self.create_deal_models(
-            dto,
-            deal_price_of_real_estate_list,
-            inserted_real_estate_models_dict,
+        serializer = DealSerializer()
+        serializer.get_organized_data(
+            inserted_real_estate_models_dict, deal_price_of_real_estate_list
         )
+        serializer = DealSerializer(
+            data=deal_price_of_real_estate_list, many=True
+        )
+        serializer.is_valid(raise_exception=True)
+
+        deal_models = [Deal(**data) for data in serializer.validated_data]
 
         try:
             if deal_models:
@@ -101,6 +172,20 @@ class CollectDealPriceOfRealEstateService:
             logger.error(f"deal bulk_create e : {e}")
         return False
 
+    @staticmethod
+    def create_inserted_real_estate_models_dict(inserted_real_estate_models):
+        inserted_real_estate_models_dict = {}
+        for inserted_real_estate_model in inserted_real_estate_models:
+            regional_code = inserted_real_estate_model.regional_code
+            lot_number = inserted_real_estate_model.lot_number
+            unique_key = f"{regional_code}{lot_number}"
+            inserted_real_estate_models_dict[unique_key] = (
+                inserted_real_estate_model
+            )
+        return inserted_real_estate_models_dict
+
+
+class Delete:
     def delete_duplication(
         self, dto: CollectDealPriceOfRealEstateDto, deal_prices_of_real_estate
     ):
@@ -144,220 +229,6 @@ class CollectDealPriceOfRealEstateService:
         return unique_keys_in_db
 
     @staticmethod
-    def create_inserted_real_estate_models_dict(inserted_real_estate_models):
-        inserted_real_estate_models_dict = {}
-        for inserted_real_estate_model in inserted_real_estate_models:
-            regional_code = inserted_real_estate_model.regional_code
-            lot_number = inserted_real_estate_model.lot_number
-            unique_key = f"{regional_code}{lot_number}"
-            inserted_real_estate_models_dict[unique_key] = (
-                inserted_real_estate_model
-            )
-        return inserted_real_estate_models_dict
-
-    @staticmethod
-    def convert_real_estate_type(dto: CollectDealPriceOfRealEstateDto) -> str:
-        if (
-            dto.real_estate_type
-            == RealEstateTypesForQueryEnum.MULTI_UNIT_HOUSE.value
-        ):
-            return RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value
-        return ""
-
-    def create_real_estates(
-        self,
-        deal_prices_of_real_estate: DataFrame,
-        dto: CollectDealPriceOfRealEstateDto,
-    ):
-        deal_price_of_real_estate_list = []
-        unique_keys = {}
-        real_estate_models = []
-
-        real_estate_type = self.convert_real_estate_type(dto)
-        if not real_estate_type:
-            logger.error(
-                f"right real_estate_type not exist : {real_estate_type}"
-            )
-            return False
-
-        for (
-            _,
-            deal_price_of_real_estate,
-        ) in deal_prices_of_real_estate.iterrows():
-            regional_code = deal_price_of_real_estate["지역코드"]
-            lot_number = deal_price_of_real_estate["지번"]
-            unique_key = f"{regional_code}{lot_number}"
-
-            validated_real_estate = self.create_validated_real_estate(
-                deal_price_of_real_estate=deal_price_of_real_estate,
-                real_estate_type=real_estate_type,
-            )
-            if not validated_real_estate:
-                return False
-
-            self.set_remove_reason_date(
-                deal_price_of_real_estate=deal_price_of_real_estate
-            )
-
-            self.set_remove_or_not(deal_price_of_real_estate)
-
-            deal_price_of_real_estate_list.append(deal_price_of_real_estate)
-
-            self.append_real_estate(
-                unique_keys,
-                real_estate_models,
-                unique_key,
-                validated_real_estate,
-            )
-
-        inserted_real_estate_models = []
-        try:
-            if real_estate_models:
-                inserted_real_estate_models = RealEstate.objects.bulk_create(
-                    real_estate_models
-                )
-            return inserted_real_estate_models, deal_price_of_real_estate_list
-        except Exception as e:
-            logger.error(
-                f"real_estate bulk_create e : {e} inserted_real_estate_models : {inserted_real_estate_models}"
-            )
-            return False
-
-    @staticmethod
-    def append_real_estate(
-        unique_keys, real_estate_models, unique_key, validated_real_estate
-    ):
-        if unique_key not in unique_keys:
-            real_estate_models.append(RealEstate(**validated_real_estate))
-            unique_keys[unique_key] = ""
-
-    @staticmethod
-    def set_remove_or_not(deal_price_of_real_estate):
-        if not deal_price_of_real_estate.get("해제여부"):
-            deal_price_of_real_estate["해제여부"] = False
-
-    @staticmethod
-    def set_remove_reason_date(deal_price_of_real_estate):
-        if deal_price_of_real_estate.get("해제사유발생일"):
-            canceled_date = deal_price_of_real_estate.get("해제사유발생일")
-            y, m, d = canceled_date.split(".")
-            y = f"20{y}"
-
-            deal_price_of_real_estate["해제사유발생일"] = f"{y}-{m}-{d}"
-
-    @staticmethod
-    def create_real_estate_model(
-        deal_price_of_real_estate, address_info, real_estate_type: str
-    ) -> RealEstate:
-        return RealEstate(
-            name=deal_price_of_real_estate["연립다세대"],
-            build_year=deal_price_of_real_estate["건축년도"],
-            regional_code=deal_price_of_real_estate["지역코드"],
-            lot_number=deal_price_of_real_estate["지번"],
-            road_name_address=address_info["road_name_address"],
-            address=address_info["address"],
-            real_estate_type=real_estate_type,
-            latitude=address_info["latitude"],
-            longitude=address_info["longitude"],
-            point=Point(
-                float(address_info["latitude"]),
-                float(address_info["longitude"]),
-            ),
-        )
-
-    def create_validated_real_estate(
-        self, deal_price_of_real_estate, real_estate_type: str
-    ):
-        dong = deal_price_of_real_estate["법정동"]
-        lot_number = deal_price_of_real_estate["지번"]
-        query: str = f"{dong} {lot_number}"
-
-        if not self.address_converter_util.convert_address(query=query):
-            return False
-
-        address_info = self.address_converter_util.get_address()
-
-        real_estate_model: RealEstate = self.create_real_estate_model(
-            deal_price_of_real_estate=deal_price_of_real_estate,
-            address_info=address_info,
-            real_estate_type=real_estate_type,
-        )
-
-        return validate_data(
-            serializer=RealEstateSerializer, model=real_estate_model
-        )
-
-    def create_deal_models(
-        self,
-        dto: CollectDealPriceOfRealEstateDto,
-        deal_price_of_real_estate_list,
-        inserted_real_estate_models_dict,
-    ):
-        deal_models = []
-        for deal_price_of_real_estate in deal_price_of_real_estate_list:
-            regional_code = deal_price_of_real_estate["지역코드"]
-            lot_number = deal_price_of_real_estate["지번"]
-            unique_key = f"{regional_code}{lot_number}"
-
-            validated_deal: ReturnDict = self.create_validated_deal_model(
-                deal_price_of_real_estate,
-                inserted_real_estate_models_dict[unique_key],
-                dto.deal_type,
-            )
-            if not validated_deal:
-                return False
-
-            deal_models.append(Deal(**dict(validated_deal)))
-        return deal_models
-
-    def create_validated_deal_model(
-        self, deal_price_of_real_estate, inserted_real_estate_model, deal_type
-    ):
-        deal_model = self.create_deal_model(
-            deal_price_of_real_estate, inserted_real_estate_model, deal_type
-        )
-
-        deal_dict = model_to_dict(deal_model)
-
-        validated_deal_model = validate_data(
-            model=deal_model,
-            data=deal_dict,
-            serializer=DealSerializer,
-        )
-
-        return validated_deal_model
-
-    @staticmethod
-    def create_deal_model(
-        deal_price_of_real_estate, inserted_real_estate_model, deal_type
-    ) -> Deal:
-        brokerage_type = deal_price_of_real_estate["거래유형"]
-        _deal_type = DealTypesForDBEnum.DEAL.value
-        # if deal_type == "전세":
-        #     _deal_type = DealTypesForDBEnum.JEONSE.value
-        # elif deal_type == "월세":
-        #     _deal_type = DealTypesForDBEnum.MONTHLY_RENT.value
-
-        return Deal(
-            deal_price=deal_price_of_real_estate["거래금액"],
-            brokerage_type=(
-                BrokerageTypesEnum.BROKERAGE.value
-                if brokerage_type == "중개거래"
-                else BrokerageTypesEnum.DIRECT.value
-            ),
-            deal_year=deal_price_of_real_estate["년"],
-            land_area=deal_price_of_real_estate["대지권면적"],
-            deal_month=deal_price_of_real_estate["월"],
-            deal_day=deal_price_of_real_estate["일"],
-            area_for_exclusive_use=deal_price_of_real_estate["전용면적"],
-            floor=deal_price_of_real_estate["층"],
-            is_deal_canceled=deal_price_of_real_estate["해제여부"],
-            deal_canceled_date=deal_price_of_real_estate["해제사유발생일"],
-            deal_type=_deal_type,
-            real_estate_id=inserted_real_estate_model.id,
-        )
-
-    @staticmethod
     def get_data_in_db(dto: CollectDealPriceOfRealEstateDto):
         return list(
             RealEstate.objects.prefetch_related("deals")
@@ -366,7 +237,6 @@ class CollectDealPriceOfRealEstateService:
                 deals__deal_year=int(dto.year_month[:4]),
                 deals__deal_month=int(dto.year_month[4:]),
                 deals__deal_type=dto.deal_type,
-                # deal__deal_type=None,
             )
             .all()
         )

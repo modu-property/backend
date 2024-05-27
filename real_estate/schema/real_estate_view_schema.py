@@ -186,6 +186,11 @@ def get_real_estates_on_map_view_get_decorator(view_function):
                 required=True,
                 examples=[
                     OpenApiExample(
+                        name="신당동, 황학동 남서측 위도",
+                        description="신당동, 황학동 남서측 위도",
+                        value="37.554",
+                    ),
+                    OpenApiExample(
                         name="서울 남서측 위도",
                         description="남서측 위도",
                         value="37.54296876065889",
@@ -204,6 +209,11 @@ def get_real_estates_on_map_view_get_decorator(view_function):
                 description="지도상의 남서측 경도",
                 required=True,
                 examples=[
+                    OpenApiExample(
+                        name="신당동, 황학동 남서측 경도",
+                        description="신당동, 황학동 남서측 경도",
+                        value="127.0073",
+                    ),
                     OpenApiExample(
                         name="서울 남서측 경도",
                         description="남서측 경도",
@@ -224,6 +234,11 @@ def get_real_estates_on_map_view_get_decorator(view_function):
                 required=True,
                 examples=[
                     OpenApiExample(
+                        name="신당동, 황학동 북동측 위도",
+                        description="서울역 북동측 위도",
+                        value="37.5735",
+                    ),
+                    OpenApiExample(
                         name="북동측 위도",
                         description="북동측 위도",
                         value="37.55780157762771",
@@ -242,6 +257,11 @@ def get_real_estates_on_map_view_get_decorator(view_function):
                 description="지도상의 북동측 경도",
                 required=True,
                 examples=[
+                    OpenApiExample(
+                        name="신당동, 황학동 북동측 경도",
+                        description=" 서울역 북동측 경도",
+                        value="127.0263",
+                    ),
                     OpenApiExample(
                         name="북동측 경도",
                         description="북동측 경도",

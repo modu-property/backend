@@ -1,5 +1,5 @@
 import pytest
-from real_estate.services.collect_address_service import CollectRegionService
+from real_estate.services.collect_region_service import CollectRegionService
 
 
 @pytest.mark.django_db

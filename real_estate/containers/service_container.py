@@ -7,7 +7,7 @@ from real_estate.containers.utils.address_collector_container import (
     AddressCollectorContainer,
 )
 from real_estate.repository.real_estate_repository import RealEstateRepository
-from real_estate.services.collect_address_service import CollectRegionService
+from real_estate.services.collect_region_service import CollectRegionService
 from real_estate.services.get_real_estates_service import (
     GetRealEstatesService,
     GetRegionsService,
