@@ -266,23 +266,30 @@ class GetRealEstatesOnMapResponseSerializer(serializers.Serializer):
     deal_date = serializers.DateField()
 
 
-class RegionPriceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RegionPrice
-        fields = (
-            "total_deal_price",
-            "total_jeonse_price",
-            "average_deal_price",
-            "average_jeonse_price",
-            "average_deal_price_per_pyung",
-            "average_jeonse_price_per_pyung",
-            "deal_date",
-            "region",
-            "deal_count",
-            "jeonse_count",
-            "total_deal_price_per_pyung",
-            "total_jeonse_price_per_pyung",
-        )
+class RegionPriceSerializer(serializers.Serializer):
+    region_id = serializers.IntegerField()
+    total_deal_price = serializers.IntegerField(allow_null=True)
+    total_jeonse_price = serializers.IntegerField(allow_null=True)
+    total_deal_price_per_pyung = serializers.CharField(
+        max_length=15, allow_null=True
+    )
+    total_jeonse_price_per_pyung = serializers.CharField(
+        max_length=15, allow_null=True
+    )
+    average_deal_price = serializers.CharField(max_length=15, allow_null=True)
+    average_jeonse_price = serializers.CharField(max_length=15, allow_null=True)
+    average_deal_price_per_pyung = serializers.CharField(
+        max_length=15, allow_null=True
+    )
+    average_jeonse_price_per_pyung = serializers.CharField(
+        max_length=15, allow_null=True
+    )
+    deal_date = serializers.DateField()
+    deal_count = serializers.IntegerField()
+    jeonse_count = serializers.IntegerField()
+
+    def create(self, validated_data):
+        return RegionPrice.objects.create(**validated_data)
 
 
 class RegionSerializer(serializers.ModelSerializer):
