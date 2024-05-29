@@ -16,6 +16,7 @@ class Command(BaseCommand):
             ServiceContainer.collect_regions_service
         ],
     ):
+        super().__init__()
         self.service = service
 
     def handle(self, *args, **options):
