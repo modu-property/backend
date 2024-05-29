@@ -108,7 +108,7 @@ class RealEstateRepository:
         region_models: List[Region],
     ) -> Union[List[Region], bool]:
         try:
-            result: list[Region] = Region.objects.bulk_create(region_models)
+            result: List[Region] = Region.objects.bulk_create(region_models)
             return result
         except Exception as e:
             logger.error(f"bulk_create_regions 실패 e : {e}")

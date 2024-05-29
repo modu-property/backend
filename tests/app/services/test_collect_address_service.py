@@ -1,4 +1,8 @@
+from typing import Union, List
+
 import pytest
+
+from real_estate.models import Region
 from real_estate.services.collect_region_service import CollectRegionService
 
 
@@ -11,7 +15,9 @@ class TestCollectRegionService:
             return_value=dongs_df,
         )
 
-        result: bool = CollectRegionService().collect_region()
+        result: Union[List[Region], bool] = (
+            CollectRegionService().collect_region()
+        )
 
         for region in result:
             assert region.latitude is not None
