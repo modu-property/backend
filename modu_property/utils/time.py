@@ -68,3 +68,7 @@ class TimeUtil:
             datetime.strptime(f"{deal_year}-{deal_month}-01", "%Y-%m-%d"),
             "%Y-%m-%d",
         )
+
+    @staticmethod
+    def get_year_month_day(date):
+        return datetime.strftime(date, "%Y%m%d")

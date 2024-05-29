@@ -216,7 +216,7 @@ http://localhost:8000/api/docs/
 pytest 관련 로그는 pytest.ini에서 설정함  
 파일에 로그 저장하고 싶으면 pytest.ini에서 콘솔에 로그 capture하는거 막아야 함 `addopts=-p no:logging`  
 
-# 데이터 수집
+# 데이터 수집 Command
 ## Region 테이블에 지역 코드 수집. 법정동이 바뀌지 않는 이상 DB에 한번 적용하면 됨.
 SERVER_ENV=local python manage.py collect_regional_code_command  
 

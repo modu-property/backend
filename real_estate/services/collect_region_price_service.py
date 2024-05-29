@@ -1,5 +1,6 @@
 import threading
 from datetime import datetime
+from typing import List
 
 from dependency_injector.wiring import Provide
 
@@ -42,7 +43,7 @@ class CollectRegionPriceService:
         if not regions:
             raise Exception("regions not found")
 
-    def _get_years_and_months(self, end_date, start_date):
+    def _get_years_and_months(self, end_date, start_date) -> List[str]:
         if not all([start_date, end_date]):
             last_region_price = (
                 self.real_estate_repository.get_last_region_price()
@@ -52,14 +53,13 @@ class CollectRegionPriceService:
                     "시작/종료 연월과 region_price 둘 다 없음. 둘 중에 하나는 있어야 함"
                 )
 
-            years_and_months = GetCollectingPeriodUtil.get_collecting_period(
+            return GetCollectingPeriodUtil.get_collecting_period(
                 instance=last_region_price
             )
-        else:
-            years_and_months = GetCollectingPeriodUtil.get_collecting_period(
-                start_date=start_date, end_date=end_date
-            )
-        return years_and_months
+
+        return GetCollectingPeriodUtil.get_collecting_period(
+            start_date=start_date, end_date=end_date
+        )
 
     def _collect_region_price_by_date_and_region(
         self,
@@ -101,6 +101,9 @@ class CollectRegionPriceService:
         ):
             return
 
+        self._calc(deal_month, deal_year, region)
+
+    def _calc(self, deal_month, deal_year, region):
         if EnvUtil.not_test_env():
             threads = self._create_calc_region_price_threads(
                 region=region, deal_year=deal_year, deal_month=deal_month
@@ -131,7 +134,7 @@ class CollectRegionPriceService:
 
         region_prices = list(region_prices)
         for region_price in region_prices:
-            deal_date = datetime.strftime(region_price.deal_date, "%Y%m%d")
+            deal_date = TimeUtil.get_year_month_day(region_price.deal_date)
             deal_year, deal_month = TimeUtil.split_year_and_month(
                 year_and_month=deal_date
             )
