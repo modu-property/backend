@@ -3,6 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 
 from real_estate.enum.deal_enum import DealTypesForDBEnum
+from real_estate.enum.real_estate_enum import SearchLimitEnum
 
 
 @pytest.mark.django_db(transaction=True, reset_sequences=True)
@@ -25,6 +26,7 @@ def test_get_real_estates_with_keyword_view(client, get_jwt):
     headers = {"HTTP_AUTHORIZATION": f"Bearer {_jwt}"}
     query_params = {
         "keyword": "강남",
+        "real_estate_search_limit": SearchLimitEnum.REAL_ESTATES.value,
     }
 
     response = client.get(url, data=query_params, **headers)
@@ -37,7 +39,9 @@ def test_get_real_estates_with_keyword_view(client, get_jwt):
 
 
 @pytest.mark.django_db(transaction=True, reset_sequences=True)
-def test_get_real_estates_with_keyword_view(client, get_jwt, mocker):
+def test_when_get_real_estates_with_keyword_view_and_update_error_then_400(
+    client, get_jwt, mocker
+):
     mocker.patch(
         "real_estate.services.get_real_estates_on_search_service.GetRealEstatesOnSearchService._update_result",
         return_value=False,
