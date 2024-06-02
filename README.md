@@ -132,7 +132,7 @@ searchd {
 }
 ```
 
-검색 관련 변경 시 manticore.conf.template 수정해야 함
+> 검색 관련 변경 시 manticore.conf.template 수정해야 함
 
 real_estate 검색 테스트 준비  
 * docker compose 실행  
@@ -239,6 +239,7 @@ SERVER_ENV=development python manage.py collect_deal_price_of_real_estate_comman
 collect_deal_price_of_real_estate_command 으로 전체 수집을 했다면, collect_deal_price_of_real_estate_task 스케쥴러로 최신 데이터 수집함  
 
 # 전체/특정지역 통계 정보 수집 명령어
+django 컨테이너에서 실행  
 SERVER_ENV=local python manage.py collect_region_price_command 서울특별시  
 SERVER_ENV=local python manage.py collect_region_price_command 서울특별시 --start_date=200602 --end_date=200602  
 
