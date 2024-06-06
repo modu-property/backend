@@ -1,5 +1,4 @@
 from typing import List, Optional, Union
-from django.forms import model_to_dict
 from real_estate.dto.collect_region_price_dto import CollectRegionPriceDto
 from real_estate.dto.get_real_estate_dto import (
     GetDealsDto,
