@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from typing import List, OrderedDict, Union
-from modu_property.utils.validator import validate_data
 from real_estate.dto.get_real_estate_dto import GetRealEstatesOnMapDto
 from real_estate.dto.service_result_dto import ServiceResultDto
 from real_estate.repository.real_estate_repository import RealEstateRepository
@@ -36,12 +35,12 @@ class GetRealEstatesService(GetRealEstatesInterface):
                 status_code=404,
             )
 
+        serializer = GetRealEstatesOnMapResponseSerializer(
+            instance=real_estates, many=True
+        )
+
         data: Union[List[OrderedDict[str, Union[int, str]]], bool] = (
-            validate_data(
-                queryset=real_estates,
-                serializer=GetRealEstatesOnMapResponseSerializer,
-                many=True,
-            )
+            serializer.data
         )
 
         if data:
@@ -69,12 +68,12 @@ class GetRegionsService(GetRealEstatesInterface):
                 status_code=404,
             )
 
+        serializer = GetRegionsOnMapResponseSerializer(
+            instance=regions, many=True
+        )
+
         data: Union[List[OrderedDict[str, Union[int, str]]], bool] = (
-            validate_data(
-                queryset=regions,
-                serializer=GetRegionsOnMapResponseSerializer,
-                many=True,
-            )
+            serializer.data
         )
 
         if data:

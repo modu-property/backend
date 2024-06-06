@@ -37,11 +37,11 @@ class GetRealEstatesOnSearchService:
         result: Dict[str, list] = {}
 
         dto.limit = SearchLimitEnum.REGION.value
-        self._process_search_and_update(
+        self._process_search_and_set(
             dto,
             result,
             index="region_index",
-            update_method=self.set_region.update_result_with_data,
+            update_method=self.set_region.update_result_with_real_estates,
         )
 
         dto.limit = (
@@ -49,11 +49,11 @@ class GetRealEstatesOnSearchService:
             if dto.real_estate_search_limit
             else SearchLimitEnum.REAL_ESTATES.value
         )
-        self._process_search_and_update(
+        self._process_search_and_set(
             dto,
             result,
             index="real_estate",
-            update_method=self.set_real_estate.update_result_with_data,
+            update_method=self.set_real_estate.update_result_with_real_estates,
         )
 
         if not result:
@@ -61,7 +61,7 @@ class GetRealEstatesOnSearchService:
 
         return result
 
-    def _process_search_and_update(self, dto, result, index, update_method):
+    def _process_search_and_set(self, dto, result, index, update_method):
         real_estates = self._search(
             dto=dto,
             index=index,
@@ -81,4 +81,4 @@ class GetRealEstatesOnSearchService:
 
     @staticmethod
     def _update_result(result, real_estates, update_method) -> bool:
-        return update_method(result=result, data=real_estates)
+        return update_method(result=result, real_estates=real_estates)
