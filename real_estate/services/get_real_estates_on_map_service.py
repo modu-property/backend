@@ -39,7 +39,7 @@ class GetRealEstatesOnMapService:
         raise NotFoundException()
 
     @staticmethod
-    def _get_real_estates(dto, method):
+    def _get_real_estates(dto: GetRealEstatesOnMapDto, method):
         real_estates: Union[
             List[OrderedDict[str, Union[int, str]]], ServiceResultDto, bool
         ] = method(dto=dto)
@@ -58,7 +58,7 @@ class GetRealEstatesOnMapService:
     @staticmethod
     def _is_regions_zoom_level(dto):
         return (
-            RegionZoomLevelEnum.DONGRI.value
+            RegionZoomLevelEnum.UBMYUNDONG.value
             <= dto.zoom_level
             <= RegionZoomLevelEnum.SIDO.value
         )

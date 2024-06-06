@@ -1,5 +1,4 @@
 from typing import List, Optional, Union
-from django.forms import model_to_dict
 from real_estate.dto.collect_region_price_dto import CollectRegionPriceDto
 from real_estate.dto.get_real_estate_dto import (
     GetDealsDto,
@@ -198,10 +197,7 @@ class RealEstateRepository:
 
         if isinstance(dto, GetRealEstatesOnMapDto):
             logger.debug(dto.__dict__)
-            if dto.zoom_level == RegionZoomLevelEnum.DONGRI.value:
-                # dongri
-                _q = _q.exclude(region__dongri="")
-            elif dto.zoom_level == RegionZoomLevelEnum.UBMYUNDONG.value:
+            if dto.zoom_level == RegionZoomLevelEnum.UBMYUNDONG.value:
                 # ubmyundong
                 _q = _q.exclude(region__ubmyundong="").filter(region__dongri="")
             elif dto.zoom_level == RegionZoomLevelEnum.SIGUNGU.value:
