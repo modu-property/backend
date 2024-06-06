@@ -288,7 +288,7 @@ def get_real_estates_on_map_view_get_decorator(view_function):
                     ),
                     OpenApiExample(
                         name="줌 레벨 6",
-                        description="6 이상 9이하면 20개의 지역 부동산 정보를 응답함",
+                        description="6 이상 8이하면 20개의 지역 부동산 정보를 응답함",
                         value="6",
                     ),
                 ],

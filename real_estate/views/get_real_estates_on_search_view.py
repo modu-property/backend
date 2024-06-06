@@ -6,7 +6,6 @@ from rest_framework.response import Response
 
 from modu_property.utils.loggers import logger
 from real_estate.dto.get_real_estate_dto import GetRealEstatesOnSearchDto
-from real_estate.enum.real_estate_enum import SearchLimitEnum
 from real_estate.exceptions import (
     SearchAndUpdateRealEstatesException,
     NotFoundException,

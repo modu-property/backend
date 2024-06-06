@@ -40,10 +40,10 @@ class RealEstateZoomLevelEnum(Enum):
 
 
 class RegionZoomLevelEnum(Enum):
-    DONGRI = 6
-    UBMYUNDONG = 7
-    SIGUNGU = 8
-    SIDO = 9
+    # dongri 단위는 없는 지역이 많아서 보여주지 않기로 함.
+    UBMYUNDONG = 6
+    SIGUNGU = 7
+    SIDO = 8
 
 
 class RegionCodeEnum(Enum):
