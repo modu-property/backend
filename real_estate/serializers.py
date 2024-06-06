@@ -229,6 +229,10 @@ class GetRealEstatesOnSearchResponseSerializer(serializers.Serializer):
     latitude = serializers.FloatField()
     longitude = serializers.FloatField()
 
+    area_for_exclusive_use = serializers.CharField(max_length=10)
+    area_for_exclusive_use_pyung = serializers.CharField(max_length=7)
+    area_for_exclusive_use_price_per_pyung = serializers.CharField(max_length=8)
+
 
 class GetRealEstatesOnMapRequestSerializer(serializers.Serializer):
     deal_type = serializers.ChoiceField(choices=DEAL_TYPES)

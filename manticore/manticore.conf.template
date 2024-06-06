@@ -17,7 +17,20 @@ source real_estate_source {
     sql_pass = $DB_PASSWORD
     sql_db = $DB_NAME
 
-    sql_query = select id, name, lot_number, road_name_address, real_estate_type, address, latitude, longitude from real_estate
+    sql_query = \
+        select real_estate.id                    as id, \
+       real_estate.name                  as name, \
+       real_estate.lot_number            as lot_number, \
+       real_estate.road_name_address     as road_name_address, \
+       real_estate.real_estate_type      as real_estate_type, \
+       real_estate.address               as address, \
+       real_estate.latitude              as latitude, \
+       real_estate.longitude             as longitude, \
+       deal.area_for_exclusive_use       as area_for_exclusive_use, \
+       deal.area_for_exclusive_use_pyung as area_for_exclusive_use_pyung, \
+       deal.area_for_exclusive_use_price_per_pyung \
+    from real_estate \
+    join deal on real_estate.id = deal.real_estate_id;
 
     sql_field_string = lot_number
     sql_field_string = road_name_address
@@ -26,6 +39,11 @@ source real_estate_source {
     sql_field_string = name
     sql_field_string = latitude
     sql_field_string = longitude
+
+    sql_field_string = area_for_exclusive_use
+    sql_field_string = area_for_exclusive_use_pyung
+    sql_field_string = area_for_exclusive_use_price_per_pyung
+
 }
 
 index real_estate {
