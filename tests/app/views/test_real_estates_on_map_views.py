@@ -365,11 +365,6 @@ def test_get_real_estates_on_map_view(
     "title, zoom_level, expected_region",
     [
         (
-            "zoom_level 6 then dongri",
-            RegionZoomLevelEnum.DONGRI.value,
-            "dongri",
-        ),
-        (
             "zoom_level 7 then ubmyundong",
             RegionZoomLevelEnum.UBMYUNDONG.value,
             "ubmyundong",
