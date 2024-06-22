@@ -94,7 +94,7 @@ class RealEstateSerializer(serializers.ModelSerializer):
         address_converter_util = self.context.get("address_converter_util")
         if not address_converter_util.convert_address(query=query):
             raise serializers.ValidationError(
-                "address_converter_util failed 주소 정보가 없음"
+                f"address_converter_util failed 주소 정보가 없음 query : {query}"
             )
         address_info = address_converter_util.get_address()
         deal_price_of_real_estate["address_info"] = address_info

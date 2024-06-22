@@ -365,12 +365,12 @@ def test_get_real_estates_on_map_view(
     "title, zoom_level, expected_region",
     [
         (
-            "zoom_level 7 then ubmyundong",
-            RegionZoomLevelEnum.UBMYUNDONG.value,
+            "zoom_level 4~5 then ubmyundong",
+            RegionZoomLevelEnum.UBMYUNDONG_MIN.value,
             "ubmyundong",
         ),
         (
-            "zoom_level 8 then sigungu",
+            "zoom_level 6 then sigungu",
             RegionZoomLevelEnum.SIGUNGU.value,
             "sigungu",
         ),

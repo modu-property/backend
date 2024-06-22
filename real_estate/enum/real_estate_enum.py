@@ -34,16 +34,17 @@ REAL_ESTATE_TYPES = (
 
 
 class RealEstateZoomLevelEnum(Enum):
-    DEFAULT = 4
+    DEFAULT = 3
     MIN = 1
-    MAX = 5
+    MAX = 4
 
 
 class RegionZoomLevelEnum(Enum):
     # dongri 단위는 없는 지역이 많아서 보여주지 않기로 함.
-    UBMYUNDONG = 6
+    UBMYUNDONG_MIN = 5
+    UBMYUNDONG_MAX = 6
     SIGUNGU = 7
-    SIDO = 8
+    SIDO = 9
 
 
 class RegionCodeEnum(Enum):

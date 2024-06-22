@@ -58,7 +58,7 @@ class GetRealEstatesOnMapService:
     @staticmethod
     def _is_regions_zoom_level(dto):
         return (
-            RegionZoomLevelEnum.UBMYUNDONG.value
+            RegionZoomLevelEnum.UBMYUNDONG_MIN.value
             <= dto.zoom_level
             <= RegionZoomLevelEnum.SIDO.value
         )

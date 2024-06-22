@@ -282,14 +282,29 @@ def get_real_estates_on_map_view_get_decorator(view_function):
                 required=True,
                 examples=[
                     OpenApiExample(
+                        name="줌 레벨 4",
+                        description="4 이하면 150개의 개별 부동산 정보를 응답함",
+                        value="4",
+                    ),
+                    OpenApiExample(
                         name="줌 레벨 5",
-                        description="5 이하면 150개의 개별 부동산 정보를 응답함",
+                        description="5 이면 읍면동 지역 부동산 정보를 응답함",
                         value="5",
                     ),
                     OpenApiExample(
                         name="줌 레벨 6",
-                        description="6 이상 8이하면 20개의 지역 부동산 정보를 응답함",
+                        description="6 이면 읍면동 지역 부동산 정보를 응답함",
                         value="6",
+                    ),
+                    OpenApiExample(
+                        name="줌 레벨 7",
+                        description="7 이면 시군구 지역 부동산 정보를 응답함",
+                        value="7",
+                    ),
+                    OpenApiExample(
+                        name="줌 레벨 9",
+                        description="9 이면 시도 지역 부동산 정보를 응답함",
+                        value="9",
                     ),
                 ],
             ),

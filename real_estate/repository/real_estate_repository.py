@@ -197,7 +197,11 @@ class RealEstateRepository:
 
         if isinstance(dto, GetRealEstatesOnMapDto):
             logger.debug(dto.__dict__)
-            if dto.zoom_level == RegionZoomLevelEnum.UBMYUNDONG.value:
+            if (
+                RegionZoomLevelEnum.UBMYUNDONG_MIN.value
+                <= dto.zoom_level
+                <= RegionZoomLevelEnum.UBMYUNDONG_MAX.value
+            ):
                 # ubmyundong
                 _q = _q.exclude(region__ubmyundong="").filter(region__dongri="")
             elif dto.zoom_level == RegionZoomLevelEnum.SIGUNGU.value:
