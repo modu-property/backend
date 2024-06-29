@@ -55,6 +55,10 @@ class GetRealEstatesOnMapView(ListAPIView):
             "zoom_level": request.query_params.get(
                 "zoom_level", default=RealEstateZoomLevelEnum.DEFAULT.value
             ),
+            "start_year": request.query_params.get("start_year", 2006),
+            "start_month": request.query_params.get("start_month", 1),
+            "end_year": request.query_params.get("end_year", 2100),
+            "end_month": request.query_params.get("end_month", 1),
         }
         serializer = self.get_serializer(data=request_data)
         serializer.is_valid(raise_exception=True)

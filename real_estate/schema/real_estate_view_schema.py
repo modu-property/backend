@@ -308,6 +308,62 @@ def get_real_estates_on_map_view_get_decorator(view_function):
                     ),
                 ],
             ),
+            OpenApiParameter(
+                name="start_year",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description="시작 연도",
+                required=False,
+                examples=[
+                    OpenApiExample(
+                        name="시작 연도",
+                        description="시작 연도",
+                        value=2006,
+                    ),
+                ],
+            ),
+            OpenApiParameter(
+                name="start_month",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description="시작 월",
+                required=False,
+                examples=[
+                    OpenApiExample(
+                        name="시작 월",
+                        description="시작 월",
+                        value=1,
+                    ),
+                ],
+            ),
+            OpenApiParameter(
+                name="end_year",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description="끝 연도",
+                required=False,
+                examples=[
+                    OpenApiExample(
+                        name="끝 연도",
+                        description="끝 연도",
+                        value=2006,
+                    ),
+                ],
+            ),
+            OpenApiParameter(
+                name="end_month",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description="끝 월",
+                required=False,
+                examples=[
+                    OpenApiExample(
+                        name="끝 월",
+                        description="끝 월",
+                        value=12,
+                    ),
+                ],
+            ),
         ],
         request=GetRealEstatesOnMapRequestSerializer,
         responses={

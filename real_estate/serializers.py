@@ -1,6 +1,8 @@
 from decimal import Decimal
 
 from django.contrib.gis.geos import Point
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from real_estate.enum.deal_enum import (
     DEAL_TYPES,
@@ -241,9 +243,18 @@ class GetRealEstatesOnMapRequestSerializer(serializers.Serializer):
     ne_lat = serializers.FloatField()
     ne_lng = serializers.FloatField()
     zoom_level = serializers.IntegerField(min_value=1, max_value=9)
+    start_year = serializers.IntegerField()
+    start_month = serializers.IntegerField()
+    end_year = serializers.IntegerField()
+    end_month = serializers.IntegerField()
 
 
 class GetRealEstatesOnMapResponseSerializer(serializers.Serializer):
+    deal_price = serializers.SerializerMethodField()
+    area_for_exclusive_use_pyung = serializers.SerializerMethodField()
+    area_for_exclusive_use_price_per_pyung = serializers.SerializerMethodField()
+    deal_date = serializers.SerializerMethodField()
+
     id = serializers.IntegerField()
     name = serializers.CharField(
         max_length=30, allow_blank=True, allow_null=True
@@ -257,17 +268,30 @@ class GetRealEstatesOnMapResponseSerializer(serializers.Serializer):
     road_name_address = serializers.CharField(
         max_length=50, allow_blank=True, allow_null=True
     )
-    real_estate_type = serializers.ChoiceField(
-        choices=RealEstateTypesForQueryEnum
-    )
     build_year = serializers.IntegerField()
     latitude = serializers.CharField(max_length=20)
     longitude = serializers.CharField(max_length=20)
-    deal_price = serializers.IntegerField()
-    area_for_exclusive_use_pyung = serializers.CharField(max_length=6)
-    area_for_exclusive_use_price_per_pyung = serializers.CharField(max_length=8)
+    # deal_price = serializers.IntegerField()
+    # area_for_exclusive_use_pyung = serializers.CharField(max_length=6)
+    # area_for_exclusive_use_price_per_pyung = serializers.CharField(max_length=8)
     real_estate_type = serializers.CharField(max_length=20)
-    deal_date = serializers.DateField()
+    # deal_date = serializers.DateField()
+
+    @extend_schema_field(OpenApiTypes.INT)
+    def get_deal_price(self, obj):
+        return obj.latest_deal.deal_price
+
+    @extend_schema_field(OpenApiTypes.STR)
+    def get_area_for_exclusive_use_pyung(self, obj):
+        return obj.latest_deal.area_for_exclusive_use_pyung
+
+    @extend_schema_field(OpenApiTypes.STR)
+    def get_area_for_exclusive_use_price_per_pyung(self, obj):
+        return obj.latest_deal.area_for_exclusive_use_price_per_pyung
+
+    @extend_schema_field(OpenApiTypes.DATE)
+    def get_deal_date(self, obj):
+        return f"{obj.latest_deal.deal_year}-{obj.latest_deal.deal_month}-{obj.latest_deal.deal_day}"
 
 
 class RegionPriceSerializer(serializers.Serializer):

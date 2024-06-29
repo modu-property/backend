@@ -54,3 +54,7 @@ class RegionCodeEnum(Enum):
 class SearchLimitEnum(Enum):
     REGION = 3
     REAL_ESTATES = 15
+
+
+class MapLimitEnum(Enum):
+    REAL_ESTATES = 150

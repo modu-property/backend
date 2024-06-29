@@ -55,7 +55,7 @@ def create_real_estate():
 @pytest.fixture()
 def create_deal():
     def _create_deal(
-        real_estate_id: int,
+        real_estate: RealEstate,
         deal_price: int,
         brokerage_type: str,
         deal_year: int,
@@ -71,7 +71,7 @@ def create_deal():
         deal_type: str,
     ):
         deal = Deal(
-            real_estate_id=real_estate_id,
+            real_estate=real_estate,
             deal_price=deal_price,
             brokerage_type=brokerage_type,
             deal_year=deal_year,

@@ -28,7 +28,7 @@ def test_collect_region_price_command(
     )
 
     deal = create_deal(
-        real_estate_id=real_estate1.id,
+        real_estate=real_estate1,
         deal_price=28000,
         brokerage_type=None,
         deal_year=2006,
@@ -58,7 +58,7 @@ def test_collect_region_price_command(
     )
 
     deal = create_deal(
-        real_estate_id=real_estate2.id,
+        real_estate=real_estate2,
         deal_price=10000,
         brokerage_type=None,
         deal_year=2006,
@@ -113,7 +113,7 @@ def test_when_collect_region_price_command_with_region_price_then_collect_from_l
     )
 
     deal = create_deal(
-        real_estate_id=real_estate1.id,
+        real_estate=real_estate1,
         deal_price=28000,
         brokerage_type=None,
         deal_year=2006,
@@ -143,7 +143,7 @@ def test_when_collect_region_price_command_with_region_price_then_collect_from_l
     )
 
     deal = create_deal(
-        real_estate_id=real_estate2.id,
+        real_estate=real_estate2,
         deal_price=10000,
         brokerage_type=None,
         deal_year=2006,

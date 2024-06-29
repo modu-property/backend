@@ -57,7 +57,7 @@ def test_when_get_deals_then_return_deals(
 
     for i in range(deal_create_count):
         create_deal(
-            real_estate_id=real_estate.id,
+            real_estate=real_estate,
             deal_price=10000,
             brokerage_type=BrokerageTypesEnum.DIRECT.value,
             deal_year=year - i,
@@ -87,7 +87,7 @@ def test_when_get_deals_then_return_deals(
     )
 
     create_deal(
-        real_estate_id=another_real_estate.id,
+        real_estate=another_real_estate,
         deal_price=10000,
         brokerage_type=BrokerageTypesEnum.DIRECT.value,
         deal_year=year,

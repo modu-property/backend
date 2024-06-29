@@ -4,7 +4,7 @@ from real_estate.dto.get_real_estate_dto import (
     GetDealsDto,
     GetRealEstatesOnMapDto,
 )
-from real_estate.enum.real_estate_enum import RegionZoomLevelEnum
+from real_estate.enum.real_estate_enum import RegionZoomLevelEnum, MapLimitEnum
 from real_estate.models import Deal, RealEstate, Region, RegionPrice
 from modu_property.utils.loggers import logger
 from django.db.models import (
@@ -16,8 +16,13 @@ from django.db.models import (
     Value,
     DateField,
     Count,
+    Q,
+    Max,
+    CharField,
+    Window,
+    FilteredRelation,
 )
-from django.db.models.functions import Concat
+from django.db.models.functions import Concat, RowNumber, Coalesce
 from real_estate.serializers import RegionPriceSerializer
 
 
@@ -61,43 +66,37 @@ class RealEstateRepository:
     def get_individual_real_estates(dto: GetRealEstatesOnMapDto):
         """
         시, 군, 구, 동이 아닌 개별 부동산 정보를 응답함
+        개별 부동산(real_estate)의 최신 거래(deal)을 1개만 join 해서 응답함.
         """
         try:
-            subquery = Subquery(
-                Deal.objects.filter(real_estate_id=OuterRef("real_estate_id"))
-                .order_by("-deal_year", "-deal_month", "-deal_day")
-                .values_list("id", flat=True)[:1]
-            )
-            real_estates: QuerySet = (
+            qs = (
                 RealEstate.objects.annotate(
-                    deal_date=Concat(
-                        "deals__deal_year",
-                        Value("-"),
-                        "deals__deal_month",
-                        Value("-"),
-                        "deals__deal_day",
-                        output_field=DateField(),
+                    latest_deal=FilteredRelation(
+                        "deals",
+                        condition=Q(
+                            deals=Subquery(
+                                Deal.objects.filter(
+                                    Q(deal_year__gte=dto.start_year)
+                                    & Q(deal_month__gte=dto.start_month)
+                                    & Q(deal_year__lte=dto.end_year)
+                                    & Q(deal_month__lte=dto.end_month)
+                                    & Q(real_estate=OuterRef("id"))
+                                )
+                                .order_by(
+                                    "-deal_year", "-deal_month", "-deal_day"
+                                )
+                                .values("id")[:1]
+                            ),
+                        ),
                     ),
-                    area_for_exclusive_use_pyung=F(
-                        "deals__area_for_exclusive_use_pyung"
-                    ),
-                    area_for_exclusive_use_price_per_pyung=F(
-                        "deals__area_for_exclusive_use_price_per_pyung"
-                    ),
-                    deal_price=F("deals__deal_price"),
                 )
-                .prefetch_related(
-                    Prefetch("deals", Deal.objects.filter(id=subquery))
-                )
-                .filter(
-                    deals__is_deal_canceled=False,
-                    latitude__gte=dto.sw_lat,
-                    latitude__lte=dto.ne_lat,
-                    longitude__gte=dto.sw_lng,
-                    longitude__lte=dto.ne_lng,
-                )
+                .filter(latest_deal__isnull=False)
+                .select_related("latest_deal")
             )
-            return real_estates[:150]
+
+            real_estates = list(qs)
+
+            return real_estates[: MapLimitEnum.REAL_ESTATES.value]
         except Exception as e:
             logger.error(f"get_individual_real_estates e : {e}")
             return False

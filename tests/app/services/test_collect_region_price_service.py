@@ -33,7 +33,7 @@ class TestCollectRegionPriceService:
         )
 
         deal = create_deal(
-            real_estate_id=real_estate1.id,
+            real_estate=real_estate1,
             deal_price=28000,
             brokerage_type=None,
             deal_year=2006,
@@ -63,7 +63,7 @@ class TestCollectRegionPriceService:
         )
 
         deal = create_deal(
-            real_estate_id=real_estate1.id,
+            real_estate=real_estate1,
             deal_price=28000,
             brokerage_type=None,
             deal_year=2006,
@@ -131,7 +131,7 @@ class TestCollectRegionPriceService:
         )
 
         deal = create_deal(
-            real_estate_id=real_estate1.id,
+            real_estate=real_estate1,
             deal_price=28000,
             brokerage_type=None,
             deal_year=2006,
@@ -148,7 +148,7 @@ class TestCollectRegionPriceService:
         )
 
         deal = create_deal(
-            real_estate_id=real_estate1.id,
+            real_estate=real_estate1,
             deal_price=15000,
             brokerage_type=None,
             deal_year=2006,
@@ -179,7 +179,7 @@ class TestCollectRegionPriceService:
         )
 
         deal = create_deal(
-            real_estate_id=real_estate2.id,
+            real_estate=real_estate2,
             deal_price=28000,
             brokerage_type=None,
             deal_year=2006,
@@ -197,7 +197,7 @@ class TestCollectRegionPriceService:
 
         # 취소된 거래는 제외
         deal = create_deal(
-            real_estate_id=real_estate1.id,
+            real_estate=real_estate1,
             deal_price=15000,
             brokerage_type=None,
             deal_year=2006,

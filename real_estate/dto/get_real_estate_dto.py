@@ -17,6 +17,10 @@ class GetRealEstatesOnMapDto:
     ne_lat: float
     ne_lng: float
     zoom_level: int
+    start_year: int
+    start_month: int
+    end_year: int
+    end_month: int
 
 
 @dataclass
