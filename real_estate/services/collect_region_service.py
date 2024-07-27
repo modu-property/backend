@@ -1,5 +1,6 @@
 from typing import List, Union
 
+from modu_property.utils.loggers import logger
 from real_estate.containers.repository_container import RepositoryContainer
 from real_estate.containers.utils.address_collector_container import (
     AddressCollectorContainer,
@@ -24,6 +25,7 @@ class CollectRegionService:
         self.repository: RealEstateRepository = repository
 
     def collect_region(self) -> bool:
+        logger.info("collect_region start")
         region_models: Union[List[Region], bool] = (
             self.address_collector.collect_region()
         )
@@ -34,5 +36,6 @@ class CollectRegionService:
         result: Union[List[Region], bool] = self.repository.bulk_create_regions(
             region_models=region_models
         )
+        logger.info("collect_region finish")
 
         return result

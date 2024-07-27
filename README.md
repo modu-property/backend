@@ -48,9 +48,21 @@ brew install postgis gdal libgeoip
 * docker compose -f docker-compose.local.yml up -d --build --force-recreate  
 * SERVER_ENV=local python manage.py runserver --settings modu_property.settings.local_settings  
 
+윈도우에서 서버 실행할 때 터미널에서 wsl 치고 docker compose 하기
+
 테스팅 서버
+> 도커 컴포즈 실행 전에 디렉토리에 modu_property/logs/modu_property.log 생성하기!  
 * docker-compose -f docker-compose.development.yml up -d --build
-* docker-compose -f docker-compose.development.yml up -d --build --force-recreate
+* docker-compose -f docker-compose.development.yml up -d --build --force-recreate  
+
+window docker compose (서버 컴퓨터에서 development 컨테이너 실행)  
+* docker-compose -f docker-compose.development.window.yml up -d --build  
+
+window docker compose (서버 컴퓨터에서 production 컨테이너 실행)  
+* docker-compose -f docker-compose.production.window.yml up -d --build  
+
+# window에서 venv 실행  
+source /home/server/.virtualenvs/backend/bin/activate  
 
 # migrate
 SERVER_ENV 설정하기, django container에서 실행하기
@@ -59,7 +71,9 @@ SERVER_ENV 설정하기, django container에서 실행하기
     * SERVER_ENV=local python manage.py makemigrations --settings=modu_property.settings.local_settings
 * migrate
     * SERVER_ENV=local python manage.py migrate --settings=modu_property.settings.local_settings
-
+    * set SERVER_ENV=local python manage.py migrate --settings=modu_property.settings.local_settings
+    * SERVER_ENV=local python3 manage.py migrate --settings=modu_property.settings.local_settings
+![img.png](img.png)
 ## development용 (ec2, RDS)
 * migrate
     로컬에서 development 컨테이너 띄우고 장고 컨테이너 접속, migrate
@@ -224,13 +238,14 @@ ec2 사양 딸려서 로컬 터미널에서 실행
 SERVER_ENV=development python manage.py collect_regional_code_command
 
 sql 파일에 있는거 insert
+SERVER_ENV=local python manage.py insert_regional_code_command
 SERVER_ENV=development python manage.py insert_regional_code_command
 
 
 ## 전체/특정지역 부동산 매매 정보 수집 명령어
 전국의 빌라, 아파트에 대해 2006년부터 현재까지 수집하도록 함  
 django 컨테이너에서 실행 `DB_HOST="host.docker.internal"`, `mysql -P9306 -hhost.docker.internal -e "RELOAD TABLES"`  
-SERVER_ENV=local python manage.py collect_deal_price_of_real_estate_command 서울특별시 --start_date=200602 --end_date=200602   
+SERVER_ENV=local python manage.py collect_deal_price_of_real_estate_command 서울특별시 --start_date=200701 --end_date=200812   
 
 로컬 터미널에서 development RDS에 반영  
 SERVER_ENV=development python manage.py collect_deal_price_of_real_estate_command 서울특별시  
