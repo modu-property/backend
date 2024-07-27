@@ -33,52 +33,59 @@ from real_estate.views.get_deals_view import GetDealsView
 from real_estate.views.get_real_estates_on_search_view import (
     GetRealEstatesOnSearchView,
 )
+import os
+
+server_env = os.getenv('SERVER_ENV')
+
+print(f"SERVER ENV : {server_env}")
 
 urlpatterns = [
-    path("admin", admin.site.urls, name="admin"),
-    path(
-        "real-estate/<int:id>",
-        get_real_estate_view.GetRealEstateView.as_view(),
-        name="get-real-estate",
-    ),
-    path(
-        "real-estate/<int:id>/<str:deal_type>/deals",
-        GetDealsView.as_view(),
-        name="get-deals",
-    ),
-    path(
-        "real-estates/<str:deal_type>/keyword",
-        GetRealEstatesOnSearchView.as_view(),
-        name="get-real-estates-on-search",
-    ),
-    path(
-        "real-estates/<str:deal_type>",
-        app_views.GetRealEstatesOnMapView.as_view(),
-        name="get-real-estates-on-map",
-    ),
-    path("accounts", include("accounts.urls")),
-    path("api/token", TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("api/token/refresh", TokenRefreshView.as_view(), name="token_refresh"),
-    path(
-        "api/schema",
-        SpectacularAPIView.as_view(),
-        name="schema",
-    ),
-    path(
-        "api/docs",
-        SpectacularSwaggerView.as_view(url_name="schema"),
-        name="swagger-ui",
-    ),
-    path(
-        "api/redoc",
-        SpectacularRedocView.as_view(url_name="schema"),
-        name="redoc",
-    ),
-    path(
-        "manticore",
-        maticore_views.IndexSearchEngineView.as_view(),
-        name="manticore",
-    ),
+    path(f"{server_env}/", include([
+        path("admin", admin.site.urls, name="admin"),
+        path(
+            "real-estate/<int:id>",
+            get_real_estate_view.GetRealEstateView.as_view(),
+            name="get-real-estate",
+        ),
+        path(
+            "real-estate/<int:id>/<str:deal_type>/deals",
+            GetDealsView.as_view(),
+            name="get-deals",
+        ),
+        path(
+            "real-estates/<str:deal_type>/keyword",
+            GetRealEstatesOnSearchView.as_view(),
+            name="get-real-estates-on-search",
+        ),
+        path(
+            "real-estates/<str:deal_type>",
+            app_views.GetRealEstatesOnMapView.as_view(),
+            name="get-real-estates-on-map",
+        ),
+        path("accounts", include("accounts.urls")),
+        path("api/token", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+        path("api/token/refresh", TokenRefreshView.as_view(), name="token_refresh"),
+        path(
+            "api/schema",
+            SpectacularAPIView.as_view(),
+            name="schema",
+        ),
+        path(
+            "api/docs",
+            SpectacularSwaggerView.as_view(url_name="schema"),
+            name="swagger-ui",
+        ),
+        path(
+            "api/redoc",
+            SpectacularRedocView.as_view(url_name="schema"),
+            name="redoc",
+        ),
+        path(
+            "manticore",
+            maticore_views.IndexSearchEngineView.as_view(),
+            name="manticore",
+        ),
+    ]))
 ]
 
 if settings.DEBUG:
