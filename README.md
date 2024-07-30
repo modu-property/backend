@@ -250,6 +250,10 @@ SERVER_ENV=local python manage.py collect_deal_price_of_real_estate_command 서�
 로컬 터미널에서 development RDS에 반영  
 SERVER_ENV=development python manage.py collect_deal_price_of_real_estate_command 서울특별시  
 
+window development container
+SERVER_ENV=development_window python manage.py collect_deal_price_of_real_estate_command 서울특별시 --start_date=200901 --end_date=200901   
+
+
 # 현재 연월의 부동산 매매 정보 수집 스케쥴러
 collect_deal_price_of_real_estate_command 으로 전체 수집을 했다면, collect_deal_price_of_real_estate_task 스케쥴러로 최신 데이터 수집함  
 
