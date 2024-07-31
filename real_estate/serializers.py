@@ -7,7 +7,10 @@ from real_estate.enum.deal_enum import (
     DealTypesForDBEnum,
     BrokerageTypesEnum,
 )
-from real_estate.enum.real_estate_enum import RealEstateTypesForQueryEnum
+from real_estate.enum.real_estate_enum import (
+    RealEstateTypesForQueryEnum,
+    RealEstateKeyEnum,
+)
 from real_estate.models import Deal, RealEstate, Region, RegionPrice
 
 
@@ -16,10 +19,10 @@ class RealEstateSerializer(serializers.ModelSerializer):
     bulk_create를 할 때는 SerializerMethodField가 동작하지 않으므로 직접 메서드를 호출해서 수정함.
     """
 
-    이름 = serializers.CharField(source="name")
-    건축년도 = serializers.IntegerField(source="build_year")
-    지역코드 = serializers.CharField(source="regional_code")
-    지번 = serializers.CharField(source="lot_number")
+    mhouseNm = serializers.CharField(source="name")
+    buildYear = serializers.IntegerField(source="build_year")
+    sggCd = serializers.CharField(source="regional_code")
+    jibun = serializers.CharField(source="lot_number")
     road_name_address = serializers.CharField()
     address = serializers.CharField()
     real_estate_type = serializers.CharField()
@@ -33,10 +36,10 @@ class RealEstateSerializer(serializers.ModelSerializer):
         model = RealEstate
         geo_field = "point"
         fields = (
-            "이름",
-            "건축년도",
-            "지역코드",
-            "지번",
+            "mhouseNm",
+            "buildYear",
+            "sggCd",
+            "jibun",
             "road_name_address",
             "address",
             "real_estate_type",
@@ -56,7 +59,7 @@ class RealEstateSerializer(serializers.ModelSerializer):
 
             deal_price_of_real_estate = dict(deal_price_of_real_estate)
 
-            self._set_name(deal_price_of_real_estate)
+            # self._set_name(deal_price_of_real_estate)
 
             self._set_address(deal_price_of_real_estate)
 
@@ -80,7 +83,7 @@ class RealEstateSerializer(serializers.ModelSerializer):
         return result
 
     def _already_exist_then_skip(self, deal_price_of_real_estate):
-        unique_key = f"{deal_price_of_real_estate.get('지역코드')}{deal_price_of_real_estate.get('지번')}"
+        unique_key = f"{deal_price_of_real_estate.get(RealEstateKeyEnum.지역코드.value )}{deal_price_of_real_estate.get(RealEstateKeyEnum.지번.value)}"
         unique_keys = self.context.get("unique_keys")
         if unique_key in unique_keys:
             return True
@@ -88,8 +91,8 @@ class RealEstateSerializer(serializers.ModelSerializer):
         return False
 
     def _set_address(self, deal_price_of_real_estate):
-        dong = deal_price_of_real_estate.get("법정동")
-        lot_number = deal_price_of_real_estate.get("지번")
+        dong = deal_price_of_real_estate.get(RealEstateKeyEnum.법정동.value)
+        lot_number = deal_price_of_real_estate.get(RealEstateKeyEnum.지번.value)
         query = f"{dong} {lot_number}"
         address_converter_util = self.context.get("address_converter_util")
         if not address_converter_util.convert_address(query=query):
@@ -99,24 +102,23 @@ class RealEstateSerializer(serializers.ModelSerializer):
         address_info = address_converter_util.get_address()
         deal_price_of_real_estate["address_info"] = address_info
 
-    def _set_name(self, deal_price_of_real_estate):
-        if "연립다세대" in deal_price_of_real_estate:
-            deal_price_of_real_estate["이름"] = deal_price_of_real_estate.pop(
-                "연립다세대"
-            )
+    # def _set_name(self, deal_price_of_real_estate):
+    #     if "연립다세대" in deal_price_of_real_estate:
+    #         deal_price_of_real_estate["이름"] = deal_price_of_real_estate.pop(
+    #             "연립다세대"
+    #         )
 
 
 class DealSerializer(serializers.ModelSerializer):
-    거래금액 = serializers.IntegerField(source="deal_price")
-    중개유형 = serializers.CharField(source="brokerage_type")
-    년 = serializers.IntegerField(source="deal_year")
-    대지권면적 = serializers.CharField(source="land_area")
-    월 = serializers.IntegerField(source="deal_month")
-    일 = serializers.IntegerField(source="deal_day")
-    전용면적 = serializers.CharField(source="area_for_exclusive_use")
-    층 = serializers.CharField(source="floor")
-    해제여부 = serializers.BooleanField(source="is_deal_canceled")
-    해제사유발생일 = serializers.DateField(
+    dealAmount = serializers.IntegerField(source="deal_price")
+    dealingGbn = serializers.CharField(source="brokerage_type")
+    dealYear = serializers.IntegerField(source="deal_year")
+    landAr = serializers.CharField(source="land_area")
+    dealMonth = serializers.IntegerField(source="deal_month")
+    dealDay = serializers.IntegerField(source="deal_day")
+    excluUseAr = serializers.CharField(source="area_for_exclusive_use")
+    cdealType = serializers.BooleanField(source="is_deal_canceled")
+    cdealDay = serializers.DateField(
         source="deal_canceled_date", allow_null=True
     )
     real_estate_id = serializers.IntegerField()
@@ -130,16 +132,16 @@ class DealSerializer(serializers.ModelSerializer):
         model = Deal
         fields = (
             "id",
-            "거래금액",
-            "중개유형",
-            "년",
-            "대지권면적",
-            "월",
-            "일",
-            "전용면적",
-            "층",
-            "해제여부",
-            "해제사유발생일",
+            "dealAmount",
+            "dealingGbn",
+            "dealYear",
+            "landAr",
+            "dealMonth",
+            "dealDay",
+            "excluUseAr",
+            "floor",
+            "cdealType",
+            "cdealDay",
             "area_for_exclusive_use_pyung",
             "area_for_exclusive_use_price_per_pyung",
             "deal_type",
@@ -150,9 +152,10 @@ class DealSerializer(serializers.ModelSerializer):
         self, inserted_real_estate_models_dict, deal_price_of_real_estate_list
     ):
         for deal_price_of_real_estate in deal_price_of_real_estate_list:
-            deal_price_of_real_estate["거래유형"] = (
+            deal_price_of_real_estate[RealEstateKeyEnum.거래유형.value] = (
                 BrokerageTypesEnum.BROKERAGE.value
-                if deal_price_of_real_estate["거래유형"] == "중개거래"
+                if deal_price_of_real_estate[RealEstateKeyEnum.거래유형.value]
+                == "중개거래"
                 else BrokerageTypesEnum.DIRECT.value
             )
             deal_price_of_real_estate["deal_type"] = (
@@ -174,29 +177,33 @@ class DealSerializer(serializers.ModelSerializer):
             )
 
     def convert_square_meter_to_pyung(self, instance):
-        area = instance["전용면적"]
+        area = instance[RealEstateKeyEnum.전용면적.value]
 
         self.pyung = round(Decimal(area) / Decimal(3.305785), 2)
         instance["area_for_exclusive_use_pyung"] = str(self.pyung)
 
     def calc_price_per_pyung(self, instance):
-        price = instance["거래금액"]
+        price = instance[RealEstateKeyEnum.거래금액.value]
         instance["area_for_exclusive_use_price_per_pyung"] = str(
             round(price / self.pyung, 2)
         )
 
     @staticmethod
     def set_is_deal_canceled(instance):
-        instance["해제여부"] = instance["해제여부"] == "O"
+        instance[RealEstateKeyEnum.해제여부.value] = (
+            instance[RealEstateKeyEnum.해제여부.value] == "O"
+        )
 
     def stringify_floor(self, instance):
-        instance["층"] = str(instance["층"])
+        instance[RealEstateKeyEnum.층.value] = str(
+            instance[RealEstateKeyEnum.층.value]
+        )
 
     def set_deal_type(self, instance):
-        instance["중개유형"] = instance["deal_type"]
+        instance[RealEstateKeyEnum.거래유형.value] = instance["deal_type"]
 
     def set_real_estate_id(self, instance, inserted_real_estate_models_dict):
-        unique_key = f"{instance['지역코드']}{instance['지번']}"
+        unique_key = f"{instance[RealEstateKeyEnum.지역코드.value]}{instance[RealEstateKeyEnum.지번.value]}"
         real_estate = inserted_real_estate_models_dict[unique_key]
         instance["real_estate_id"] = real_estate.id
 

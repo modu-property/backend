@@ -7,7 +7,7 @@ from real_estate.enum.real_estate_enum import (
     RealEstateTypesForQueryEnum,
     RegionCodeEnum,
 )
-from real_estate.enum.deal_enum import DealTypesForQueryEnum
+from real_estate.enum.deal_enum import DealTypesForDBEnum
 from real_estate.repository.real_estate_repository import RealEstateRepository
 
 from real_estate.services.collect_deal_price_of_real_estate_service import (
@@ -46,7 +46,7 @@ def run_service(regional_codes, year_and_month):
         service = CollectDealPriceOfRealEstateService()
 
         real_estate_types = RealEstateTypesForQueryEnum.get_real_estate_types()
-        deal_types = DealTypesForQueryEnum.get_deal_types()
+        deal_types = DealTypesForDBEnum.get_deal_types()
 
         for real_estate_type in real_estate_types:
             for deal_type in deal_types:

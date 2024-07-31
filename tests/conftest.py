@@ -10,6 +10,7 @@ from django.contrib.auth.hashers import make_password
 from accounts.models import User
 from modu_property.utils.file import FileUtil
 from modu_property.settings.test_settings import SECRET_KEY
+from real_estate.enum.real_estate_enum import RealEstateKeyEnum
 from real_estate.models import (
     Deal,
     RealEstate,
@@ -105,22 +106,30 @@ def create_monthly_rent():
 @pytest.fixture
 def mock_collect_deal_price_of_real_estate():
     dct = {
-        "지역코드": {0: "11110", 1: "11110", 2: "11110"},
-        "법정동": {0: "청운동", 1: "신교동", 2: "필운동"},
-        "지번": {0: "134-2", 1: "15-1", 2: "26"},
-        "연립다세대": {0: "풍림팍사이드빌라", 1: "(15-1)", 2: "우인빌라"},
-        "건축년도": {0: 1997, 1: 1998, 2: 2001},
-        "층": {0: "2", 1: "2", 2: "3"},
-        "대지권면적": {0: "37.902", 1: "22.75", 2: "21.55"},
-        "전용면적": {0: "53.83", 1: "59.88", 2: "50.55"},
-        "년": {0: 2020, 1: 2020, 2: 2020},
-        "월": {0: 1, 1: 1, 2: 1},
-        "일": {0: 20, 1: 11, 2: 6},
-        "거래금액": {0: 28000, 1: 40000, 2: 31000},
-        "거래유형": {0: None, 1: None, 2: None},
-        "중개사소재지": {0: None, 1: None, 2: None},
-        "해제사유발생일": {0: None, 1: None, 2: None},
-        "해제여부": {0: None, 1: None, 2: None},
+        RealEstateKeyEnum.지역코드.value: {0: "11110", 1: "11110", 2: "11110"},
+        RealEstateKeyEnum.법정동.value: {0: "청운동", 1: "신교동", 2: "필운동"},
+        RealEstateKeyEnum.지번.value: {0: "134-2", 1: "15-1", 2: "26"},
+        RealEstateKeyEnum.연립다세대명.value: {
+            0: "풍림팍사이드빌라",
+            1: "(15-1)",
+            2: "우인빌라",
+        },
+        RealEstateKeyEnum.건축년도.value: {0: 1997, 1: 1998, 2: 2001},
+        RealEstateKeyEnum.층.value: {0: "2", 1: "2", 2: "3"},
+        RealEstateKeyEnum.대지권면적.value: {
+            0: "37.902",
+            1: "22.75",
+            2: "21.55",
+        },
+        RealEstateKeyEnum.전용면적.value: {0: "53.83", 1: "59.88", 2: "50.55"},
+        RealEstateKeyEnum.계약년도.value: {0: 2020, 1: 2020, 2: 2020},
+        RealEstateKeyEnum.계약월.value: {0: 1, 1: 1, 2: 1},
+        RealEstateKeyEnum.계약일.value: {0: 20, 1: 11, 2: 6},
+        RealEstateKeyEnum.거래금액.value: {0: 28000, 1: 40000, 2: 31000},
+        RealEstateKeyEnum.거래유형.value: {0: None, 1: None, 2: None},
+        RealEstateKeyEnum.중개사소재지.value: {0: None, 1: None, 2: None},
+        RealEstateKeyEnum.해제사유발생일.value: {0: None, 1: None, 2: None},
+        RealEstateKeyEnum.해제여부.value: {0: None, 1: None, 2: None},
     }
 
     return DataFrame.from_dict(dct)

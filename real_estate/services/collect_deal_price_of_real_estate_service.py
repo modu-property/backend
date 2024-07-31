@@ -6,9 +6,11 @@ from real_estate.containers.utils.address_converter_container import (
     AddressConverterContainer,
 )
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
+from real_estate.enum.deal_enum import DealTypesForQueryEnum, DealTypesForDBEnum
 from real_estate.enum.real_estate_enum import (
     RealEstateTypesForDBEnum,
     RealEstateTypesForQueryEnum,
+    RealEstateKeyEnum,
 )
 
 from real_estate.models import Deal, RealEstate
@@ -209,8 +211,10 @@ class Delete:
             index,
             deal_price_of_real_estate,
         ) in deal_prices_of_real_estate.iterrows():
-            regional_code = deal_price_of_real_estate["지역코드"]
-            lot_number = deal_price_of_real_estate["지번"]
+            regional_code = deal_price_of_real_estate[
+                RealEstateKeyEnum.지역코드.value
+            ]
+            lot_number = deal_price_of_real_estate[RealEstateKeyEnum.지번.value]
             unique_key = f"{regional_code}{lot_number}"
 
             if unique_key in unique_keys_in_db:
@@ -230,13 +234,19 @@ class Delete:
 
     @staticmethod
     def get_data_in_db(dto: CollectDealPriceOfRealEstateDto):
+        _deal_type = (
+            DealTypesForDBEnum.DEAL.value
+            if dto.deal_type == DealTypesForQueryEnum.DEAL.value
+            else None
+        )
+
         return list(
             RealEstate.objects.prefetch_related("deals")
             .filter(
                 regional_code=dto.regional_code,
                 deals__deal_year=int(dto.year_month[:4]),
                 deals__deal_month=int(dto.year_month[4:]),
-                deals__deal_type=dto.deal_type,
+                deals__deal_type=_deal_type,
             )
             .all()
         )

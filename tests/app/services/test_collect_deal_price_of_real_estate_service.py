@@ -1,7 +1,7 @@
 import pytest
 
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
-from real_estate.enum.deal_enum import DealTypesForDBEnum
+from real_estate.enum.deal_enum import DealTypesForDBEnum, DealTypesForQueryEnum
 from real_estate.enum.real_estate_enum import (
     RealEstateTypesForDBEnum,
     RealEstateTypesForQueryEnum,
@@ -64,7 +64,7 @@ class TestCollectDealPriceOfRealEstateService:
 
         dto = CollectDealPriceOfRealEstateDto(
             real_estate_type=RealEstateTypesForQueryEnum.MULTI_UNIT_HOUSE.value,
-            deal_type=DealTypesForDBEnum.DEAL.value,
+            deal_type=DealTypesForQueryEnum.DEAL.value,
             regional_code="11110",
             year_month="202001",
         )
