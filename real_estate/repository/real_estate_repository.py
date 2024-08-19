@@ -1,9 +1,12 @@
 from typing import List, Optional, Union
+
+from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
 from real_estate.dto.collect_region_price_dto import CollectRegionPriceDto
 from real_estate.dto.get_real_estate_dto import (
     GetDealsDto,
     GetRealEstatesOnMapDto,
 )
+from real_estate.enum.deal_enum import DealTypesForDBEnum, DealTypesForQueryEnum
 from real_estate.enum.real_estate_enum import RegionZoomLevelEnum
 from real_estate.models import Deal, RealEstate, Region, RegionPrice
 from modu_property.utils.loggers import logger
@@ -252,3 +255,22 @@ class RealEstateRepository:
     @staticmethod
     def get_last_deal():
         return Deal.objects.order_by("-id").first()
+
+    @staticmethod
+    def get_real_estates_on_this_month(dto: CollectDealPriceOfRealEstateDto):
+        _deal_type = (
+            DealTypesForDBEnum.DEAL.value
+            if dto.deal_type == DealTypesForQueryEnum.DEAL.value
+            else None
+        )
+
+        return list(
+            RealEstate.objects.prefetch_related("deals")
+            .filter(
+                regional_code=dto.regional_code,
+                deals__deal_year=int(dto.year_month[:4]),
+                deals__deal_month=int(dto.year_month[4:]),
+                deals__deal_type=_deal_type,
+            )
+            .all()
+        )

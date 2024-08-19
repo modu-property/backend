@@ -12,6 +12,7 @@ from real_estate.enum.real_estate_enum import (
     RealEstateKeyEnum,
 )
 from real_estate.models import Deal, RealEstate, Region, RegionPrice
+from modu_property.utils.loggers import file_logger
 
 
 class RealEstateSerializer(serializers.ModelSerializer):
@@ -23,7 +24,7 @@ class RealEstateSerializer(serializers.ModelSerializer):
     buildYear = serializers.IntegerField(source="build_year")
     sggCd = serializers.CharField(source="regional_code")
     jibun = serializers.CharField(source="lot_number")
-    road_name_address = serializers.CharField()
+    road_name_address = serializers.CharField(allow_null=True, allow_blank=True)
     address = serializers.CharField()
     real_estate_type = serializers.CharField()
     latitude = serializers.CharField()
@@ -49,11 +50,15 @@ class RealEstateSerializer(serializers.ModelSerializer):
         )
 
     def get_organized_data(self, deal_price_of_real_estates):
-        result = []
+        real_estate_result = []
+        deal_result = []
+
         for (
             _,
             deal_price_of_real_estate,
         ) in deal_price_of_real_estates.iterrows():
+            deal_result.append(deal_price_of_real_estate)
+
             if self._already_exist_then_skip(deal_price_of_real_estate):
                 continue
 
@@ -61,7 +66,9 @@ class RealEstateSerializer(serializers.ModelSerializer):
 
             # self._set_name(deal_price_of_real_estate)
 
-            self._set_address(deal_price_of_real_estate)
+            is_set = self._set_address(deal_price_of_real_estate)
+            if not is_set:
+                continue
 
             address_info = deal_price_of_real_estate.get("address_info")
 
@@ -79,11 +86,11 @@ class RealEstateSerializer(serializers.ModelSerializer):
                 }
             )
 
-            result.append(deal_price_of_real_estate)
-        return result
+            real_estate_result.append(deal_price_of_real_estate)
+        return real_estate_result, deal_result
 
     def _already_exist_then_skip(self, deal_price_of_real_estate):
-        unique_key = f"{deal_price_of_real_estate.get(RealEstateKeyEnum.지역코드.value )}{deal_price_of_real_estate.get(RealEstateKeyEnum.지번.value)}"
+        unique_key = f"{deal_price_of_real_estate.get(RealEstateKeyEnum.지역코드.value)}{deal_price_of_real_estate.get(RealEstateKeyEnum.지번.value)}"
         unique_keys = self.context.get("unique_keys")
         if unique_key in unique_keys:
             return True
@@ -96,17 +103,14 @@ class RealEstateSerializer(serializers.ModelSerializer):
         query = f"{dong} {lot_number}"
         address_converter_util = self.context.get("address_converter_util")
         if not address_converter_util.convert_address(query=query):
-            raise serializers.ValidationError(
-                "address_converter_util failed 주소 정보가 없음"
+            file_logger.info(
+                f"address_converter_util failed 주소 정보가 없음 query : {query}"
             )
+            return False
+
         address_info = address_converter_util.get_address()
         deal_price_of_real_estate["address_info"] = address_info
-
-    # def _set_name(self, deal_price_of_real_estate):
-    #     if "연립다세대" in deal_price_of_real_estate:
-    #         deal_price_of_real_estate["이름"] = deal_price_of_real_estate.pop(
-    #             "연립다세대"
-    #         )
+        return True
 
 
 class DealSerializer(serializers.ModelSerializer):
@@ -162,6 +166,8 @@ class DealSerializer(serializers.ModelSerializer):
                 DealTypesForDBEnum.DEAL.value
             )
 
+            self.cast_price_to_int(deal_price_of_real_estate)
+
             self.convert_square_meter_to_pyung(deal_price_of_real_estate)
 
             self.calc_price_per_pyung(deal_price_of_real_estate)
@@ -172,9 +178,15 @@ class DealSerializer(serializers.ModelSerializer):
 
             self.set_deal_type(deal_price_of_real_estate)
 
-            self.set_real_estate_id(
-                deal_price_of_real_estate, inserted_real_estate_models_dict
-            )
+            if inserted_real_estate_models_dict:
+                self.set_real_estate_id(
+                    deal_price_of_real_estate, inserted_real_estate_models_dict
+                )
+
+    def cast_price_to_int(self, instance):
+        instance[RealEstateKeyEnum.거래금액.value] = int(
+            instance[RealEstateKeyEnum.거래금액.value].replace(",", "")
+        )
 
     def convert_square_meter_to_pyung(self, instance):
         area = instance[RealEstateKeyEnum.전용면적.value]
@@ -203,6 +215,8 @@ class DealSerializer(serializers.ModelSerializer):
         instance[RealEstateKeyEnum.거래유형.value] = instance["deal_type"]
 
     def set_real_estate_id(self, instance, inserted_real_estate_models_dict):
+        if not instance:
+            file_logger.error("instance 없음")
         unique_key = f"{instance[RealEstateKeyEnum.지역코드.value]}{instance[RealEstateKeyEnum.지번.value]}"
         real_estate = inserted_real_estate_models_dict[unique_key]
         instance["real_estate_id"] = real_estate.id

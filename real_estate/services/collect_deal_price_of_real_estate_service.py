@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from dependency_injector.wiring import Provide, inject
 from pandas import DataFrame
 
@@ -14,6 +16,7 @@ from real_estate.enum.real_estate_enum import (
 )
 
 from real_estate.models import Deal, RealEstate
+from real_estate.repository.real_estate_repository import RealEstateRepository
 from real_estate.serializers import DealSerializer, RealEstateSerializer
 from real_estate.utils.address_converter_util import KakaoAddressConverterUtil
 from real_estate.utils.real_estate_collector_util import RealEstateCollectorUtil
@@ -43,7 +46,7 @@ class CollectDealPriceOfRealEstateService:
         self.address_converter_util: KakaoAddressConverterUtil = (
             address_converter_util
         )
-        self.delete = Delete()
+        self.segregator = Segregator()
         self.create_real_estate = CreateRealEstate(
             address_converter_util=self.address_converter_util
         )
@@ -57,6 +60,9 @@ class CollectDealPriceOfRealEstateService:
                 dto=dto
             )
         )
+        file_logger.debug(
+            f"deal_prices_of_real_estate : {deal_prices_of_real_estate}"
+        )
 
         if (
             deal_prices_of_real_estate is False
@@ -64,21 +70,35 @@ class CollectDealPriceOfRealEstateService:
         ):
             return
 
-        deal_prices_of_real_estate = self.delete.delete_duplication(
-            dto, deal_prices_of_real_estate
+        """
+        DB에 이미 있는 real_estate면 create real_estate 생략
+        이미 있으면 real_estate id랑 deal 따로 구하기, 나머지는 그대로 로직 타기
+        """
+
+        deal_prices_about_new_real_estate, deal_prices_about_new_deal = (
+            self.segregator.segregate_real_estates(
+                dto, deal_prices_of_real_estate
+            )
         )
+        if not deal_prices_about_new_real_estate.empty:
+            logger.info("@@@ deal_prices_about_new_real_estate.empty")
+            result = self.create_real_estate.create_real_estates(
+                deal_prices_of_real_estate=deal_prices_about_new_real_estate,
+                dto=dto,
+            )
 
-        if deal_prices_of_real_estate.empty:
-            return
+            if not result:
+                return
 
-        result = self.create_real_estate.create_real_estates(
-            deal_prices_of_real_estate=deal_prices_of_real_estate, dto=dto
-        )
+            self.create_deal.create_deals(
+                result, deal_prices_about_new_real_estate
+            )
 
-        if not result:
-            return
+        if not deal_prices_about_new_deal.empty:
+            logger.info("@@@ deal_prices_about_new_deal.empty")
+            self.create_deal.create_only_deals(deal_prices_about_new_deal, dto)
 
-        return self.create_deal.create_deals(result)
+        return True
 
 
 class CreateRealEstate:
@@ -107,7 +127,7 @@ class CreateRealEstate:
             },
         )
 
-        deal_price_of_real_estates = serializer.get_organized_data(
+        deal_price_of_real_estates, deal_result = serializer.get_organized_data(
             deal_price_of_real_estates=deal_prices_of_real_estate
         )
 
@@ -126,7 +146,11 @@ class CreateRealEstate:
                 inserted_real_estate_models = RealEstate.objects.bulk_create(
                     real_estate_models
                 )
-            return inserted_real_estate_models, deal_price_of_real_estates
+            return (
+                inserted_real_estate_models,
+                deal_price_of_real_estates,
+                deal_result,
+            )
         except Exception as e:
             logger.error(
                 f"real_estate bulk_create e : {e} inserted_real_estate_models : {inserted_real_estate_models}"
@@ -144,10 +168,51 @@ class CreateRealEstate:
 
 
 class CreateDeal:
-    def create_deals(self, result):
+    def __init__(self):
+        self.repository = RealEstateRepository()
+
+    def create_only_deals(
+        self, deals: DataFrame, dto: CollectDealPriceOfRealEstateDto
+    ):
+        serializer = DealSerializer()
+        deal_dict_list = []
+
+        # real_estates = self.repository.get_real_estates_on_this_month(dto)
+        # keys_on_db = {}
+        # for real_estate in real_estates:
+        #     # 부동산 지역코드, 지번, 매매 연,월, 평형,가격, 등으로 key 생성
+        #     _deals = real_estate.deals.all()
+        #     for deal in _deals:
+        #         key = f"{real_estate.regional_code}{real_estate.lot_number}{deal.floor}{deal.deal_year}{deal.deal_month}{deal.deal_day}{deal.deal_price}"
+        #         keys_on_db[key] = None
+        #
+        for _, deal in deals.iterrows():
+            # key = f"{deal[RealEstateKeyEnum.지역코드.value]}{deal[RealEstateKeyEnum.지번.value]}{deal[RealEstateKeyEnum.층.value]}{deal[RealEstateKeyEnum.계약년도.value]}{deal[RealEstateKeyEnum.계약월.value]}{deal[RealEstateKeyEnum.계약일.value]}{deal[RealEstateKeyEnum.거래금액.value].replace(',', '')}"
+            # if key in keys_on_db:
+            #     continue
+
+            deal_dict_list.append(dict(deal))
+
+        serializer.get_organized_data(None, deal_dict_list)
+
+        serializer = DealSerializer(data=deal_dict_list, many=True)
+        serializer.is_valid(raise_exception=True)
+
+        deal_models = [Deal(**data) for data in serializer.validated_data]
+
+        try:
+            if deal_models:
+                Deal.objects.bulk_create(deal_models)
+            return True
+        except Exception as e:
+            logger.error(f"deal bulk_create e : {e}")
+        return False
+
+    def create_deals(self, result, deal_prices_of_real_estate_dataframe):
         (
             inserted_real_estate_models,
             deal_price_of_real_estate_list,
+            deal_result,
         ) = result
         inserted_real_estate_models_dict = (
             self.create_inserted_real_estate_models_dict(
@@ -156,12 +221,16 @@ class CreateDeal:
         )
 
         serializer = DealSerializer()
+
+        # deal_prices_of_real_estate = (
+        #     deal_prices_of_real_estate_dataframe.to_dict(orient="records")
+        # )
+        deal_prices_of_real_estate = [deal.to_dict() for deal in deal_result]
+
         serializer.get_organized_data(
-            inserted_real_estate_models_dict, deal_price_of_real_estate_list
+            inserted_real_estate_models_dict, deal_prices_of_real_estate
         )
-        serializer = DealSerializer(
-            data=deal_price_of_real_estate_list, many=True
-        )
+        serializer = DealSerializer(data=deal_prices_of_real_estate, many=True)
         serializer.is_valid(raise_exception=True)
 
         deal_models = [Deal(**data) for data in serializer.validated_data]
@@ -187,22 +256,52 @@ class CreateDeal:
         return inserted_real_estate_models_dict
 
 
-class Delete:
-    def delete_duplication(
+class Segregator:
+    def __init__(self):
+        self.repository = RealEstateRepository()
+
+    def segregate_real_estates(
         self, dto: CollectDealPriceOfRealEstateDto, deal_prices_of_real_estate
     ):
-        file_logger.info("delete_duplication")
+        """
+        DB에 있는 real_estates와 DB에 없는 새로운 real_estates를 반환함
+        """
+
+        file_logger.info("segregate_real_estates")
         unique_keys_in_db = self.create_unique_keys_in_db(dto=dto)
 
-        indexes_to_drop = self.create_indexes_to_drop(
+        return self.get_new_real_estates_and_deals(
             deal_prices_of_real_estate, unique_keys_in_db
         )
 
-        deal_prices_of_real_estate = deal_prices_of_real_estate.drop(
-            indexes_to_drop
-        )
+    def get_new_real_estates_and_deals(
+        self, deal_prices_of_real_estate, unique_keys_in_db
+    ) -> Tuple[DataFrame, DataFrame]:
+        new_real_estates = []
+        deals = []
 
-        return deal_prices_of_real_estate
+        """
+        deal_prices_of_real_estate에 unique_keys_in_db랑 일치하는 게 있으면  deals에 저장, 나머지는 new_real_estates에 저장 
+        """
+        for (
+            _,
+            deal_price_of_real_estate,
+        ) in deal_prices_of_real_estate.iterrows():
+            regional_code = deal_price_of_real_estate[
+                RealEstateKeyEnum.지역코드.value
+            ]
+            lot_number = deal_price_of_real_estate[RealEstateKeyEnum.지번.value]
+            unique_key = f"{regional_code}{lot_number}"
+
+            if unique_key in unique_keys_in_db:
+                deal_price_of_real_estate["real_estate_id"] = unique_keys_in_db[
+                    unique_key
+                ]
+                deals.append(deal_price_of_real_estate)
+            else:
+                new_real_estates.append(deal_price_of_real_estate)
+
+        return DataFrame(new_real_estates), DataFrame(deals)
 
     @staticmethod
     def create_indexes_to_drop(deal_prices_of_real_estate, unique_keys_in_db):
@@ -223,30 +322,11 @@ class Delete:
 
     def create_unique_keys_in_db(self, dto: CollectDealPriceOfRealEstateDto):
         unique_keys_in_db = {}
-        data_in_db = self.get_data_in_db(dto)
+        data_in_db = self.repository.get_real_estates_on_this_month(dto)
         for data in data_in_db:
             regional_code = data.regional_code
             lot_number = data.lot_number
             unique_key = f"{regional_code}{lot_number}"
 
-            unique_keys_in_db[unique_key] = True
+            unique_keys_in_db[unique_key] = data.id
         return unique_keys_in_db
-
-    @staticmethod
-    def get_data_in_db(dto: CollectDealPriceOfRealEstateDto):
-        _deal_type = (
-            DealTypesForDBEnum.DEAL.value
-            if dto.deal_type == DealTypesForQueryEnum.DEAL.value
-            else None
-        )
-
-        return list(
-            RealEstate.objects.prefetch_related("deals")
-            .filter(
-                regional_code=dto.regional_code,
-                deals__deal_year=int(dto.year_month[:4]),
-                deals__deal_month=int(dto.year_month[4:]),
-                deals__deal_type=_deal_type,
-            )
-            .all()
-        )
