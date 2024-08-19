@@ -57,6 +57,10 @@ class RealEstateSerializer(serializers.ModelSerializer):
             _,
             deal_price_of_real_estate,
         ) in deal_price_of_real_estates.iterrows():
+            is_set = self._set_address(deal_price_of_real_estate)
+            if not is_set:
+                continue
+
             deal_result.append(deal_price_of_real_estate)
 
             if self._already_exist_then_skip(deal_price_of_real_estate):
@@ -65,10 +69,6 @@ class RealEstateSerializer(serializers.ModelSerializer):
             deal_price_of_real_estate = dict(deal_price_of_real_estate)
 
             # self._set_name(deal_price_of_real_estate)
-
-            is_set = self._set_address(deal_price_of_real_estate)
-            if not is_set:
-                continue
 
             address_info = deal_price_of_real_estate.get("address_info")
 

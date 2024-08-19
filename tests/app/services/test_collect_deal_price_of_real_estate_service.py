@@ -84,6 +84,10 @@ class TestCollectDealPriceOfRealEstateService:
         for real_estate in real_estates:
             if real_estate.name == "풍림팍사이드빌라":
                 assert len(real_estate.deals.all()) == 4
+            if real_estate.name == "(15-1)":
+                assert len(real_estate.deals.all()) == 1
+            if real_estate.name == "우인빌라":
+                assert len(real_estate.deals.all()) == 1
 
     def test_when_collect_new_deal_price_of_villa_then_success(
         self,
