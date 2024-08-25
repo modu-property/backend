@@ -48,8 +48,7 @@ class AddressCollectorUtil:
 
                 query: str = f"{sido} {sigungu} {ubmyundong} {dongri}".strip()
 
-                if not self.address_converter_util.convert_address(query=query):
-                    continue
+                self.address_converter_util.convert_address(query=query)
 
                 address_info: Union[dict[str, str], dict, bool] = (
                     self.address_converter_util.get_address()

@@ -68,8 +68,6 @@ class RealEstateSerializer(serializers.ModelSerializer):
 
             deal_price_of_real_estate = dict(deal_price_of_real_estate)
 
-            # self._set_name(deal_price_of_real_estate)
-
             address_info = deal_price_of_real_estate.get("address_info")
 
             deal_price_of_real_estate.update(
@@ -102,7 +100,8 @@ class RealEstateSerializer(serializers.ModelSerializer):
         lot_number = deal_price_of_real_estate.get(RealEstateKeyEnum.지번.value)
         query = f"{dong} {lot_number}"
         address_converter_util = self.context.get("address_converter_util")
-        if not address_converter_util.convert_address(query=query):
+        address_converter_util.convert_address(query=query)
+        if not address_converter_util.get_address().get("road_name_address"):
             file_logger.info(
                 f"address_converter_util failed 주소 정보가 없음 query : {query}"
             )

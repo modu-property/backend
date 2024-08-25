@@ -25,9 +25,6 @@ class KakaoAddressConverterUtil:
             latitude: str = address_info["y"]
             longitude: str = address_info["x"]
 
-            if not road_name_address:
-                raise Exception(f"도로명 주소 없음 {address_info.__dict__}")
-
             self.address_info = {
                 "road_name_address": road_name_address,
                 "address": address,

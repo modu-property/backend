@@ -80,23 +80,32 @@ class CollectDealPriceOfRealEstateService:
                 dto, deal_prices_of_real_estate
             )
         )
+
         if not deal_prices_about_new_real_estate.empty:
-            logger.info("@@@ deal_prices_about_new_real_estate.empty")
-            result = self.create_real_estate.create_real_estates(
-                deal_prices_of_real_estate=deal_prices_about_new_real_estate,
-                dto=dto,
+            result = self._create_new_real_estates_and_new_deals(
+                dto, deal_prices_about_new_real_estate
             )
 
             if not result:
                 return
 
-            self.create_deal.create_deals(
-                result, deal_prices_about_new_real_estate
-            )
-
         if not deal_prices_about_new_deal.empty:
-            logger.info("@@@ deal_prices_about_new_deal.empty")
-            self.create_deal.create_only_deals(deal_prices_about_new_deal, dto)
+            self.create_deal.create_only_new_deals(deal_prices_about_new_deal)
+
+        return True
+
+    def _create_new_real_estates_and_new_deals(
+        self, dto, deal_prices_about_new_real_estate
+    ):
+        result = self.create_real_estate.create_real_estates(
+            deal_prices_of_real_estate=deal_prices_about_new_real_estate,
+            dto=dto,
+        )
+
+        if not result:
+            return
+
+        self.create_deal.create_deals(result)
 
         return True
 
@@ -148,7 +157,6 @@ class CreateRealEstate:
                 )
             return (
                 inserted_real_estate_models,
-                deal_price_of_real_estates,
                 deal_result,
             )
         except Exception as e:
@@ -171,26 +179,11 @@ class CreateDeal:
     def __init__(self):
         self.repository = RealEstateRepository()
 
-    def create_only_deals(
-        self, deals: DataFrame, dto: CollectDealPriceOfRealEstateDto
-    ):
+    def create_only_new_deals(self, deal_prices_about_new_deal: DataFrame):
         serializer = DealSerializer()
         deal_dict_list = []
 
-        # real_estates = self.repository.get_real_estates_on_this_month(dto)
-        # keys_on_db = {}
-        # for real_estate in real_estates:
-        #     # 부동산 지역코드, 지번, 매매 연,월, 평형,가격, 등으로 key 생성
-        #     _deals = real_estate.deals.all()
-        #     for deal in _deals:
-        #         key = f"{real_estate.regional_code}{real_estate.lot_number}{deal.floor}{deal.deal_year}{deal.deal_month}{deal.deal_day}{deal.deal_price}"
-        #         keys_on_db[key] = None
-        #
-        for _, deal in deals.iterrows():
-            # key = f"{deal[RealEstateKeyEnum.지역코드.value]}{deal[RealEstateKeyEnum.지번.value]}{deal[RealEstateKeyEnum.층.value]}{deal[RealEstateKeyEnum.계약년도.value]}{deal[RealEstateKeyEnum.계약월.value]}{deal[RealEstateKeyEnum.계약일.value]}{deal[RealEstateKeyEnum.거래금액.value].replace(',', '')}"
-            # if key in keys_on_db:
-            #     continue
-
+        for _, deal in deal_prices_about_new_deal.iterrows():
             deal_dict_list.append(dict(deal))
 
         serializer.get_organized_data(None, deal_dict_list)
@@ -208,10 +201,9 @@ class CreateDeal:
             logger.error(f"deal bulk_create e : {e}")
         return False
 
-    def create_deals(self, result, deal_prices_of_real_estate_dataframe):
+    def create_deals(self, result):
         (
             inserted_real_estate_models,
-            deal_price_of_real_estate_list,
             deal_result,
         ) = result
         inserted_real_estate_models_dict = (
@@ -222,9 +214,6 @@ class CreateDeal:
 
         serializer = DealSerializer()
 
-        # deal_prices_of_real_estate = (
-        #     deal_prices_of_real_estate_dataframe.to_dict(orient="records")
-        # )
         deal_prices_of_real_estate = [deal.to_dict() for deal in deal_result]
 
         serializer.get_organized_data(
