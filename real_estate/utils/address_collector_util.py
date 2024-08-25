@@ -36,6 +36,7 @@ class AddressCollectorUtil:
     def get_region_models(self, table: DataFrame) -> List[Optional[Region]]:
         region_list = []
         for _, row in table.iterrows():
+            logger.info(f"get_region_models row : {row}")
             if not row.get("말소일자"):
                 regional_code = row.get("시군구코드", None)
                 sido = row.get("시도명", None)
@@ -47,8 +48,7 @@ class AddressCollectorUtil:
 
                 query: str = f"{sido} {sigungu} {ubmyundong} {dongri}".strip()
 
-                if not self.address_converter_util.convert_address(query=query):
-                    continue
+                self.address_converter_util.convert_address(query=query)
 
                 address_info: Union[dict[str, str], dict, bool] = (
                     self.address_converter_util.get_address()

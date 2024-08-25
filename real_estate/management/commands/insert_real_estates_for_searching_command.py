@@ -14,10 +14,10 @@ class Command(BaseCommand):
         subprocess.run(["bash", f"{dir_path}/run_indexer.sh"])
 
     def delete_real_estate(self):
-        RealEstate.objects.all().delete()
+        RealEstate.objects.all().segregator()
 
     def delete_real_estate_deal(self):
-        Deal.objects.all().delete()
+        Deal.objects.all().segregator()
 
     def create_real_estate_and_real_estate_deal(self):
         real_estate1 = RealEstate(

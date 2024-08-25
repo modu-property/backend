@@ -25,11 +25,6 @@ class SetRealEstatesService:
             return True
 
         _data = self.serializer(data=list(real_estates), many=True)
-        if not _data:
-            logger.error(
-                f"update_result_with_data result : {result} _data : {real_estates}"
-            )
-            return False
-
-        result[self.key] = list(real_estates)
-        return True
+        if _data.is_valid(raise_exception=True):
+            result[self.key] = _data.data
+            return True

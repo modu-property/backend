@@ -183,3 +183,5 @@ cython_debug/
 
 /manticore/data
 /manticore/manticore.conf
+/manticore/production/data
+/manticore/production/manticore.conf

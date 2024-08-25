@@ -1,7 +1,7 @@
 import pytest
 
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
-from real_estate.enum.deal_enum import DealTypesForDBEnum
+from real_estate.enum.deal_enum import DealTypesForDBEnum, DealTypesForQueryEnum
 from real_estate.enum.real_estate_enum import (
     RealEstateTypesForDBEnum,
     RealEstateTypesForQueryEnum,
@@ -25,7 +25,8 @@ class TestCollectDealPriceOfRealEstateService:
         """
         풍림팍사이드빌라를 미리 DB에 생성하고
         mock_collect_deal_price_of_real_estate로 수집 목킹해서 3개 빌라를 반환함
-        풍림팍사이드빌라가 이미 DB에 있어서 제외하고 2개 빌라 저장함
+        풍림팍사이드빌라가 이미 DB에 있어도 저장함.
+        이유는 빌라가 지어지고 분양 시 같은 날에 같은 층의 같은 면적이 같은 가격으로 매매되기 때문.
         """
         mocker.patch(
             "real_estate.utils.real_estate_collector_util.RealEstateCollectorUtil.collect_deal_price_of_real_estate",
@@ -64,7 +65,7 @@ class TestCollectDealPriceOfRealEstateService:
 
         dto = CollectDealPriceOfRealEstateDto(
             real_estate_type=RealEstateTypesForQueryEnum.MULTI_UNIT_HOUSE.value,
-            deal_type=DealTypesForDBEnum.DEAL.value,
+            deal_type=DealTypesForQueryEnum.DEAL.value,
             regional_code="11110",
             year_month="202001",
         )
@@ -78,3 +79,53 @@ class TestCollectDealPriceOfRealEstateService:
         real_estates = RealEstateRepository().get_real_estates()
 
         assert len(real_estates) == 3
+
+        for real_estate in real_estates:
+            if real_estate.name == "풍림팍사이드빌라":
+                assert len(real_estate.deals.all()) == 4
+            if real_estate.name == "(15-1)":
+                assert len(real_estate.deals.all()) == 1
+            if real_estate.name == "우인빌라":
+                assert len(real_estate.deals.all()) == 1
+
+    def test_when_collect_new_deal_price_of_villa_then_success(
+        self,
+        mocker,
+        mock_collect_deal_price_of_real_estate,
+        create_real_estate,
+        create_deal,
+    ):
+        """
+        mock_collect_deal_price_of_real_estate로 수집 목킹해서 6개 빌라를 반환함
+        DB에 부동산 데이터가 없는 상태에서 중복된 데이터가 저장되는지 확인
+        """
+        mocker.patch(
+            "real_estate.utils.real_estate_collector_util.RealEstateCollectorUtil.collect_deal_price_of_real_estate",
+            return_value=mock_collect_deal_price_of_real_estate,
+        )
+
+        dto = CollectDealPriceOfRealEstateDto(
+            real_estate_type=RealEstateTypesForQueryEnum.MULTI_UNIT_HOUSE.value,
+            deal_type=DealTypesForQueryEnum.DEAL.value,
+            regional_code="11110",
+            year_month="202001",
+            # year_month="201403",
+        )
+
+        result = CollectDealPriceOfRealEstateService().collect_deal_price_of_real_estate(
+            dto=dto
+        )
+
+        assert result is True
+
+        real_estates = RealEstateRepository().get_real_estates()
+
+        assert len(real_estates) == 3
+
+        for real_estate in real_estates:
+            if real_estate.name == "풍림팍사이드빌라":
+                assert len(real_estate.deals.all()) == 4
+            if real_estate.name == "(15-1)":
+                assert len(real_estate.deals.all()) == 1
+            if real_estate.name == "우인빌라":
+                assert len(real_estate.deals.all()) == 1

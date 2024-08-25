@@ -16,10 +16,10 @@ class RealEstateTypesForQueryEnum(Enum):
 
 
 class RealEstateTypesForDBEnum(Enum):
-    MULTI_UNIT_HOUSE = "MULTI_UNIT_HOUSE"
+    MULTI_UNIT_HOUSE = "MULTI_UNIT_HOUSE"  # 연립/다세대
     APARTMENT = "APARTMENT"
     OFFICETEL = "OFFICETEL"
-    MULTI_HOUSEHOLD = "MULTI_HOUSEHOLD"
+    MULTI_HOUSEHOLD = "MULTI_HOUSEHOLD"  # 다가구
     LAND = "LAND"
     OWNERSHIP = "OWNERSHIP"
     FACTORY_WAREHOUSE = "FACTORY_WAREHOUSE"
@@ -53,3 +53,25 @@ class RegionCodeEnum(Enum):
 class SearchLimitEnum(Enum):
     REGION = 3
     REAL_ESTATES = 15
+
+
+class RealEstateKeyEnum(Enum):
+    건축년도 = "buildYear"
+    매수자 = "buyerGbn"
+    해제사유발생일 = "cdealDay"
+    해제여부 = "cdealType"
+    거래금액 = "dealAmount"
+    계약일 = "dealDay"
+    계약월 = "dealMonth"
+    계약년도 = "dealYear"
+    거래유형 = "dealingGbn"
+    중개사소재지 = "estateAgentSggNm"
+    전용면적 = "excluUseAr"
+    층 = "floor"
+    지번 = "jibun"
+    대지권면적 = "landAr"
+    연립다세대명 = "mhouseNm"
+    등기일자 = "rgstData"
+    지역코드 = "sggCd"
+    매도자 = "slerGbn"
+    법정동 = "umdNm"

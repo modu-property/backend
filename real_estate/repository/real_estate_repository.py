@@ -1,10 +1,17 @@
 from typing import List, Optional, Union
+
+from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
 from real_estate.dto.collect_region_price_dto import CollectRegionPriceDto
 from real_estate.dto.get_real_estate_dto import (
     GetDealsDto,
     GetRealEstatesOnMapDto,
 )
-from real_estate.enum.real_estate_enum import RegionZoomLevelEnum
+from real_estate.enum.deal_enum import DealTypesForDBEnum, DealTypesForQueryEnum
+from real_estate.enum.real_estate_enum import (
+    RegionZoomLevelEnum,
+    RealEstateTypesForDBEnum,
+    RealEstateTypesForQueryEnum,
+)
 from real_estate.models import Deal, RealEstate, Region, RegionPrice
 from modu_property.utils.loggers import logger
 from django.db.models import (
@@ -252,3 +259,21 @@ class RealEstateRepository:
     @staticmethod
     def get_last_deal():
         return Deal.objects.order_by("-id").first()
+
+    @staticmethod
+    def get_real_estates_by_regional_code_and_type(
+        dto: CollectDealPriceOfRealEstateDto,
+    ):
+        _real_estate_type = (
+            RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value
+            if dto.real_estate_type
+            == RealEstateTypesForQueryEnum.MULTI_UNIT_HOUSE.value
+            else None
+        )
+
+        return list(
+            RealEstate.objects.filter(
+                regional_code=dto.regional_code,
+                real_estate_type=_real_estate_type,
+            ).all()
+        )

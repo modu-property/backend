@@ -72,3 +72,7 @@ class TimeUtil:
     @staticmethod
     def get_year_month_day(date):
         return datetime.strftime(date, "%Y%m%d")
+
+    @staticmethod
+    def convert_date_dot_to_date_dash(date):
+        return datetime.strptime(date, "%y.%m.%d").date()

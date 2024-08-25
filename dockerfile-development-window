@@ -1,0 +1,27 @@
+# syntax=docker/dockerfile:experimental
+
+FROM python:3.10-slim as python-base
+
+RUN apt-get update \
+&& apt-get install default-mysql-client gdal-bin libgdal-dev docker.io gettext curl -yqq 
+
+FROM python-base as poetry-base
+WORKDIR /modu_property
+COPY pyproject.toml pyproject.toml
+COPY poetry.lock poetry.lock
+
+ENV \
+  # Poetry's configuration:
+  POETRY_NO_INTERACTION=1 \
+  POETRY_VIRTUALENVS_CREATE=false \
+  POETRY_CACHE_DIR='/var/cache/pypoetry' \
+  POETRY_HOME='/usr/local' \
+  POETRY_VERSION=1.6.1
+
+RUN curl -sSL https://install.python-poetry.org | python3 - --version 1.6.1
+
+RUN poetry install --no-interaction --no-ansi
+
+FROM poetry-base as app
+WORKDIR /modu_property
+COPY . .
