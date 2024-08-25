@@ -2,6 +2,8 @@ from decimal import Decimal
 
 from django.contrib.gis.geos import Point
 from rest_framework import serializers
+
+from modu_property.utils.time import TimeUtil
 from real_estate.enum.deal_enum import (
     DEAL_TYPES,
     DealTypesForDBEnum,
@@ -10,6 +12,7 @@ from real_estate.enum.deal_enum import (
 from real_estate.enum.real_estate_enum import (
     RealEstateTypesForQueryEnum,
     RealEstateKeyEnum,
+    RealEstateTypesForDBEnum,
 )
 from real_estate.models import Deal, RealEstate, Region, RegionPrice
 from modu_property.utils.loggers import file_logger
@@ -177,6 +180,8 @@ class DealSerializer(serializers.ModelSerializer):
 
             self.set_deal_type(deal_price_of_real_estate)
 
+            self.convert_deal_canceled_date(deal_price_of_real_estate)
+
             if inserted_real_estate_models_dict:
                 self.set_real_estate_id(
                     deal_price_of_real_estate, inserted_real_estate_models_dict
@@ -220,6 +225,11 @@ class DealSerializer(serializers.ModelSerializer):
         real_estate = inserted_real_estate_models_dict[unique_key]
         instance["real_estate_id"] = real_estate.id
 
+    def convert_deal_canceled_date(self, instance):
+        date = instance.get("cdealDay")
+        if date:
+            instance["cdealDay"] = TimeUtil.convert_date_dot_to_date_dash(date)
+
 
 class GetRealEstateRequestSerializer(serializers.Serializer):
     id = serializers.IntegerField(min_value=1)
@@ -252,6 +262,22 @@ class GetRealEstatesOnSearchResponseSerializer(serializers.Serializer):
     area_for_exclusive_use = serializers.CharField(max_length=10)
     area_for_exclusive_use_pyung = serializers.CharField(max_length=7)
     area_for_exclusive_use_price_per_pyung = serializers.CharField(max_length=8)
+
+    def to_representation(self, instance):
+        super().to_representation(instance)
+
+        old_real_estate_type = instance["real_estate_type"]
+        if (
+            old_real_estate_type
+            == RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value
+        ):
+            new_real_estate_type = (
+                RealEstateTypesForQueryEnum.MULTI_UNIT_HOUSE.value
+            )
+
+            instance["real_estate_type"] = new_real_estate_type
+
+        return instance
 
 
 class GetRealEstatesOnMapRequestSerializer(serializers.Serializer):

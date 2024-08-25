@@ -112,6 +112,7 @@ def mock_collect_deal_price_of_real_estate():
             2: "11110",
             3: "11110",
             4: "11110",
+            5: "11110",
         },
         RealEstateKeyEnum.법정동.value: {
             0: "청운동",
@@ -119,6 +120,7 @@ def mock_collect_deal_price_of_real_estate():
             2: "필운동",
             3: "청운동",
             4: "청운동",
+            5: "청운동",
         },
         RealEstateKeyEnum.지번.value: {
             0: "134-2",
@@ -126,6 +128,7 @@ def mock_collect_deal_price_of_real_estate():
             2: "26",
             3: "134-2",
             4: "134-2",
+            5: "134-2",
         },
         RealEstateKeyEnum.연립다세대명.value: {
             0: "풍림팍사이드빌라",
@@ -133,6 +136,7 @@ def mock_collect_deal_price_of_real_estate():
             2: "우인빌라",
             3: "풍림팍사이드빌라",
             4: "풍림팍사이드빌라",
+            5: "풍림팍사이드빌라",
         },
         RealEstateKeyEnum.건축년도.value: {
             0: 1997,
@@ -140,14 +144,23 @@ def mock_collect_deal_price_of_real_estate():
             2: 2001,
             3: 1997,
             4: 1997,
+            5: 1997,
         },
-        RealEstateKeyEnum.층.value: {0: "2", 1: "2", 2: "3", 3: "3", 4: "2"},
+        RealEstateKeyEnum.층.value: {
+            0: "2",
+            1: "2",
+            2: "3",
+            3: "3",
+            4: "2",
+            5: "2",
+        },
         RealEstateKeyEnum.대지권면적.value: {
             0: "37.902",
             1: "22.75",
             2: "21.55",
             3: "10.11",
             4: "10.11",
+            5: "10.11",
         },
         RealEstateKeyEnum.전용면적.value: {
             0: "53.83",
@@ -155,6 +168,7 @@ def mock_collect_deal_price_of_real_estate():
             2: "50.55",
             3: "6.54",
             4: "6.54",
+            5: "50.54",
         },
         RealEstateKeyEnum.계약년도.value: {
             0: 2020,
@@ -162,15 +176,24 @@ def mock_collect_deal_price_of_real_estate():
             2: 2020,
             3: 2020,
             4: 2020,
+            5: 2020,
         },
-        RealEstateKeyEnum.계약월.value: {0: 1, 1: 1, 2: 1, 3: 1, 4: 1},
-        RealEstateKeyEnum.계약일.value: {0: 20, 1: 11, 2: 6, 3: 20, 4: 20},
+        RealEstateKeyEnum.계약월.value: {0: 1, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1},
+        RealEstateKeyEnum.계약일.value: {
+            0: 20,
+            1: 11,
+            2: 6,
+            3: 20,
+            4: 20,
+            5: 20,
+        },
         RealEstateKeyEnum.거래금액.value: {
             0: "28,000",
             1: "40,000",
             2: "31,000",
             3: "29,000",
             4: "29,000",
+            5: "28,000",
         },
         RealEstateKeyEnum.거래유형.value: {
             0: None,
@@ -178,6 +201,7 @@ def mock_collect_deal_price_of_real_estate():
             2: None,
             3: None,
             4: None,
+            5: None,
         },
         RealEstateKeyEnum.중개사소재지.value: {
             0: None,
@@ -185,13 +209,15 @@ def mock_collect_deal_price_of_real_estate():
             2: None,
             3: None,
             4: None,
+            5: None,
         },
         RealEstateKeyEnum.해제사유발생일.value: {
             0: None,
-            1: None,
+            1: "24.01.01",
             2: None,
             3: None,
             4: None,
+            5: None,
         },
         RealEstateKeyEnum.해제여부.value: {
             0: None,
@@ -199,6 +225,7 @@ def mock_collect_deal_price_of_real_estate():
             2: None,
             3: None,
             4: None,
+            5: None,
         },
     }
 

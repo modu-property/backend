@@ -68,7 +68,6 @@ class TestCollectDealPriceOfRealEstateService:
             deal_type=DealTypesForQueryEnum.DEAL.value,
             regional_code="11110",
             year_month="202001",
-            # year_month="201403",
         )
 
         result = CollectDealPriceOfRealEstateService().collect_deal_price_of_real_estate(
@@ -97,43 +96,13 @@ class TestCollectDealPriceOfRealEstateService:
         create_deal,
     ):
         """
-        mock_collect_deal_price_of_real_estate로 수집 목킹해서 3개 빌라를 반환함
+        mock_collect_deal_price_of_real_estate로 수집 목킹해서 6개 빌라를 반환함
         DB에 부동산 데이터가 없는 상태에서 중복된 데이터가 저장되는지 확인
         """
         mocker.patch(
             "real_estate.utils.real_estate_collector_util.RealEstateCollectorUtil.collect_deal_price_of_real_estate",
             return_value=mock_collect_deal_price_of_real_estate,
         )
-
-        # real_estate1 = create_real_estate(
-        #     name="풍림팍사이드빌라",
-        #     build_year=1997,
-        #     regional_code="11110",
-        #     lot_number="134-2",
-        #     road_name_address="서울 종로구 자하문로 99-3",
-        #     address="서울특별시 종로구 청운동 134-2",
-        #     real_estate_type=RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value,
-        #     latitude="37.5848604533872",
-        #     longitude="126.969812605749",
-        #     point=Point(37.5848604533872, 126.969812605749),
-        # )
-        #
-        # create_deal(
-        #     real_estate_id=real_estate1.id,
-        #     deal_price=28000,
-        #     brokerage_type=None,
-        #     deal_year=2020,
-        #     land_area="37.902",
-        #     deal_month=1,
-        #     deal_day=20,
-        #     area_for_exclusive_use="53.83",
-        #     floor=2,
-        #     is_deal_canceled=False,
-        #     deal_canceled_date=None,
-        #     area_for_exclusive_use_pyung="16.28",
-        #     area_for_exclusive_use_price_per_pyung="1719.90",
-        #     deal_type=DealTypesForDBEnum.DEAL.value,
-        # )
 
         dto = CollectDealPriceOfRealEstateDto(
             real_estate_type=RealEstateTypesForQueryEnum.MULTI_UNIT_HOUSE.value,
@@ -155,7 +124,7 @@ class TestCollectDealPriceOfRealEstateService:
 
         for real_estate in real_estates:
             if real_estate.name == "풍림팍사이드빌라":
-                assert len(real_estate.deals.all()) == 3
+                assert len(real_estate.deals.all()) == 4
             if real_estate.name == "(15-1)":
                 assert len(real_estate.deals.all()) == 1
             if real_estate.name == "우인빌라":

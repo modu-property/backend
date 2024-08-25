@@ -7,7 +7,11 @@ from real_estate.dto.get_real_estate_dto import (
     GetRealEstatesOnMapDto,
 )
 from real_estate.enum.deal_enum import DealTypesForDBEnum, DealTypesForQueryEnum
-from real_estate.enum.real_estate_enum import RegionZoomLevelEnum
+from real_estate.enum.real_estate_enum import (
+    RegionZoomLevelEnum,
+    RealEstateTypesForDBEnum,
+    RealEstateTypesForQueryEnum,
+)
 from real_estate.models import Deal, RealEstate, Region, RegionPrice
 from modu_property.utils.loggers import logger
 from django.db.models import (
@@ -257,20 +261,19 @@ class RealEstateRepository:
         return Deal.objects.order_by("-id").first()
 
     @staticmethod
-    def get_real_estates_on_this_month(dto: CollectDealPriceOfRealEstateDto):
-        _deal_type = (
-            DealTypesForDBEnum.DEAL.value
-            if dto.deal_type == DealTypesForQueryEnum.DEAL.value
+    def get_real_estates_by_regional_code_and_type(
+        dto: CollectDealPriceOfRealEstateDto,
+    ):
+        _real_estate_type = (
+            RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value
+            if dto.real_estate_type
+            == RealEstateTypesForQueryEnum.MULTI_UNIT_HOUSE.value
             else None
         )
 
         return list(
-            RealEstate.objects.prefetch_related("deals")
-            .filter(
+            RealEstate.objects.filter(
                 regional_code=dto.regional_code,
-                deals__deal_year=int(dto.year_month[:4]),
-                deals__deal_month=int(dto.year_month[4:]),
-                deals__deal_type=_deal_type,
-            )
-            .all()
+                real_estate_type=_real_estate_type,
+            ).all()
         )

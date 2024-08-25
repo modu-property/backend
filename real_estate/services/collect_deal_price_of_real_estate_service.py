@@ -8,7 +8,6 @@ from real_estate.containers.utils.address_converter_container import (
     AddressConverterContainer,
 )
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
-from real_estate.enum.deal_enum import DealTypesForQueryEnum, DealTypesForDBEnum
 from real_estate.enum.real_estate_enum import (
     RealEstateTypesForDBEnum,
     RealEstateTypesForQueryEnum,
@@ -257,14 +256,24 @@ class Segregator:
         """
 
         file_logger.info("segregate_real_estates")
-        unique_keys_in_db = self.create_unique_keys_in_db(dto=dto)
+        data_in_db = self.repository.get_real_estates_by_regional_code_and_type(
+            dto
+        )
+        unique_keys_for_real_estates, unique_keys_for_deals = (
+            self.create_unique_keys_in_db(data_in_db=data_in_db)
+        )
 
         return self.get_new_real_estates_and_deals(
-            deal_prices_of_real_estate, unique_keys_in_db
+            deal_prices_of_real_estate,
+            unique_keys_for_real_estates,
+            unique_keys_for_deals,
         )
 
     def get_new_real_estates_and_deals(
-        self, deal_prices_of_real_estate, unique_keys_in_db
+        self,
+        deal_prices_of_real_estate,
+        unique_keys_for_real_estates,
+        unique_keys_for_deals,
     ) -> Tuple[DataFrame, DataFrame]:
         new_real_estates = []
         deals = []
@@ -282,15 +291,38 @@ class Segregator:
             lot_number = deal_price_of_real_estate[RealEstateKeyEnum.지번.value]
             unique_key = f"{regional_code}{lot_number}"
 
-            if unique_key in unique_keys_in_db:
-                deal_price_of_real_estate["real_estate_id"] = unique_keys_in_db[
-                    unique_key
-                ]
+            if unique_key in unique_keys_for_real_estates:
+                # TODO : deal_price_of_real_estate에서 deal이 DB에 있으면 continue
+                if self.already_deal_exist(
+                    deal_price_of_real_estate, unique_keys_for_deals
+                ):
+                    continue
+
+                deal_price_of_real_estate["real_estate_id"] = (
+                    unique_keys_for_real_estates[unique_key]
+                )
                 deals.append(deal_price_of_real_estate)
             else:
                 new_real_estates.append(deal_price_of_real_estate)
 
         return DataFrame(new_real_estates), DataFrame(deals)
+
+    def already_deal_exist(
+        self, deal_price_of_real_estate, unique_keys_for_deals
+    ):
+        y = deal_price_of_real_estate[RealEstateKeyEnum.계약년도.value]
+        m = deal_price_of_real_estate[RealEstateKeyEnum.계약월.value]
+        d = deal_price_of_real_estate[RealEstateKeyEnum.계약일.value]
+        f = deal_price_of_real_estate[RealEstateKeyEnum.층.value]
+        a = deal_price_of_real_estate[RealEstateKeyEnum.전용면적.value]
+        p = deal_price_of_real_estate[RealEstateKeyEnum.거래금액.value].replace(
+            ",", ""
+        )
+
+        key = f"{y}{m}{d}{f}{a}{p}"
+        if key in unique_keys_for_deals:
+            return True
+        return False
 
     @staticmethod
     def create_indexes_to_drop(deal_prices_of_real_estate, unique_keys_in_db):
@@ -309,13 +341,26 @@ class Segregator:
                 indexes_to_drop.append(deal_prices_of_real_estate.index[index])
         return indexes_to_drop
 
-    def create_unique_keys_in_db(self, dto: CollectDealPriceOfRealEstateDto):
-        unique_keys_in_db = {}
-        data_in_db = self.repository.get_real_estates_on_this_month(dto)
+    def create_unique_keys_in_db(self, data_in_db):
+        unique_keys_for_real_estates = {}
+        unique_keys_for_deals = {}
+
         for data in data_in_db:
             regional_code = data.regional_code
             lot_number = data.lot_number
-            unique_key = f"{regional_code}{lot_number}"
+            unique_key_for_real_estate = f"{regional_code}{lot_number}"
+            unique_keys_for_real_estates[unique_key_for_real_estate] = data.id
 
-            unique_keys_in_db[unique_key] = data.id
-        return unique_keys_in_db
+            deals = list(data.deals.all())
+            for deal in deals:
+                y = deal.deal_year
+                m = deal.deal_month
+                d = deal.deal_day
+                f = deal.floor
+                a = deal.area_for_exclusive_use
+                p = deal.deal_price
+
+                unique_key_for_deal = f"{y}{m}{d}{f}{a}{p}"
+                unique_keys_for_deals[unique_key_for_deal] = None
+
+        return unique_keys_for_real_estates, unique_keys_for_deals
