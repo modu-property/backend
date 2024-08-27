@@ -67,7 +67,7 @@ jobs:
         run: |
             docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
             
-            docker-compose -f docker-compose.development.yml up -d --build 
+            docker compose -f docker-compose.development.yml up -d --build 
 
             docker push gidlemyeon/modu_property_platform_development:django
 
