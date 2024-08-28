@@ -3,13 +3,7 @@ from dotenv import load_dotenv
 load_dotenv("./env/.env.development")
 
 from .base_settings import *
-from modu_property.utils.loggers import logger
 
-
-log_file = FileUtil.get_file_path(
-    dir_name="modu_property/logs/", file_name="modu_property.log"
-)
-logger.info(f"log file : {log_file}")
 
 LOGGING["handlers"] = {
     "console": {

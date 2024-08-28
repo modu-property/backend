@@ -11,7 +11,7 @@ LOG_LEVEL = os.getenv("LOG_LEVEL")
 
 
 log_file = FileUtil.get_file_path(
-    dir_name="modu_property/logs/", file_name="modu_property.log"
+    dir_name="backend/logs/", file_name="modu_property.log"
 )
 
 logger.info(f"log file : {log_file}")
@@ -19,7 +19,7 @@ logger.info(f"log file : {log_file}")
 
 def set_logging():
     log_file = FileUtil.get_file_path(
-        dir_name="modu_property/logs/", file_name="modu_property.log"
+        dir_name="backend/logs/", file_name="modu_property.log"
     )
     return {
         "version": 1,
