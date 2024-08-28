@@ -59,9 +59,6 @@ class CollectDealPriceOfRealEstateService:
                 dto=dto
             )
         )
-        file_logger.debug(
-            f"deal_prices_of_real_estate : {deal_prices_of_real_estate}"
-        )
 
         if (
             deal_prices_of_real_estate is False

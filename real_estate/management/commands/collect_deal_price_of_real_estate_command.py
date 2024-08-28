@@ -50,7 +50,6 @@ class Command(BaseCommand, CollectCommandMixin):
 
     @TimeUtil.timer
     def handle(self, *args, **options):
-        print(f"options : {options}")
         sido, start_date, end_date = self.get_command_params(options)
 
         regional_codes = []

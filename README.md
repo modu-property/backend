@@ -322,6 +322,6 @@ command에서 service를 사용하면 command는 service_container의 provider�
 swagger에서 호출하고 api 복사해서 브라우저에서 실행
 view에서 from rest_framework.response import Response를 반환해야 함
 
-# TODO
-23.12.05  
-* https://www.notion.so/2-5ddb861b8a5d468eac0b71b1238a41aa  
+# ec2 접속
+.pem 파일 있는 곳에서 아래 명령어 실행  
+ssh -i "modu_property_backend_ec2_key.pem" ec2-user@xxx
