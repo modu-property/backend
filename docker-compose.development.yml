@@ -16,8 +16,8 @@ services:
         export SERVER_ENV=development
         gunicorn modu_property.wsgi:application --bind 0.0.0.0:8000 --workers 4 --threads 4
     volumes:
-      - .:/modu_property
-      - static_volume:/modu_property/static
+      - .:/backend
+      - static_volume:/backend/static
       - /var/run/docker.sock:/var/run/docker.sock  # django container에서 manticore container에 indexer 실행하기 위해 설정함
     network_mode: "host"
     extra_hosts:
@@ -53,7 +53,7 @@ services:
     image: nginx:stable
     volumes:
       - ./nginx/nginx.development.conf:/etc/nginx/conf.d/default.conf
-      - static_volume:/modu_property/static
+      - static_volume:/backend/static
     depends_on:
       - django
     network_mode: "host"
@@ -63,7 +63,7 @@ services:
     image: gidlemyeon/modu_property_platform_development:django
     restart: always
     volumes:
-      - .:/var/www/modu_property/worker
+      - .:/var/www/backend/worker
     command:
       - sh
       - -c
@@ -79,7 +79,7 @@ services:
     container_name: celery_beat
     image: gidlemyeon/modu_property_platform_development:django
     volumes:
-      - .:/var/www/modu_property/beat
+      - .:/var/www/backend/beat
     command:
       - sh
       - -c

@@ -6,13 +6,13 @@ RUN apt-get update \
 && apt-get install default-mysql-client gdal-bin libgdal-dev docker.io gettext -yqq 
 
 FROM python-base as poetry-base
-WORKDIR /modu_property
+WORKDIR /backend
 COPY pyproject.toml pyproject.toml
 RUN pip install poetry
 RUN poetry export --without-hashes -f requirements.txt --output requirements.txt
 
 FROM python-base as app
-WORKDIR /modu_property
+WORKDIR /backend
 COPY . .
-COPY --from=poetry-base /modu_property/requirements.txt .
+COPY --from=poetry-base /backend/requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
