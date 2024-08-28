@@ -104,6 +104,8 @@ jobs:
           script: |
             cd ~/backend
             git pull origin development
+            mkdir -p modu_property/logs
+            touch ./modu_property/logs/modu_property.log
             ls -al
             cat docker-compose.development.yml
 
