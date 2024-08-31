@@ -3,7 +3,7 @@ searchd {
     # Manticore Search server listening address and port
     listen = 9312
     # Manticore Search server query daemon
-    listen = 9306:mysql41
+    listen = 0.0.0.0:9306:mysql41
     listen = 0.0.0.0:9308:http
     pid_file = /var/run/manticore/searchd.pid
     log = /var/log/manticore/searchd.log
