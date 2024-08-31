@@ -77,6 +77,7 @@ SERVER_ENV 설정하기, django container에서 실행하기
 ## development용 (ec2, RDS)
 * migrate
     로컬에서 development 컨테이너 띄우고 장고 컨테이너 접속, migrate
+    그냥 로컬 터미널에서 해도 되는듯
     * docker exec -it {container id} sh
     * SERVER_ENV=development python3 manage.py migrate --settings=modu_property.settings.development_settings
 
@@ -248,7 +249,7 @@ django 컨테이너에서 실행 `DB_HOST="host.docker.internal"`, `mysql -P9306
 SERVER_ENV=local python manage.py collect_deal_price_of_real_estate_command 서울특별시 --start_date=200701 --end_date=200812   
 
 로컬 터미널에서 development RDS에 반영  
-SERVER_ENV=development python manage.py collect_deal_price_of_real_estate_command 서울특별시  
+SERVER_ENV=development python manage.py collect_deal_price_of_real_estate_command 서울특별시 --start_date=200601 --end_date=200912      
 
 window development container
 SERVER_ENV=development_window python manage.py collect_deal_price_of_real_estate_command 서울특별시 --start_date=200901 --end_date=200901   
@@ -264,7 +265,7 @@ SERVER_ENV=local python manage.py collect_region_price_command 서울특별시 -
 
 
 SERVER_ENV=development python manage.py collect_region_price_command 서울특별시 
-SERVER_ENV=development python manage.py collect_region_price_command 서울특별시 200602 200812  
+SERVER_ENV=development python manage.py collect_region_price_command 서울특별시 --start_date=200601 --end_date=202408    
 
 
 # ngrok
