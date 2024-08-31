@@ -3,7 +3,6 @@ services:
   django:
     container_name: django
     image: gidlemyeon/modu_property_platform_development:django
-    platform: linux/amd64
     build:
       context: .
       dockerfile: dockerfile-development
@@ -27,7 +26,6 @@ services:
   manticore:
     container_name: manticore
     image: manticoresearch/manticore
-    platform: linux/amd64
     environment:
       - EXTRA=1
     env_file: env/.env.development
@@ -53,7 +51,6 @@ services:
     container_name: nginx
     restart: on-failure
     image: nginx:stable
-    platform: linux/amd64
     volumes:
       - ./nginx/nginx.development.conf:/etc/nginx/conf.d/default.conf
       - static_volume:/backend/static
@@ -64,7 +61,6 @@ services:
   celery_worker:
     container_name: celery_worker
     image: gidlemyeon/modu_property_platform_development:django
-    platform: linux/amd64
     restart: always
     volumes:
       - .:/var/www/backend/worker
@@ -82,7 +78,6 @@ services:
   celery_beat:
     container_name: celery_beat
     image: gidlemyeon/modu_property_platform_development:django
-    platform: linux/amd64
     volumes:
       - .:/var/www/backend/beat
     command:
@@ -100,7 +95,6 @@ services:
   flower:
     container_name: celery_flower
     image: mher/flower
-    platform: linux/amd64
     env_file: env/.env.development
     depends_on:
       - celery_beat
@@ -110,7 +104,6 @@ services:
     container_name: redis
     restart: unless-stopped
     image: redis:7.0.5-alpine
-    platform: linux/amd64
     expose:
       - 6379
     network_mode: "host"
