@@ -164,6 +164,18 @@ manticore terminal에서 실행할 명령어
     FATAL: failed to lock /var/lib/manticore/property_villa.spl: Resource temporarily unavailable, will not index. Try --rotate option.
     -> 
     * indexer --config /etc/manticoresearch/manticore.conf --all --rotate
+
+        에러 발생 시 컨테이너 말고, 터미널에서 sudo chown -R 999:999 manticore/data
+        rotating table 'region_index': started
+        WARNING: table 'region_index': prealloc: failed to open file '/var/lib/manticore/region.new.spa': 'Permission denied'
+        rotating table 'real_estate': started
+        WARNING: table 'real_estate': prealloc: failed to open file '/var/lib/manticore/real_estate.new.spa': 'Permission denied'
+        rotating table: all tables done
+
+        안되면 docker exec --user manticore -it manticore indexer --all --rotate 실행해보기
+        docker exec -it manticore gosu manticore indexer --all --rotate
+
+
 또는  
 SERVER_ENV=local python run_indexer.py  
 

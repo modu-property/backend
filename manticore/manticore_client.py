@@ -2,8 +2,7 @@ from abc import ABC, abstractmethod
 import os
 import subprocess
 from typing import Any, Dict, List, Optional
-from modu_property.utils.loggers import logger
-import manticoresearch
+from modu_property.utils.loggers import logger, file_logger
 import manticoresearch
 
 from manticoresearch.api import search_api
@@ -49,15 +48,18 @@ class ManticoreClient(SearchClientInterface):
         self, index: str, query: dict, limit: int
     ) -> List[Optional[Dict[str, Any]]]:
         try:
+            file_logger.info(f"search query : {query}")
             search_request = SearchRequest(
                 index=index, query=query, limit=limit
             )
 
             search_response = self.search_api.search(search_request)
             hits = search_response.hits
+            file_logger.info(f"search hits : {hits}")
             if not hits:
                 return []
             hits = hits.hits
+            file_logger.info(f"search hits : {hits}")
             return hits
         except Exception as e:
             logger.error(f"ManticoreClient search e : {e}")
