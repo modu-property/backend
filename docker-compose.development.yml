@@ -78,7 +78,6 @@ services:
   celery_beat:
     container_name: celery_beat
     image: gidlemyeon/modu_property_platform_development:django
-    platform: linux/arm64
     volumes:
       - .:/var/www/backend/beat
     command:
