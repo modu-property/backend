@@ -30,6 +30,8 @@ env:
   DOCKER_HUB_PASSWORD: ${{secrets.DOCKER_HUB_PASSWORD}}
   AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
   AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+  HTTP_HOST: ${{secrets.HTTP_HOST}}
+  HTTP_PORT: ${{secrets.HTTP_PORT}}
 
   GITHUB_ID: ${{secrets._GITHUB_ID}}
   GITHUB_TOKEN: ${{secrets._GITHUB_TOKEN}}
@@ -60,6 +62,8 @@ jobs:
           echo "KAKAO_API_KEY=$KAKAO_API_KEY" >> env/.env.development
           echo "FLOWER_PORT=$FLOWER_PORT" >> env/.env.development
           echo "DB_HOST_FOR_MANTICORE=$DB_HOST_FOR_MANTICORE" >> env/.env.development
+          echo "HTTP_HOST=$HTTP_HOST" >> env/.env.development
+          echo "HTTP_PORT=$HTTP_PORT" >> env/.env.development
           
           cat env/.env.development
 
