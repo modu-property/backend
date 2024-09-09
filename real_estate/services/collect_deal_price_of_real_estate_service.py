@@ -86,7 +86,9 @@ class CollectDealPriceOfRealEstateService:
                 return
 
         if not deal_prices_about_new_deal.empty:
-            self.create_deal.create_only_new_deals(deal_prices_about_new_deal)
+            self.create_deal.create_only_new_deals(
+                deal_prices_about_new_deal, dto
+            )
 
         return True
 
@@ -101,7 +103,7 @@ class CollectDealPriceOfRealEstateService:
         if not result:
             return
 
-        self.create_deal.create_deals(result)
+        self.create_deal.create_deals(result, dto)
 
         return True
 
@@ -175,19 +177,21 @@ class CreateDeal:
     def __init__(self):
         self.repository = RealEstateRepository()
 
-    def create_only_new_deals(self, deal_prices_about_new_deal: DataFrame):
+    def create_only_new_deals(self, deal_prices_about_new_deal: DataFrame, dto):
         serializer = DealSerializer()
         deal_dict_list = []
 
         for _, deal in deal_prices_about_new_deal.iterrows():
             deal_dict_list.append(dict(deal))
 
-        serializer.get_organized_data(None, deal_dict_list)
+        serializer.get_organized_data(None, deal_dict_list, dto)
 
         serializer = DealSerializer(data=deal_dict_list, many=True)
         serializer.is_valid(raise_exception=True)
 
-        deal_models = [Deal(**data) for data in serializer.validated_data]
+        deal_models = []
+        for deal in serializer.validated_data:
+            deal_models.append(Deal(**deal))
 
         try:
             if deal_models:
@@ -197,7 +201,7 @@ class CreateDeal:
             logger.error(f"deal bulk_create e : {e}")
         return False
 
-    def create_deals(self, result):
+    def create_deals(self, result, dto):
         (
             inserted_real_estate_models,
             deal_result,
@@ -213,12 +217,14 @@ class CreateDeal:
         deal_prices_of_real_estate = [deal.to_dict() for deal in deal_result]
 
         serializer.get_organized_data(
-            inserted_real_estate_models_dict, deal_prices_of_real_estate
+            inserted_real_estate_models_dict, deal_prices_of_real_estate, dto
         )
         serializer = DealSerializer(data=deal_prices_of_real_estate, many=True)
         serializer.is_valid(raise_exception=True)
 
-        deal_models = [Deal(**data) for data in serializer.validated_data]
+        deal_models = []
+        for deal in serializer.validated_data:
+            deal_models.append(Deal(**deal))
 
         try:
             if deal_models:
@@ -312,9 +318,27 @@ class Segregator:
         d = deal_price_of_real_estate[RealEstateKeyEnum.계약일.value]
         f = deal_price_of_real_estate[RealEstateKeyEnum.층.value]
         a = deal_price_of_real_estate[RealEstateKeyEnum.전용면적.value]
-        p = deal_price_of_real_estate[RealEstateKeyEnum.거래금액.value].replace(
-            ",", ""
-        )
+        p = None
+        try:
+            p = deal_price_of_real_estate[
+                RealEstateKeyEnum.거래금액.value
+            ].replace(",", "")
+        except Exception as e:
+            pass
+
+        try:
+            p = deal_price_of_real_estate[
+                RealEstateKeyEnum.보증금액.value
+            ].replace(",", "")
+        except Exception as e:
+            pass
+
+        try:
+            p = deal_price_of_real_estate[
+                RealEstateKeyEnum.월세금액.value
+            ].replace(",", "")
+        except Exception as e:
+            pass
 
         key = f"{y}{m}{d}{f}{a}{p}"
         if key in unique_keys_for_deals:
