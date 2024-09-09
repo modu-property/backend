@@ -10,7 +10,7 @@ from django.contrib.gis.geos.point import Point
 
 @pytest.mark.skip(reason="수집 오래걸려서 스킵함")
 @pytest.mark.django_db(transaction=True, reset_sequences=True)
-def test_collect_deal_price_of_estate_command(insert_regions):
+def test_collect_deal_price_of_real_estate_command(insert_regions):
     insert_regions()
 
     Command().handle(sido="서울특별시", start_date="200601", end_date="200601")
