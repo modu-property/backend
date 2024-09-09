@@ -75,3 +75,5 @@ class RealEstateKeyEnum(Enum):
     지역코드 = "sggCd"
     매도자 = "slerGbn"
     법정동 = "umdNm"
+    보증금액 = "deposit"
+    월세금액 = "monthlyRent"

@@ -69,13 +69,13 @@ class Deal(models.Model):
         null=True,
         blank=True,
         choices=BROKERAGE_TYPES,
-        max_length=10,
+        max_length=20,
     )
     deal_year = models.SmallIntegerField(
         help_text="계약년도(년)", null=False, blank=False
     )
     land_area = models.CharField(
-        help_text="대지권면적", null=False, blank=False, max_length=10
+        help_text="대지권면적", null=True, blank=True, max_length=20
     )
     deal_month = models.SmallIntegerField(
         help_text="계약 월", null=False, blank=False
@@ -84,15 +84,15 @@ class Deal(models.Model):
         help_text="계약 일", null=False, blank=False
     )
     area_for_exclusive_use = models.CharField(
-        help_text="전용면적(제곱미터)", null=False, blank=False, max_length=10
+        help_text="전용면적(제곱미터)", null=False, blank=False, max_length=20
     )
     floor = models.CharField(
         help_text="층", null=False, blank=False, max_length=3
     )
     is_deal_canceled = models.BooleanField(
         help_text="해제여부(거래계약이 무효, 취소, 해제)",
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
     )
     deal_canceled_date = models.DateField(
         help_text="해제사유 발생일", null=True, blank=True
@@ -110,6 +110,7 @@ class Deal(models.Model):
         choices=DEAL_TYPES,
         max_length=13,
     )
+    monthly_rent = models.IntegerField(help_text="월세", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -117,21 +118,6 @@ class Deal(models.Model):
         "RealEstate",
         related_name="deals",
         on_delete=models.DO_NOTHING,
-    )
-
-
-class MonthlyRent(models.Model):
-    class Meta:
-        db_table = "monthly_rent"
-
-    deal = models.OneToOneField(
-        Deal,
-        primary_key=True,
-        help_text="기본키, 거래 외래키",
-        on_delete=models.CASCADE,
-    )
-    price = models.PositiveIntegerField(
-        help_text="반전세의 월세, 월세", null=False, blank=False
     )
 
 

@@ -3,7 +3,7 @@ from enum import Enum
 
 class DealTypesForQueryEnum(Enum):
     DEAL = "매매"
-    # JEONSE_MONTHLY_RENT = "전월세"
+    JEONSE_MONTHLY_RENT = "전월세"
 
     @staticmethod
     def get_deal_types() -> list[str]:
@@ -12,8 +12,8 @@ class DealTypesForQueryEnum(Enum):
 
 class DealTypesForDBEnum(Enum):
     DEAL = "DEAL"
-    # JEONSE = "JEONSE"
-    # MONTHLY_RENT = "MONTHLY_RENT"
+    JEONSE = "JEONSE"
+    MONTHLY_RENT = "MONTHLY_RENT"
 
     @staticmethod
     def get_deal_types() -> list[str]:
@@ -22,8 +22,11 @@ class DealTypesForDBEnum(Enum):
 
 DEAL_TYPES = (
     (DealTypesForDBEnum.DEAL.value, DealTypesForDBEnum.DEAL.value),
-    # (DealTypesForDBEnum.JEONSE.value, DealTypesForDBEnum.JEONSE.value),
-    # (DealTypesForDBEnum.MONTHLY_RENT.value, DealTypesForDBEnum.MONTHLY_RENT.value),
+    (DealTypesForDBEnum.JEONSE.value, DealTypesForDBEnum.JEONSE.value),
+    (
+        DealTypesForDBEnum.MONTHLY_RENT.value,
+        DealTypesForDBEnum.MONTHLY_RENT.value,
+    ),
 )
 
 
