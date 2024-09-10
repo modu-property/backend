@@ -23,6 +23,7 @@ from django.db.models import (
     Value,
     DateField,
     Count,
+    Q,
 )
 from django.db.models.functions import Concat
 from real_estate.serializers import RegionPriceSerializer
@@ -70,41 +71,47 @@ class RealEstateRepository:
         시, 군, 구, 동이 아닌 개별 부동산 정보를 응답함
         """
         try:
-            subquery = Subquery(
-                Deal.objects.filter(real_estate_id=OuterRef("real_estate_id"))
-                .order_by("-deal_year", "-deal_month", "-deal_day")
-                .values_list("id", flat=True)[:1]
-            )
-            real_estates: QuerySet = (
-                RealEstate.objects.annotate(
+            real_estates_and_deals = (
+                Deal.objects.select_related("real_estate")
+                .filter(
+                    Q(
+                        is_deal_canceled=False,
+                        real_estate__latitude__gte=dto.sw_lat,
+                        real_estate__latitude__lte=dto.ne_lat,
+                        real_estate__longitude__gte=dto.sw_lng,
+                        real_estate__longitude__lte=dto.ne_lng,
+                        deal_type=dto.deal_type,
+                    )
+                    | Q(
+                        is_deal_canceled=None,
+                        real_estate__latitude__gte=dto.sw_lat,
+                        real_estate__latitude__lte=dto.ne_lat,
+                        real_estate__longitude__gte=dto.sw_lng,
+                        real_estate__longitude__lte=dto.ne_lng,
+                        deal_type=dto.deal_type,
+                    )
+                )
+                .annotate(
                     deal_date=Concat(
-                        "deals__deal_year",
+                        "deal_year",
                         Value("-"),
-                        "deals__deal_month",
+                        "deal_month",
                         Value("-"),
-                        "deals__deal_day",
+                        "deal_day",
                         output_field=DateField(),
                     ),
-                    area_for_exclusive_use_pyung=F(
-                        "deals__area_for_exclusive_use_pyung"
-                    ),
-                    area_for_exclusive_use_price_per_pyung=F(
-                        "deals__area_for_exclusive_use_price_per_pyung"
-                    ),
-                    deal_price=F("deals__deal_price"),
+                    name=F("real_estate__name"),
+                    lot_number=F("real_estate__lot_number"),
+                    address=F("real_estate__address"),
+                    road_name_address=F("real_estate__road_name_address"),
+                    build_year=F("real_estate__build_year"),
+                    latitude=F("real_estate__latitude"),
+                    longitude=F("real_estate__longitude"),
+                    real_estate_type=F("real_estate__real_estate_type"),
                 )
-                .prefetch_related(
-                    Prefetch("deals", Deal.objects.filter(id=subquery))
-                )
-                .filter(
-                    deals__is_deal_canceled=False,
-                    latitude__gte=dto.sw_lat,
-                    latitude__lte=dto.ne_lat,
-                    longitude__gte=dto.sw_lng,
-                    longitude__lte=dto.ne_lng,
-                )
+                .order_by("-deal_year", "-deal_month", "-deal_day")
             )
-            return real_estates[:150]
+            return real_estates_and_deals[:150]
         except Exception as e:
             logger.error(f"get_individual_real_estates e : {e}")
             return False

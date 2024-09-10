@@ -8,6 +8,7 @@ from real_estate.enum.deal_enum import (
     DEAL_TYPES,
     DealTypesForDBEnum,
     BrokerageTypesEnum,
+    DealTypesForQueryEnum,
 )
 from real_estate.enum.real_estate_enum import (
     RealEstateTypesForQueryEnum,
@@ -117,15 +118,24 @@ class RealEstateSerializer(serializers.ModelSerializer):
 
 class DealSerializer(serializers.ModelSerializer):
     dealAmount = serializers.IntegerField(source="deal_price")
-    dealingGbn = serializers.CharField(source="brokerage_type")
+    dealingGbn = serializers.CharField(
+        source="brokerage_type", allow_null=True, required=False
+    )
     dealYear = serializers.IntegerField(source="deal_year")
-    landAr = serializers.CharField(source="land_area")
+    landAr = serializers.CharField(
+        source="land_area", allow_null=True, required=False
+    )
     dealMonth = serializers.IntegerField(source="deal_month")
     dealDay = serializers.IntegerField(source="deal_day")
     excluUseAr = serializers.CharField(source="area_for_exclusive_use")
-    cdealType = serializers.BooleanField(source="is_deal_canceled")
+    cdealType = serializers.BooleanField(
+        source="is_deal_canceled", allow_null=True, required=False
+    )
     cdealDay = serializers.DateField(
-        source="deal_canceled_date", allow_null=True
+        source="deal_canceled_date", allow_null=True, required=False
+    )
+    monthlyRent = serializers.IntegerField(
+        source="monthly_rent", allow_null=True, required=False
     )
     real_estate_id = serializers.IntegerField()
 
@@ -151,30 +161,60 @@ class DealSerializer(serializers.ModelSerializer):
             "area_for_exclusive_use_pyung",
             "area_for_exclusive_use_price_per_pyung",
             "deal_type",
+            "monthlyRent",
             "real_estate_id",
         )
 
     def get_organized_data(
-        self, inserted_real_estate_models_dict, deal_price_of_real_estate_list
+        self,
+        inserted_real_estate_models_dict,
+        deal_price_of_real_estate_list,
+        dto,
     ):
         for deal_price_of_real_estate in deal_price_of_real_estate_list:
-            deal_price_of_real_estate[RealEstateKeyEnum.거래유형.value] = (
-                BrokerageTypesEnum.BROKERAGE.value
-                if deal_price_of_real_estate[RealEstateKeyEnum.거래유형.value]
-                == "중개거래"
-                else BrokerageTypesEnum.DIRECT.value
-            )
-            deal_price_of_real_estate["deal_type"] = (
-                DealTypesForDBEnum.DEAL.value
-            )
+            try:
+                deal_price_of_real_estate[RealEstateKeyEnum.거래유형.value] = (
+                    BrokerageTypesEnum.BROKERAGE.value
+                    if deal_price_of_real_estate[
+                        RealEstateKeyEnum.거래유형.value
+                    ]
+                    == "중개거래"
+                    else BrokerageTypesEnum.DIRECT.value
+                )
+            except:
+                pass
 
-            self.cast_price_to_int(deal_price_of_real_estate)
+            self.cast_price_to_int(deal_price_of_real_estate, dto)
 
             self.convert_square_meter_to_pyung(deal_price_of_real_estate)
 
             self.calc_price_per_pyung(deal_price_of_real_estate)
 
-            self.set_is_deal_canceled(deal_price_of_real_estate)
+            if (
+                "DEAL" in DealTypesForQueryEnum.__members__
+                and dto.deal_type == DealTypesForQueryEnum.DEAL.value
+            ):
+                self.set_is_deal_canceled(deal_price_of_real_estate)
+                self.convert_deal_canceled_date(deal_price_of_real_estate)
+
+                deal_price_of_real_estate["deal_type"] = (
+                    DealTypesForDBEnum.DEAL.value
+                )
+            elif (
+                "JEONSE_MONTHLY_RENT" in DealTypesForQueryEnum.__members__
+                and deal_price_of_real_estate.get("monthlyRent")
+            ):
+                deal_price_of_real_estate["deal_type"] = (
+                    DealTypesForDBEnum.MONTHLY_RENT.value
+                )
+            elif (
+                "JEONSE_MONTHLY_RENT" in DealTypesForQueryEnum.__members__
+                and deal_price_of_real_estate.get("deposit")
+                and not deal_price_of_real_estate.get("monthlyRent")
+            ):
+                deal_price_of_real_estate["deal_type"] = (
+                    DealTypesForDBEnum.JEONSE.value
+                )
 
             self.stringify_floor(deal_price_of_real_estate)
 
@@ -187,10 +227,24 @@ class DealSerializer(serializers.ModelSerializer):
                     deal_price_of_real_estate, inserted_real_estate_models_dict
                 )
 
-    def cast_price_to_int(self, instance):
-        instance[RealEstateKeyEnum.거래금액.value] = int(
-            instance[RealEstateKeyEnum.거래금액.value].replace(",", "")
-        )
+    def cast_price_to_int(self, instance, dto):
+        if (
+            "DEAL" in DealTypesForQueryEnum.__members__
+            and dto.deal_type == DealTypesForQueryEnum.DEAL.value
+        ):
+            instance[RealEstateKeyEnum.거래금액.value] = int(
+                instance[RealEstateKeyEnum.거래금액.value].replace(",", "")
+            )
+        elif (
+            "JEONSE_MONTHLY_RENT" in DealTypesForQueryEnum.__members__
+            and dto.deal_type == DealTypesForQueryEnum.JEONSE_MONTHLY_RENT.value
+        ):
+            instance[RealEstateKeyEnum.거래금액.value] = int(
+                instance[RealEstateKeyEnum.보증금액.value].replace(",", "")
+            )
+            instance[RealEstateKeyEnum.월세금액.value] = int(
+                instance[RealEstateKeyEnum.월세금액.value].replace(",", "")
+            )
 
     def convert_square_meter_to_pyung(self, instance):
         area = instance[RealEstateKeyEnum.전용면적.value]
@@ -259,7 +313,7 @@ class GetRealEstatesOnSearchResponseSerializer(serializers.Serializer):
     latitude = serializers.FloatField()
     longitude = serializers.FloatField()
 
-    area_for_exclusive_use = serializers.CharField(max_length=10)
+    area_for_exclusive_use = serializers.CharField(max_length=20)
     area_for_exclusive_use_pyung = serializers.CharField(max_length=7)
     area_for_exclusive_use_price_per_pyung = serializers.CharField(max_length=8)
 
@@ -290,7 +344,9 @@ class GetRealEstatesOnMapRequestSerializer(serializers.Serializer):
 
 
 class GetRealEstatesOnMapResponseSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
+    real_estate_id = (
+        serializers.IntegerField()
+    )  # deal이랑 real_estate를 join한다음 real_estate의 id를 지정함.
     name = serializers.CharField(
         max_length=30, allow_blank=True, allow_null=True
     )
@@ -303,9 +359,6 @@ class GetRealEstatesOnMapResponseSerializer(serializers.Serializer):
     road_name_address = serializers.CharField(
         max_length=50, allow_blank=True, allow_null=True
     )
-    real_estate_type = serializers.ChoiceField(
-        choices=RealEstateTypesForQueryEnum
-    )
     build_year = serializers.IntegerField()
     latitude = serializers.CharField(max_length=20)
     longitude = serializers.CharField(max_length=20)
@@ -314,6 +367,7 @@ class GetRealEstatesOnMapResponseSerializer(serializers.Serializer):
     area_for_exclusive_use_price_per_pyung = serializers.CharField(max_length=8)
     real_estate_type = serializers.CharField(max_length=20)
     deal_date = serializers.DateField()
+    monthly_rent = serializers.IntegerField(allow_null=True)
 
 
 class RegionPriceSerializer(serializers.Serializer):
@@ -366,7 +420,7 @@ class GetRegionsOnMapResponseSerializer(serializers.ModelSerializer):
 
 class GetRegionsOnSearchResponseSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    sido = serializers.CharField(max_length=10, allow_blank=True)
+    sido = serializers.CharField(max_length=20, allow_blank=True)
     sigungu = serializers.CharField(max_length=15, allow_blank=True)
     ubmyundong = serializers.CharField(max_length=20, allow_blank=True)
     dongri = serializers.CharField(max_length=20, allow_blank=True)
@@ -391,7 +445,7 @@ class GetDealsRequestSerializer(serializers.Serializer):
 
 class DealDictSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    deal_price = serializers.CharField()
+    deal_price = serializers.IntegerField()
     brokerage_type = serializers.CharField()
     deal_year = serializers.IntegerField()
     land_area = serializers.CharField()
@@ -408,4 +462,5 @@ class DealDictSerializer(serializers.Serializer):
         max_digits=10, decimal_places=2
     )
     deal_type = serializers.CharField()
+    monthly_rent = serializers.IntegerField()
     real_estate_id = serializers.IntegerField()

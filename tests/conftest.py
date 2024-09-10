@@ -69,6 +69,7 @@ def create_deal():
         area_for_exclusive_use_pyung: str,
         area_for_exclusive_use_price_per_pyung: str,
         deal_type: str,
+        monthly_rent: int = None,
     ):
         deal = Deal(
             real_estate_id=real_estate_id,
@@ -85,6 +86,7 @@ def create_deal():
             area_for_exclusive_use_pyung=area_for_exclusive_use_pyung,
             area_for_exclusive_use_price_per_pyung=area_for_exclusive_use_price_per_pyung,
             deal_type=deal_type,
+            monthly_rent=monthly_rent,
         )
         deal.save()
         return deal
