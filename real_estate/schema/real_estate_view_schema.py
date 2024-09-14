@@ -77,12 +77,12 @@ def get_real_estates_on_search_view_get_decorator(view_function):
                     OpenApiExample(
                         name="전세",
                         description="전세 타입",
-                        value="JEONSE",
+                        value=DealTypesForDBEnum.JEONSE.value,
                     ),
                     OpenApiExample(
                         name="월세",
                         description="월세 타입",
-                        value="MONTHLY_RENT",
+                        value=DealTypesForDBEnum.MONTHLY_RENT.value,
                     ),
                 ],
             ),
@@ -164,17 +164,17 @@ def get_real_estates_on_map_view_get_decorator(view_function):
                     OpenApiExample(
                         name="매매",
                         description="매매 타입",
-                        value="deal",
+                        value=DealTypesForDBEnum.DEAL.value,
                     ),
                     OpenApiExample(
                         name="전세",
                         description="전세 타입",
-                        value="jeonse",
+                        value=DealTypesForDBEnum.JEONSE.value,
                     ),
                     OpenApiExample(
                         name="월세",
                         description="월세 타입",
-                        value="monthly_rent",
+                        value=DealTypesForDBEnum.MONTHLY_RENT.value,
                     ),
                 ],
             ),
@@ -239,9 +239,9 @@ def get_real_estates_on_map_view_get_decorator(view_function):
                         value="37.5735",
                     ),
                     OpenApiExample(
-                        name="북동측 위도",
+                        name="서울 북동측 위도",
                         description="북동측 위도",
-                        value="37.55780157762771",
+                        value="37.6458394",
                     ),
                     OpenApiExample(
                         name="강원도 속초 북동측 위도",
@@ -263,9 +263,9 @@ def get_real_estates_on_map_view_get_decorator(view_function):
                         value="127.0263",
                     ),
                     OpenApiExample(
-                        name="북동측 경도",
+                        name="서울 북동측 경도",
                         description="북동측 경도",
-                        value="126.98407317806495",
+                        value="127.084518",
                     ),
                     OpenApiExample(
                         name="강원도 속초 북동측 경도",
@@ -282,12 +282,12 @@ def get_real_estates_on_map_view_get_decorator(view_function):
                 required=True,
                 examples=[
                     OpenApiExample(
-                        name="줌 레벨 5",
+                        name="개별 부동산(줌 레벨 5)",
                         description="5 이하면 150개의 개별 부동산 정보를 응답함",
                         value="5",
                     ),
                     OpenApiExample(
-                        name="줌 레벨 6",
+                        name="개별 부동산(줌 레벨 6)",
                         description="6 이상 8이하면 20개의 지역 부동산 정보를 응답함",
                         value="6",
                     ),
@@ -338,9 +338,19 @@ def get_deals_view_get_decorator(view_function):
                 required=True,
                 examples=[
                     OpenApiExample(
-                        name="deal_type",
-                        description="deal_type",
+                        name="매매",
+                        description="매매 타입",
                         value=DealTypesForDBEnum.DEAL.value,
+                    ),
+                    OpenApiExample(
+                        name="전세",
+                        description="전세 타입",
+                        value=DealTypesForDBEnum.JEONSE.value,
+                    ),
+                    OpenApiExample(
+                        name="월세",
+                        description="월세 타입",
+                        value=DealTypesForDBEnum.MONTHLY_RENT.value,
                     ),
                 ],
             ),

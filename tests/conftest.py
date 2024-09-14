@@ -14,7 +14,6 @@ from real_estate.enum.real_estate_enum import RealEstateKeyEnum
 from real_estate.models import (
     Deal,
     RealEstate,
-    MonthlyRent,
     Region,
     RegionPrice,
 )
@@ -70,6 +69,7 @@ def create_deal():
         area_for_exclusive_use_pyung: str,
         area_for_exclusive_use_price_per_pyung: str,
         deal_type: str,
+        monthly_rent: int = None,
     ):
         deal = Deal(
             real_estate_id=real_estate_id,
@@ -86,21 +86,12 @@ def create_deal():
             area_for_exclusive_use_pyung=area_for_exclusive_use_pyung,
             area_for_exclusive_use_price_per_pyung=area_for_exclusive_use_price_per_pyung,
             deal_type=deal_type,
+            monthly_rent=monthly_rent,
         )
         deal.save()
         return deal
 
     return _create_deal
-
-
-@pytest.fixture
-def create_monthly_rent():
-    def _create_monthly_rent(deal_id: int, price: int):
-        monthly_rent = MonthlyRent(deal_id=deal_id, price=price)
-        monthly_rent.save()
-        return monthly_rent
-
-    return _create_monthly_rent
 
 
 @pytest.fixture

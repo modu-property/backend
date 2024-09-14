@@ -152,9 +152,46 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         deal_type=DealTypesForDBEnum.DEAL.value,
     )
 
+    create_deal(
+        real_estate_id=real_estate1.id,
+        deal_price=30000,
+        brokerage_type=BrokerageTypesEnum.BROKERAGE.value,
+        deal_year=2022,
+        land_area=150,
+        deal_month=1,
+        deal_day=1,
+        area_for_exclusive_use=130,
+        floor=2,
+        is_deal_canceled=False,
+        deal_canceled_date=None,
+        area_for_exclusive_use_pyung="60.60",
+        area_for_exclusive_use_price_per_pyung="329.99",
+        deal_type=DealTypesForDBEnum.MONTHLY_RENT.value,
+        monthly_rent=100,
+    )
+
+    create_deal(
+        real_estate_id=real_estate1.id,
+        deal_price=30000,
+        brokerage_type=BrokerageTypesEnum.BROKERAGE.value,
+        deal_year=2022,
+        land_area=150,
+        deal_month=1,
+        deal_day=1,
+        area_for_exclusive_use=130,
+        floor=2,
+        is_deal_canceled=False,
+        deal_canceled_date=None,
+        area_for_exclusive_use_pyung="60.60",
+        area_for_exclusive_use_price_per_pyung="329.99",
+        deal_type=DealTypesForDBEnum.MONTHLY_RENT.value,
+        monthly_rent=None,
+    )
+
     url = reverse(
         "get-real-estates-on-map",
-        kwargs={"deal_type": DealTypesForDBEnum.DEAL.value},
+        # kwargs={"deal_type": DealTypesForDBEnum.DEAL.value},
+        kwargs={"deal_type": DealTypesForDBEnum.MONTHLY_RENT.value},
     )
 
     _jwt = get_jwt
@@ -188,6 +225,7 @@ def test_get_real_estates_with_latitude_longitude_zoom_level_view(
         assert "longitude" in real_estate
         assert "area_for_exclusive_use_pyung" in real_estate
         assert "area_for_exclusive_use_price_per_pyung" in real_estate
+        assert "monthly_rent" in real_estate
 
 
 @pytest.mark.django_db(transaction=True, reset_sequences=True)

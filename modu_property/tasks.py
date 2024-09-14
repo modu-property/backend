@@ -16,9 +16,6 @@ from real_estate.services.collect_deal_price_of_real_estate_service import (
 from modu_property.utils.loggers import logger
 
 
-# TODO : 1시간마다 현재연월/전체법정동코드 싹 수집
-
-
 @shared_task
 def collect_deal_price_of_real_estate_task(
     sido: str,

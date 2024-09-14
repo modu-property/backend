@@ -335,6 +335,29 @@ command에서 service를 사용하면 command는 service_container의 provider�
 swagger에서 호출하고 api 복사해서 브라우저에서 실행
 view에서 from rest_framework.response import Response를 반환해야 함
 
+ListAPIView를 상속받은 클래스 사용 시 아래 코드를 오버라이딩 해야 함.   
+```python
+def get_queryset(self):
+    return  # repository layer에서 query 작성했으면 이렇게 none 반환.
+```
+
 # ec2 접속
 .pem 파일 있는 곳에서 아래 명령어 실행  
 ssh -i "modu_property_backend_ec2_key.pem" ec2-user@xxx
+
+# 데이터 수집 후 중복 확인
+## 빌라
+```sql
+select count(*) c, area_for_exclusive_use_price_per_pyung, deal_year, deal_day, deal_month, floor, deal_price, land_area, area_for_exclusive_use, real_estate_id
+from deal
+group by area_for_exclusive_use_price_per_pyung, deal_year, deal_day, deal_month, floor, deal_price, land_area, area_for_exclusive_use, real_estate_id
+order by c desc, area_for_exclusive_use_price_per_pyung, deal_year, deal_day, deal_month, floor, deal_price, land_area, area_for_exclusive_use;
+
+WITH variables (VAR_1) AS (
+    VALUES (551.68)
+)
+SELECT *
+FROM deal
+WHERE area_for_exclusive_use_price_per_pyung::numeric = (SELECT VAR_1::float FROM variables);
+```
+
