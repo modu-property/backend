@@ -4,6 +4,7 @@ from django.contrib.gis.geos import Point
 from rest_framework import serializers
 
 from modu_property.utils.time import TimeUtil
+from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
 from real_estate.enum.deal_enum import (
     DEAL_TYPES,
     DealTypesForDBEnum,
@@ -137,7 +138,7 @@ class DealSerializer(serializers.ModelSerializer):
     monthlyRent = serializers.IntegerField(
         source="monthly_rent", allow_null=True, required=False
     )
-    real_estate_id = serializers.IntegerField()
+    real_estate_id = serializers.IntegerField(allow_null=True, required=False)
 
     def __init__(self, instance=None, data=..., **kwargs):
         super().__init__(instance, data, **kwargs)
@@ -169,9 +170,16 @@ class DealSerializer(serializers.ModelSerializer):
         self,
         inserted_real_estate_models_dict,
         deal_price_of_real_estate_list,
-        dto,
+        dto: CollectDealPriceOfRealEstateDto,
     ):
-        for deal_price_of_real_estate in deal_price_of_real_estate_list:
+        deal_result = []
+
+        for i, deal_price_of_real_estate in enumerate(
+            deal_price_of_real_estate_list
+        ):
+            if self._already_exist_then_skip(deal_price_of_real_estate):
+                continue
+
             try:
                 deal_price_of_real_estate[RealEstateKeyEnum.거래유형.value] = (
                     BrokerageTypesEnum.BROKERAGE.value
@@ -220,12 +228,23 @@ class DealSerializer(serializers.ModelSerializer):
 
             self.set_deal_type(deal_price_of_real_estate)
 
-            self.convert_deal_canceled_date(deal_price_of_real_estate)
-
             if inserted_real_estate_models_dict:
                 self.set_real_estate_id(
                     deal_price_of_real_estate, inserted_real_estate_models_dict
                 )
+
+            deal_result.append(deal_price_of_real_estate)
+        return deal_result
+
+    def _already_exist_then_skip(
+        self,
+        deal_price_of_real_estate,
+    ):
+        unique_key = f"{deal_price_of_real_estate.get(RealEstateKeyEnum.지역코드.value)}{deal_price_of_real_estate.get(RealEstateKeyEnum.지번.value)}{deal_price_of_real_estate.get(RealEstateKeyEnum.거래금액.value)}{deal_price_of_real_estate.get(RealEstateKeyEnum.층.value)}{deal_price_of_real_estate.get(RealEstateKeyEnum.전용면적.value)}{deal_price_of_real_estate.get(RealEstateKeyEnum.계약년도.value)}{deal_price_of_real_estate.get(RealEstateKeyEnum.계약월.value)}{deal_price_of_real_estate.get(RealEstateKeyEnum.계약일.value)}"
+        if unique_key in self.context.get("unique_keys"):
+            return True
+        self.context.get("unique_keys").add(unique_key)
+        return False
 
     def cast_price_to_int(self, instance, dto):
         if (

@@ -60,3 +60,6 @@ class GetRealEstatesOnMapView(ListAPIView):
         serializer.is_valid(raise_exception=True)
         dto = GetRealEstatesOnMapDto(**serializer.validated_data)
         return dto
+
+    def get_queryset(self):
+        return

@@ -260,6 +260,23 @@ class RealEstateRepository:
         )
 
     @staticmethod
+    def get_deals_by_address_and_date(
+        dto: CollectDealPriceOfRealEstateDto = None,
+    ):
+        deal_year = dto.year_month[:4]
+        deal_month = dto.year_month[4:]
+        return (
+            Deal.objects.select_related("real_estate")
+            .filter(real_estate__real_estate_type=dto.real_estate_type)
+            .filter(deal_type=dto.deal_type)
+            .filter(real_estate__regional_code=dto.regional_code)
+            .filter(deal_year=deal_year)
+            .filter(deal_month=deal_month)
+            .all()
+            .order_by("-deal_year", "-deal_month", "-deal_day")
+        )
+
+    @staticmethod
     def get_last_region_price():
         return RegionPrice.objects.order_by("-id").first()
 
