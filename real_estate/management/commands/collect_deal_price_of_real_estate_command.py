@@ -1,6 +1,7 @@
 import threading
 from django.core.management.base import BaseCommand
 from manticore.manticore_client import ManticoreClient
+from modu_property.utils.loggers import logger
 from real_estate.dto.collect_address_dto import CollectDealPriceOfRealEstateDto
 from real_estate.enum.real_estate_enum import (
     RealEstateTypesForQueryEnum,

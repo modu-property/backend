@@ -172,6 +172,30 @@ class CreateRealEstate:
             == RealEstateTypesForQueryEnum.MULTI_UNIT_HOUSE.value
         ):
             return RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value
+        elif (
+            dto.real_estate_type == RealEstateTypesForQueryEnum.OFFICETEL.value
+        ):
+            return RealEstateTypesForDBEnum.OFFICETEL.value
+        elif (
+            dto.real_estate_type == RealEstateTypesForQueryEnum.APARTMENT.value
+        ):
+            return RealEstateTypesForDBEnum.APARTMENT.value
+        elif (
+            dto.real_estate_type
+            == RealEstateTypesForQueryEnum.MULTI_HOUSEHOLD.value
+        ):
+            return RealEstateTypesForDBEnum.MULTI_HOUSEHOLD.value
+        elif dto.real_estate_type == RealEstateTypesForQueryEnum.LAND.value:
+            return RealEstateTypesForDBEnum.LAND.value
+        elif (
+            dto.real_estate_type == RealEstateTypesForQueryEnum.OWNERSHIP.value
+        ):
+            return RealEstateTypesForDBEnum.OWNERSHIP.value
+        elif (
+            dto.real_estate_type
+            == RealEstateTypesForQueryEnum.FACTORY_WAREHOUSE.value
+        ):
+            return RealEstateTypesForDBEnum.FACTORY_WAREHOUSE.value
         return ""
 
 
@@ -280,8 +304,6 @@ class Segregator:
         """
         DB에 있는 real_estates와 DB에 없는 새로운 real_estates를 반환함
         """
-
-        file_logger.info("segregate_real_estates")
         data_in_db = self.repository.get_real_estates_by_regional_code_and_type(
             dto
         )

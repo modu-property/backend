@@ -3,16 +3,17 @@ from enum import Enum
 
 class RealEstateTypesForQueryEnum(Enum):
     MULTI_UNIT_HOUSE = "연립다세대"
-    # APARTMENT = "아파트"
-    # OFFICETEL = "오피스텔"
-    # MULTI_HOUSEHOLD = "단독다가구"
-    # LAND = "토지"
-    # OWNERSHIP = "분양입주권"
-    # FACTORY_WAREHOUSE = "공장창고"
+    APARTMENT = "아파트"
+    OFFICETEL = "오피스텔"
+    MULTI_HOUSEHOLD = "단독다가구"
+    LAND = "토지"
+    OWNERSHIP = "분양입주권"
+    FACTORY_WAREHOUSE = "공장창고"
 
     @classmethod
     def get_real_estate_types(cls):
-        return [e.value for e in RealEstateTypesForQueryEnum]
+        # return [e.value for e in RealEstateTypesForQueryEnum]
+        return [cls.OFFICETEL.value]
 
 
 class RealEstateTypesForDBEnum(Enum):
@@ -29,6 +30,26 @@ REAL_ESTATE_TYPES = (
     (
         RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.name,
         RealEstateTypesForDBEnum.MULTI_UNIT_HOUSE.value,
+    ),
+    (
+        RealEstateTypesForDBEnum.OFFICETEL.name,
+        RealEstateTypesForDBEnum.OFFICETEL.value,
+    ),
+    (
+        RealEstateTypesForDBEnum.APARTMENT.name,
+        RealEstateTypesForDBEnum.APARTMENT.value,
+    ),
+    (
+        RealEstateTypesForDBEnum.MULTI_HOUSEHOLD.name,
+        RealEstateTypesForDBEnum.MULTI_HOUSEHOLD.value,
+    ),
+    (
+        RealEstateTypesForDBEnum.LAND.name,
+        RealEstateTypesForDBEnum.LAND.value,
+    ),
+    (
+        RealEstateTypesForDBEnum.OWNERSHIP.name,
+        RealEstateTypesForDBEnum.OWNERSHIP.value,
     ),
 )
 

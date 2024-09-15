@@ -86,8 +86,6 @@ LOGGING = set_logging()
 
 DEBUG = os.getenv("DEBUG")
 
-LOG_LEVEL = os.getenv("LOG_LEVEL")
-
 # Raises Django's ImproperlyConfigured
 # exception if SECRET_KEY not in os.environ
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -100,7 +98,6 @@ DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")
 DJANGO_ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", default="").split(" ")
 ALLOWED_HOSTS = DJANGO_ALLOWED_HOSTS
-DB_USER = os.getenv("DB_USER", default="")
 
 # Application definition
 

@@ -17,7 +17,7 @@ from real_estate.enum.real_estate_enum import (
     RealEstateTypesForDBEnum,
 )
 from real_estate.models import Deal, RealEstate, Region, RegionPrice
-from modu_property.utils.loggers import file_logger
+from modu_property.utils.loggers import file_logger, logger
 
 
 class RealEstateSerializer(serializers.ModelSerializer):
@@ -25,7 +25,12 @@ class RealEstateSerializer(serializers.ModelSerializer):
     bulk_create를 할 때는 SerializerMethodField가 동작하지 않으므로 직접 메서드를 호출해서 수정함.
     """
 
-    mhouseNm = serializers.CharField(source="name")
+    mhouseNm = serializers.CharField(
+        source="name", allow_null=True, allow_blank=True, required=False
+    )
+    offiNm = serializers.CharField(
+        source="name", allow_null=True, allow_blank=True, required=False
+    )
     buildYear = serializers.IntegerField(source="build_year")
     sggCd = serializers.CharField(source="regional_code")
     jibun = serializers.CharField(source="lot_number")
@@ -43,6 +48,7 @@ class RealEstateSerializer(serializers.ModelSerializer):
         geo_field = "point"
         fields = (
             "mhouseNm",
+            "offiNm",
             "buildYear",
             "sggCd",
             "jibun",
@@ -89,6 +95,15 @@ class RealEstateSerializer(serializers.ModelSerializer):
                 }
             )
 
+            build_year = deal_price_of_real_estate.get("buildYear", 0)
+            if isinstance(build_year, int):
+                deal_price_of_real_estate["buildYear"] = int(
+                    deal_price_of_real_estate.get("buildYear", 0)
+                )
+            else:
+                logger.debug(f"build_year : {build_year}")
+                deal_price_of_real_estate["buildYear"] = 0
+
             real_estate_result.append(deal_price_of_real_estate)
         return real_estate_result, deal_result
 
@@ -120,7 +135,10 @@ class RealEstateSerializer(serializers.ModelSerializer):
 class DealSerializer(serializers.ModelSerializer):
     dealAmount = serializers.IntegerField(source="deal_price")
     dealingGbn = serializers.CharField(
-        source="brokerage_type", allow_null=True, required=False
+        source="brokerage_type",
+        allow_null=True,
+        allow_blank=True,
+        required=False,
     )
     dealYear = serializers.IntegerField(source="deal_year")
     landAr = serializers.CharField(
@@ -180,53 +198,43 @@ class DealSerializer(serializers.ModelSerializer):
             if self._already_exist_then_skip(deal_price_of_real_estate):
                 continue
 
-            try:
-                deal_price_of_real_estate[RealEstateKeyEnum.거래유형.value] = (
-                    BrokerageTypesEnum.BROKERAGE.value
-                    if deal_price_of_real_estate[
-                        RealEstateKeyEnum.거래유형.value
-                    ]
-                    == "중개거래"
-                    else BrokerageTypesEnum.DIRECT.value
-                )
-            except:
-                pass
-
             self.cast_price_to_int(deal_price_of_real_estate, dto)
 
             self.convert_square_meter_to_pyung(deal_price_of_real_estate)
 
             self.calc_price_per_pyung(deal_price_of_real_estate)
 
-            if (
-                "DEAL" in DealTypesForQueryEnum.__members__
-                and dto.deal_type == DealTypesForQueryEnum.DEAL.value
-            ):
-                self.set_is_deal_canceled(deal_price_of_real_estate)
-                self.convert_deal_canceled_date(deal_price_of_real_estate)
-
-                deal_price_of_real_estate["deal_type"] = (
-                    DealTypesForDBEnum.DEAL.value
-                )
-            elif (
-                "JEONSE_MONTHLY_RENT" in DealTypesForQueryEnum.__members__
-                and deal_price_of_real_estate.get("monthlyRent")
-            ):
-                deal_price_of_real_estate["deal_type"] = (
-                    DealTypesForDBEnum.MONTHLY_RENT.value
-                )
-            elif (
-                "JEONSE_MONTHLY_RENT" in DealTypesForQueryEnum.__members__
-                and deal_price_of_real_estate.get("deposit")
-                and not deal_price_of_real_estate.get("monthlyRent")
-            ):
-                deal_price_of_real_estate["deal_type"] = (
-                    DealTypesForDBEnum.JEONSE.value
-                )
-
+            # if (
+            #     "DEAL" in DealTypesForQueryEnum.__members__
+            #     and dto.deal_type == DealTypesForQueryEnum.DEAL.value
+            # ):
+            #     self.set_is_deal_canceled(deal_price_of_real_estate)
+            #     self.convert_deal_canceled_date(deal_price_of_real_estate)
+            #
+            #     deal_price_of_real_estate["deal_type"] = (
+            #         DealTypesForDBEnum.DEAL.value
+            #     )
+            # elif (
+            #     "JEONSE_MONTHLY_RENT" in DealTypesForQueryEnum.__members__
+            #     and deal_price_of_real_estate.get("monthlyRent")
+            # ):
+            #     deal_price_of_real_estate["deal_type"] = (
+            #         DealTypesForDBEnum.MONTHLY_RENT.value
+            #     )
+            # elif (
+            #     "JEONSE_MONTHLY_RENT" in DealTypesForQueryEnum.__members__
+            #     and deal_price_of_real_estate.get("deposit")
+            #     and not deal_price_of_real_estate.get("monthlyRent")
+            # ):
+            #     deal_price_of_real_estate["deal_type"] = (
+            #         DealTypesForDBEnum.JEONSE.value
+            #     )
+            #
             self.stringify_floor(deal_price_of_real_estate)
 
-            self.set_deal_type(deal_price_of_real_estate)
+            self.set_deal_type(deal_price_of_real_estate, dto)
+
+            self.set_brokerage_type(deal_price_of_real_estate, dto)
 
             if inserted_real_estate_models_dict:
                 self.set_real_estate_id(
@@ -288,8 +296,41 @@ class DealSerializer(serializers.ModelSerializer):
             instance[RealEstateKeyEnum.층.value]
         )
 
-    def set_deal_type(self, instance):
-        instance[RealEstateKeyEnum.거래유형.value] = instance["deal_type"]
+    def set_deal_type(self, deal_price_of_real_estate, dto):
+        if (
+            "DEAL" in DealTypesForQueryEnum.__members__
+            and dto.deal_type == DealTypesForQueryEnum.DEAL.value
+        ):
+            self.set_is_deal_canceled(deal_price_of_real_estate)
+            self.convert_deal_canceled_date(deal_price_of_real_estate)
+
+            deal_price_of_real_estate["deal_type"] = (
+                DealTypesForDBEnum.DEAL.value
+            )
+        elif (
+            "JEONSE_MONTHLY_RENT" in DealTypesForQueryEnum.__members__
+            and deal_price_of_real_estate.get("monthlyRent")
+        ):
+            deal_price_of_real_estate["deal_type"] = (
+                DealTypesForDBEnum.MONTHLY_RENT.value
+            )
+        elif (
+            "JEONSE_MONTHLY_RENT" in DealTypesForQueryEnum.__members__
+            and deal_price_of_real_estate.get("deposit")
+            and not deal_price_of_real_estate.get("monthlyRent")
+        ):
+            deal_price_of_real_estate["deal_type"] = (
+                DealTypesForDBEnum.JEONSE.value
+            )
+
+    def set_brokerage_type(self, deal_price_of_real_estate, dto):
+        deal_price_of_real_estate[RealEstateKeyEnum.거래유형.value] = (
+            BrokerageTypesEnum.BROKERAGE.value
+            if RealEstateKeyEnum.거래유형.value in deal_price_of_real_estate
+            and deal_price_of_real_estate[RealEstateKeyEnum.거래유형.value]
+            == "중개거래"
+            else BrokerageTypesEnum.DIRECT.value
+        )
 
     def set_real_estate_id(self, instance, inserted_real_estate_models_dict):
         if not instance:
@@ -299,9 +340,11 @@ class DealSerializer(serializers.ModelSerializer):
         instance["real_estate_id"] = real_estate.id
 
     def convert_deal_canceled_date(self, instance):
-        date = instance.get("cdealDay")
+        date = instance.get(RealEstateKeyEnum.해제사유발생일.value)
         if date:
-            instance["cdealDay"] = TimeUtil.convert_date_dot_to_date_dash(date)
+            instance[RealEstateKeyEnum.해제사유발생일.value] = (
+                TimeUtil.convert_date_dot_to_date_dash(date)
+            )
 
 
 class GetRealEstateRequestSerializer(serializers.Serializer):
